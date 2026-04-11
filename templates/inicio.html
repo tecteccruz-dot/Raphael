@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Raphael - Crear Personaje</title>
+    <style>
+        :root {
+            --bg: #0e0c10; --panel: #17131d; --border: rgba(201,168,76,.22);
+            --gold: #c9a84c; --text: #ebe1d2; --muted: #a59884;
+            --accent: #7c4dbd; --ok: #4a9c6a; --bad: #c4473a;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); font-family: Georgia, serif; min-height: 100vh; padding: 24px 16px 48px; }
+        h1 { font-size: 2rem; color: var(--gold); margin-bottom: 4px; }
+        h2 { font-size: 1.1rem; color: var(--gold); margin-bottom: 16px; font-family: "Times New Roman", serif; }
+        p.sub { color: var(--muted); margin-bottom: 24px; font-size: .95rem; }
+
+        .contenedor { max-width: 860px; margin: 0 auto; }
+
+        /* Steps */
+        .pasos { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 24px; }
+        .paso { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); color: var(--muted); cursor: default; }
+        .paso.activo { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,.1); }
+        .paso.completo { border-color: var(--ok); color: var(--ok); }
+        .paso-num { width: 18px; height: 18px; border-radius: 50%; background: currentColor; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--bg); font-weight: bold; }
+
+        /* Panel de paso */
+        .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+
+        /* Campos de texto */
+        .grupo { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; font-size: .9rem; color: var(--muted); }
+        input, select { width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-family: inherit; font-size: 1rem; outline: none; }
+        input:focus, select:focus { border-color: var(--gold); }
+        select option { background: #1a1520; }
+        .input-con-accion { display: flex; gap: 8px; align-items: stretch; }
+        .input-con-accion input { flex: 1; }
+        .btn-dado { width: auto; min-width: 58px; padding: 11px 12px; border-radius: 10px; border: 1px solid rgba(201,168,76,.45); background: rgba(201,168,76,.1); color: var(--gold); font-weight: bold; letter-spacing: .04em; cursor: pointer; transition: background .15s, border-color .15s, transform .15s; }
+        .btn-dado:hover { background: rgba(201,168,76,.16); border-color: rgba(201,168,76,.7); transform: translateY(-1px); }
+        .btn-dado:disabled { opacity: .5; cursor: default; transform: none; }
+        .btn-dado.small { min-width: 46px; padding: 8px 10px; font-size: .82rem; }
+
+        /* Grid de cards */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; margin-bottom: 18px; }
+        .card { border: 1px solid var(--border); border-radius: 12px; padding: 14px; cursor: pointer; transition: border-color .15s, background .15s; }
+        .card:hover { border-color: rgba(201,168,76,.5); background: rgba(201,168,76,.05); }
+        .card.seleccionada { border-color: var(--gold); background: rgba(201,168,76,.1); }
+        .card-nombre { font-size: 1rem; color: var(--gold); margin-bottom: 4px; }
+        .card-desc { font-size: .78rem; color: var(--muted); line-height: 1.4; }
+        .card-extra { margin-top: 6px; font-size: .75rem; color: #8b7fe0; }
+
+        /* Info box */
+        .info-box { background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 16px; font-size: .85rem; line-height: 1.6; color: var(--muted); }
+        .info-box strong { color: var(--text); }
+        .info-box ul { padding-left: 18px; margin-top: 6px; }
+
+        /* Tabla de atributos */
+        .tabla-attrs { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+        .tabla-attrs th { text-align: left; font-size: .78rem; color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--border); }
+        .tabla-attrs td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,.04); }
+        .tabla-attrs td:first-child { color: var(--gold); font-size: .9rem; }
+        .tabla-attrs select { padding: 6px 10px; font-size: .9rem; }
+        .col-bonus { color: #8b7fe0; text-align: center; }
+        .col-total { font-size: 1.1rem; font-weight: bold; text-align: center; }
+        .col-mod { font-size: 1rem; text-align: center; color: var(--ok); }
+        .chips-array { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+        .chip-val { padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border); font-size: .9rem; color: var(--muted); }
+        .chip-val.disponible { border-color: var(--gold); color: var(--gold); }
+        .pg-calc { font-size: .95rem; color: var(--text); margin-top: 4px; }
+        .pg-calc span { color: var(--ok); font-size: 1.2rem; font-weight: bold; }
+
+        /* Habilidades */
+        .habs-otorgadas { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .hab-chip { padding: 5px 12px; border-radius: 999px; border: 1px solid var(--ok); color: var(--ok); font-size: .8rem; }
+        .check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; margin-top: 10px; }
+        .check-grid label { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 10px; border-radius: 8px; border: 1px solid transparent; font-size: .88rem; color: var(--text); transition: border-color .15s; }
+        .check-grid label:hover { border-color: var(--border); }
+        .check-grid label.otorgada { opacity: .55; cursor: default; }
+        .check-grid input[type=checkbox] { accent-color: var(--accent); width: 16px; height: 16px; flex-shrink: 0; }
+        .contador-hab { font-size: .88rem; color: var(--muted); margin-bottom: 12px; }
+        .contador-hab strong { color: var(--gold); }
+
+        /* Resumen */
+        .resumen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+        .resumen-box { background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+        .resumen-box-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+        .resumen-k { font-size: .75rem; color: var(--muted); text-transform: uppercase; margin-bottom: 3px; }
+        .resumen-v { font-size: 1rem; color: var(--text); }
+        .summary-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+        .summary-note { color: var(--muted); font-size: .82rem; line-height: 1.4; }
+        .attrs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
+        .attr-box { text-align: center; background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 10px; padding: 10px 6px; }
+        .attr-box strong { display: block; font-size: 1.4rem; }
+        .attr-box small { font-size: .75rem; color: var(--muted); }
+        .attr-box .attr-mod { font-size: .85rem; color: var(--ok); }
+
+        /* Navegación */
+        .nav { display: flex; gap: 10px; margin-top: 24px; }
+        .btn { padding: 12px 24px; border-radius: 10px; border: 1px solid var(--border); background: rgba(255,255,255,.05); color: var(--text); font-family: inherit; font-size: 1rem; cursor: pointer; }
+        .btn:hover { background: rgba(255,255,255,.09); }
+        .btn-primary { background: rgba(124,77,189,.25); border-color: rgba(124,77,189,.6); color: #d4c0f4; }
+        .btn-primary:hover { background: rgba(124,77,189,.4); }
+        .btn-crear { background: rgba(74,156,106,.2); border-color: var(--ok); color: #a0ddb7; }
+        .btn-crear:hover { background: rgba(74,156,106,.35); }
+        .btn-random { padding: 12px 18px; border-radius: 10px; border: 1px solid rgba(201,168,76,.45); background: rgba(201,168,76,.1); color: var(--gold); font-family: inherit; font-size: .95rem; cursor: pointer; transition: background .15s, border-color .15s, transform .15s; }
+        .btn-random:hover { background: rgba(201,168,76,.16); border-color: rgba(201,168,76,.7); transform: translateY(-1px); }
+        .btn-random.small { padding: 8px 12px; font-size: .82rem; }
+
+        /* Error */
+        .error-msg { color: var(--bad); font-size: .88rem; margin-top: 10px; padding: 8px 12px; background: rgba(196,71,58,.1); border-radius: 8px; border: 1px solid rgba(196,71,58,.3); }
+
+        /* Avatar de perfil */
+        .avatar-row { display: flex; align-items: center; gap: 18px; margin-bottom: 18px; flex-wrap: wrap; }
+        .avatar-field { display: flex; align-items: center; gap: 14px; min-width: 260px; }
+        .avatar-picker { width: 92px; height: 92px; border-radius: 50%; border: 2px dashed var(--border); background: rgba(255,255,255,.03); cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; transition: border-color .15s, background .15s, transform .15s; }
+        .avatar-picker:hover { border-color: rgba(201,168,76,.5); background: rgba(201,168,76,.04); transform: translateY(-1px); }
+        .avatar-picker img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .av-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 10px; font-size: .7rem; color: var(--muted); text-align: center; line-height: 1.2; letter-spacing: .04em; text-transform: uppercase; user-select: none; pointer-events: none; }
+        .avatar-meta { display: grid; gap: 4px; min-width: 0; }
+        .avatar-meta strong { color: var(--text); font-size: .95rem; }
+        .avatar-meta span { color: var(--muted); font-size: .8rem; line-height: 1.4; }
+        .avatar-status { color: var(--gold); }
+
+        /* Semielfo/Dracónido extras */
+        .extra-opciones { background: rgba(124,77,189,.08); border: 1px solid rgba(124,77,189,.3); border-radius: 10px; padding: 14px; margin-top: 14px; }
+        .extra-opciones h3 { font-size: .88rem; color: #c4b0f0; margin-bottom: 12px; }
+        .fila-libre { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: .88rem; color: var(--muted); }
+        .fila-libre select { width: 180px; }
+
+        @media (max-width: 600px) {
+            .resumen-grid { grid-template-columns: 1fr; }
+            .attrs-grid { grid-template-columns: repeat(2, 1fr); }
+            .card-grid { grid-template-columns: 1fr 1fr; }
+            .avatar-field { width: 100%; }
+            .input-con-accion { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+<div class="contenedor">
+    <h1>&#9876; Raphael</h1>
+    <p class="sub">Mesa digital narrativa con IA. Crea tu personaje para comenzar.</p>
+
+    <!-- Indicadores de paso -->
+    <div class="pasos" id="indicadores-pasos"></div>
+
+    <!-- Cuerpo del paso -->
+    <div class="panel" id="panel-paso">
+        <p style="color:var(--muted)">Cargando datos...</p>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div class="error-msg" id="error-global" style="display:none; margin-top:12px;"></div>
+
+    <!-- Navegación -->
+    <div class="nav" id="nav-botones"></div>
+</div>
+
+<script>
+"use strict";
+
+// ─── Estado global ────────────────────────────────────────────────────────────
+const ATRIBUTOS = ["fue", "des", "con", "int", "sab", "car"];
+const NOMBRES_ATTR = { fue: "Fuerza", des: "Destreza", con: "Constitución", int: "Inteligencia", sab: "Sabiduría", car: "Carisma" };
+const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
+const MAX_PASOS = 7;
+
+let D = null; // datos D&D cargados
+
+const ch = {
+    nombre: "", sala: "demo",
+    raza: null, subraza: null,
+    clase: null,
+    trasfondo: null,
+    ascendencia: null,
+    atributos: { fue: null, des: null, con: null, int: null, sab: null, car: null },
+    mods_libres: {},   // para semielfo: { attr: 1, attr: 1 }
+    habilidades: [],   // elegidas de clase
+    avatar: null,      // Blob 1:1 (256×256 PNG) listo para subir
+};
+
+let pasoActual = 1;
+
+// ─── Utilidades ──────────────────────────────────────────────────────────────
+const esc = s => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const mod = v => Math.floor((v - 10) / 2);
+const fmod = v => { const m = mod(v); return (m >= 0 ? "+" : "") + m; };
+
+function elegirAleatorio(lista) {
+    if (!Array.isArray(lista) || !lista.length) return null;
+    return lista[Math.floor(Math.random() * lista.length)];
+}
+
+function mezclar(lista) {
+    const copia = [...(lista || [])];
+    for (let i = copia.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copia[i], copia[j]] = [copia[j], copia[i]];
+    }
+    return copia;
+}
+
+function elegirClaveAleatoria(obj) {
+    return elegirAleatorio(Object.keys(obj || {}));
+}
+
+function tomarNombreAleatorio() {
+    const nombres = Array.isArray(D?.nombres) ? D.nombres.filter(Boolean) : [];
+    if (!nombres.length) return "";
+
+    if (nombres.length === 1) return nombres[0];
+
+    const actual = ch.nombre.trim().toLowerCase();
+    let elegido = nombres[Math.floor(Math.random() * nombres.length)];
+
+    if (elegido.toLowerCase() === actual) {
+        const alternativas = nombres.filter(nombre => nombre.toLowerCase() !== actual);
+        if (alternativas.length) {
+            elegido = alternativas[Math.floor(Math.random() * alternativas.length)];
+        }
+    }
+
+    return elegido;
+}
+
+function usarNombreAleatorio(refrescar = false) {
+    const nombre = tomarNombreAleatorio();
+    if (!nombre) {
+        mostrarError("No se pudieron cargar los nombres sugeridos.");
+        return;
+    }
+
+    ch.nombre = nombre;
+    const input = document.getElementById("inp-nombre");
+    if (input) input.value = nombre;
+    mostrarError(null);
+
+    if (refrescar) renderPaso(pasoActual);
+}
+
+function asegurarNombreParaAleatorio() {
+    const actual = ch.nombre.trim();
+    if (actual.length >= 2) {
+        ch.nombre = actual;
+        return true;
+    }
+
+    const nombre = tomarNombreAleatorio();
+    if (!nombre) return false;
+
+    ch.nombre = nombre;
+    return true;
+}
+
+function habilidadesOtorgadasActuales() {
+    const raza = D?.razas?.[ch.raza] || {};
+    const trasfondo = D?.trasfondos?.[ch.trasfondo] || {};
+
+    return new Set([
+        ...(trasfondo.habilidades || []),
+        ...(raza.competencias || []),
+        ...(ch.subraza ? (raza.subrazas?.[ch.subraza]?.competencias || []) : []),
+    ]);
+}
+
+function aleatorizarRazaEstado() {
+    const razaId = elegirClaveAleatoria(D?.razas);
+    if (!razaId) return false;
+
+    ch.raza = razaId;
+    ch.subraza = null;
+    ch.ascendencia = null;
+    ch.mods_libres = {};
+
+    const raza = D.razas[razaId];
+    const subrazas = Object.keys(raza.subrazas || {});
+    if (subrazas.length) ch.subraza = elegirAleatorio(subrazas);
+
+    if (razaId === "draconido") {
+        ch.ascendencia = elegirClaveAleatoria(raza.ascendencia_draconica || {});
+    }
+
+    if (razaId === "semielfo") {
+        const attrs = mezclar(ATRIBUTOS.filter(a => a !== "car")).slice(0, 2);
+        ch.mods_libres = Object.fromEntries(attrs.map(attr => [attr, 1]));
+    }
+
+    return true;
+}
+
+function aleatorizarClaseEstado() {
+    const claseId = elegirClaveAleatoria(D?.clases);
+    if (!claseId) return false;
+
+    ch.clase = claseId;
+    ch.habilidades = [];
+    return true;
+}
+
+function aleatorizarTrasfondoEstado() {
+    const trasfondoId = elegirClaveAleatoria(D?.trasfondos);
+    if (!trasfondoId) return false;
+
+    ch.trasfondo = trasfondoId;
+    return true;
+}
+
+function aleatorizarAtributosEstado() {
+    const valores = mezclar(STANDARD_ARRAY);
+    ATRIBUTOS.forEach((attr, index) => {
+        ch.atributos[attr] = valores[index] ?? null;
+    });
+}
+
+function aleatorizarHabilidadesEstado() {
+    if (!ch.clase) return;
+
+    const clase = D.clases[ch.clase];
+    const otorgadas = habilidadesOtorgadasActuales();
+    const opciones = (clase.habilidades_opciones || []).filter(h => !otorgadas.has(h));
+    ch.habilidades = mezclar(opciones).slice(0, clase.habilidades_cantidad || 0);
+}
+
+function aleatorizarPersonaje() {
+    if (!D) {
+        mostrarError("Aun no se cargan los datos del personaje.");
+        return;
+    }
+
+    if (!asegurarNombreParaAleatorio()) {
+        mostrarError("No se pudieron cargar los nombres sugeridos.");
+        return;
+    }
+
+    if (!aleatorizarRazaEstado() || !aleatorizarClaseEstado() || !aleatorizarTrasfondoEstado()) {
+        mostrarError("No se pudieron cargar las opciones aleatorias.");
+        return;
+    }
+
+    aleatorizarAtributosEstado();
+    aleatorizarHabilidadesEstado();
+    mostrarError(null);
+    irPaso(7);
+}
+
+function aleatorizarPersonajeSinNombre() {
+    if (!ch.nombre.trim() && !asegurarNombreParaAleatorio()) {
+        mostrarError("No se pudo conservar ni generar un nombre.");
+        return;
+    }
+
+    aleatorizarPersonaje();
+}
+
+function calcBonusRaza(attr) {
+    if (!ch.raza || !D) return 0;
+    const raza = D.razas[ch.raza];
+    let b = 0;
+    const m = raza.modificadores || raza.modificadores_base || {};
+    for (const [k, v] of Object.entries(m)) {
+        if (k === attr) b += v;
+    }
+    if (ch.subraza && raza.subrazas?.[ch.subraza]) {
+        for (const [k, v] of Object.entries(raza.subrazas[ch.subraza].modificadores || {})) {
+            if (k === attr) b += v;
+        }
+    }
+    if (ch.mods_libres[attr]) b += ch.mods_libres[attr];
+    return b;
+}
+
+function atributosCompletos() {
+    return ATRIBUTOS.every(a => ch.atributos[a] !== null && ch.atributos[a] !== undefined);
+}
+
+function mostrarError(msg) {
+    const el = document.getElementById("error-global");
+    el.textContent = msg;
+    el.style.display = msg ? "block" : "none";
+}
+
+// ─── Validación por paso ──────────────────────────────────────────────────────
+function validarPaso(n) {
+    switch (n) {
+        case 1:
+            if (ch.nombre.trim().length < 2) return "El nombre debe tener al menos 2 caracteres.";
+            if (ch.sala.trim().length < 2) return "El nombre de sala debe tener al menos 2 caracteres.";
+            return null;
+        case 2: {
+            if (!ch.raza) return "Elige una raza.";
+            const raza = D.razas[ch.raza];
+            if (Object.keys(raza.subrazas || {}).length > 0 && !ch.subraza)
+                return "Elige una subraza.";
+            if (ch.raza === "draconido" && !ch.ascendencia)
+                return "Elige una ascendencia dracónica.";
+            if (ch.raza === "semielfo") {
+                const libres = Object.keys(ch.mods_libres || {});
+                if (libres.length < 2) return "Elige 2 atributos para las bonificaciones libres (+1 cada uno).";
+            }
+            return null;
+        }
+        case 3:
+            return ch.clase ? null : "Elige una clase.";
+        case 4:
+            return ch.trasfondo ? null : "Elige un trasfondo.";
+        case 5:
+            return atributosCompletos() ? null : "Asigna un valor a cada atributo.";
+        case 6: {
+            const cantidad = D.clases[ch.clase].habilidades_cantidad;
+            return ch.habilidades.length >= cantidad ? null : `Debes elegir ${cantidad} habilidades de clase.`;
+        }
+        case 7:
+            return null;
+    }
+    return null;
+}
+
+// ─── Indicadores de paso ─────────────────────────────────────────────────────
+const NOMBRES_PASOS = ["Básico", "Raza", "Clase", "Trasfondo", "Atributos", "Habilidades", "Resumen"];
+
+function renderIndicadores() {
+    const el = document.getElementById("indicadores-pasos");
+    el.innerHTML = NOMBRES_PASOS.map((nombre, i) => {
+        const n = i + 1;
+        const cls = n === pasoActual ? "paso activo" : n < pasoActual ? "paso completo" : "paso";
+        const num = n < pasoActual ? "✓" : n;
+        return `<div class="${cls}"><div class="paso-num">${num}</div>${nombre}</div>`;
+    }).join("");
+}
+
+// ─── Navegación ──────────────────────────────────────────────────────────────
+function renderNav() {
+    const el = document.getElementById("nav-botones");
+    let html = "";
+    if (pasoActual > 1) html += `<button class="btn" onclick="irPaso(${pasoActual - 1})">← Anterior</button>`;
+    html += `<div style="flex:1"></div>`;
+    if (pasoActual < MAX_PASOS)
+        html += `<button class="btn btn-primary" onclick="avanzar()">Siguiente →</button>`;
+    else
+        html += `<button class="btn btn-crear" onclick="crearPersonaje()">Crear personaje ✓</button>`;
+    el.innerHTML = html;
+}
+
+function avanzar() {
+    const err = validarPaso(pasoActual);
+    if (err) { mostrarError(err); return; }
+    mostrarError(null);
+    irPaso(pasoActual + 1);
+}
+
+function irPaso(n) {
+    pasoActual = n;
+    renderIndicadores();
+    renderNav();
+    renderPaso(n);
+}
+
+// ─── Renderizado por paso ─────────────────────────────────────────────────────
+function renderPaso(n) {
+    switch (n) {
+        case 1: renderBasico(); break;
+        case 2: renderRaza(); break;
+        case 3: renderClase(); break;
+        case 4: renderTrasfondo(); break;
+        case 5: renderAtributos(); break;
+        case 6: renderHabilidades(); break;
+        case 7: renderResumen(); break;
+    }
+}
+
+// ── PASO 1: Básico ────────────────────────────────────────────────────────────
+function renderBasico() {
+    const tieneAvatar = !!ch.avatar;
+    document.getElementById("panel-paso").innerHTML = `
+        <h2>1. Información básica</h2>
+        <div class="avatar-row">
+            <div class="avatar-picker" id="avatar-picker"
+                 onclick="document.getElementById('inp-avatar').click()"
+                 title="Haz clic para subir una foto de perfil (JPG, PNG o WebP · máx. 3 MB)">
+                <img id="avatar-img" ${tieneAvatar ? `src="${URL.createObjectURL(ch.avatar)}" style="display:block"` : ""} />
+                ${tieneAvatar ? "" : `<div class="av-placeholder" id="av-placeholder">Foto<br>de perfil</div>`}
+            </div>
+            <input id="inp-avatar" type="file" accept="image/jpeg,image/png,image/webp"
+                   style="display:none" onchange="previewAvatar(this)" />
+            <div class="avatar-meta" style="min-width:180px;max-width:240px;">
+                <strong>Foto de perfil</strong>
+                <span>
+                    Opcional. Si subes una imagen, se mostrara en la sala y junto a tus mensajes.
+                </span>
+                <span class="avatar-status">JPG, PNG o WebP · maximo 3 MB.</span>
+            </div>
+            <div style="flex:1;">
+                <label for="inp-nombre">Nombre del aventurero</label>
+                <div class="input-con-accion">
+                    <input id="inp-nombre" type="text" maxlength="24" placeholder="Ej: Kael, Lyra..."
+                        value="${esc(ch.nombre)}" oninput="ch.nombre = this.value" />
+                    <button class="btn-dado" type="button" onclick="usarNombreAleatorio()"
+                        title="Elegir un nombre al azar" ${Array.isArray(D?.nombres) && D.nombres.length ? "" : "disabled"}>
+                        d20
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="grupo">
+            <label for="inp-sala">Sala</label>
+            <input id="inp-sala" type="text" maxlength="24" placeholder="Ej: demo"
+                value="${esc(ch.sala)}" oninput="ch.sala = this.value" />
+        </div>
+        <div class="summary-actions">
+            <button class="btn-random" type="button" onclick="aleatorizarPersonaje()">
+                Aleatorizar personaje
+            </button>
+            <div class="summary-note">
+                Si ya escribiste un nombre valido, se conserva. Si no, se genera uno al azar y te llevo directo al resumen.
+            </div>
+        </div>
+    `;
+}
+
+function previewAvatar(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+        mostrarError("La imagen no puede superar 3 MB.");
+        input.value = "";
+        return;
+    }
+    mostrarError("");
+
+    const imgLoad = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    imgLoad.onload = () => {
+        // Recorte central al cuadrado más grande posible, escalar a 256×256
+        const size = Math.min(imgLoad.width, imgLoad.height);
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 256;
+        const ctx = canvas.getContext("2d");
+        const sx = (imgLoad.width - size) / 2;
+        const sy = (imgLoad.height - size) / 2;
+        ctx.drawImage(imgLoad, sx, sy, size, size, 0, 0, 256, 256);
+        URL.revokeObjectURL(objectUrl);
+
+        canvas.toBlob(blob => {
+            if (!blob) {
+                mostrarError("No se pudo procesar la imagen seleccionada.");
+                return;
+            }
+            ch.avatar = blob;
+            const imgEl = document.getElementById("avatar-img");
+            const phEl  = document.getElementById("av-placeholder");
+            if (imgEl) { imgEl.src = URL.createObjectURL(blob); imgEl.style.display = "block"; }
+            if (phEl)  { phEl.remove(); }
+        }, "image/png");
+    };
+    imgLoad.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        mostrarError("No se pudo leer la imagen. Usa JPG, PNG o WebP.");
+        input.value = "";
+    };
+    imgLoad.src = objectUrl;
+}
+
+// ── PASO 2: Raza ─────────────────────────────────────────────────────────────
+function formatearMods(raza) {
+    const m = raza.modificadores || raza.modificadores_base || {};
+    return Object.entries(m)
+        .filter(([k]) => ["fue","des","con","int","sab","car"].includes(k))
+        .map(([k, v]) => `${k.toUpperCase()} ${v > 0 ? "+" + v : v}`)
+        .join(" · ");
+}
+
+function renderRaza() {
+    const panel = document.getElementById("panel-paso");
+    let html = `<h2>2. Elige tu Raza</h2><div class="card-grid" id="grid-razas">`;
+
+    for (const [id, raza] of Object.entries(D.razas)) {
+        const mods = formatearMods(raza);
+        const seleccionada = ch.raza === id;
+        html += `<div class="card${seleccionada ? " seleccionada" : ""}" onclick="seleccionarRaza('${id}')">
+            <div class="card-nombre">${esc(raza.nombre)}</div>
+            <div class="card-desc">${esc(raza.descripcion)}</div>
+            ${mods ? `<div class="card-extra">${esc(mods)}</div>` : ""}
+        </div>`;
+    }
+    html += `</div><div id="info-raza"></div>`;
+    panel.innerHTML = html;
+
+    if (ch.raza) actualizarInfoRaza();
+}
+
+function seleccionarRaza(id) {
+    if (ch.raza !== id) {
+        ch.subraza = null;
+        ch.ascendencia = null;
+        ch.mods_libres = {};
+    }
+    ch.raza = id;
+    document.querySelectorAll("#grid-razas .card").forEach(c => {
+        c.classList.toggle("seleccionada", c.getAttribute("onclick").includes(`'${id}'`));
+    });
+    actualizarInfoRaza();
+    mostrarError(null);
+}
+
+function actualizarInfoRaza() {
+    const raza = D.razas[ch.raza];
+    let html = `<div class="info-box">`;
+    html += `<strong>${raza.nombre}</strong><br>`;
+    html += `Velocidad: ${raza.velocidad} ft &nbsp;·&nbsp; Idiomas: ${(raza.idiomas || []).join(", ")}<br>`;
+    if (raza.rasgos?.length) {
+        html += `<ul>${raza.rasgos.map(r => `<li>${esc(r)}</li>`).join("")}</ul>`;
+    }
+    html += `</div>`;
+
+    // Subrazas
+    const subrazas = raza.subrazas || {};
+    if (Object.keys(subrazas).length > 0) {
+        html += `<div class="grupo"><label>Subraza</label>
+            <select onchange="ch.subraza = this.value; actualizarInfoRaza();">
+                <option value="">-- Elige subraza --</option>`;
+        for (const [sid, sub] of Object.entries(subrazas)) {
+            html += `<option value="${sid}" ${ch.subraza === sid ? "selected" : ""}>${esc(sub.nombre)}</option>`;
+        }
+        html += `</select></div>`;
+        if (ch.subraza && subrazas[ch.subraza]) {
+            const sub = subrazas[ch.subraza];
+            html += `<div class="info-box"><strong>${sub.nombre}</strong><br>`;
+            const sm = Object.entries(sub.modificadores || {})
+                .filter(([k]) => ATRIBUTOS.includes(k))
+                .map(([k, v]) => `${k.toUpperCase()} ${v > 0 ? "+" + v : v}`).join(" · ");
+            if (sm) html += `Modificadores: ${sm}<br>`;
+            if (sub.rasgos?.length) html += `<ul>${sub.rasgos.map(r => `<li>${esc(r)}</li>`).join("")}</ul>`;
+            html += `</div>`;
+        }
+    }
+
+    // Dracónido: ascendencia
+    if (ch.raza === "draconido") {
+        const ancs = D.razas.draconido.ascendencia_draconica || {};
+        html += `<div class="grupo"><label>Ascendencia dracónica</label>
+            <select onchange="ch.ascendencia = this.value;">
+                <option value="">-- Elige ascendencia --</option>`;
+        for (const [aid, anc] of Object.entries(ancs)) {
+            html += `<option value="${aid}" ${ch.ascendencia === aid ? "selected" : ""}>${esc(aid.charAt(0).toUpperCase() + aid.slice(1))} (${esc(anc.daño)})</option>`;
+        }
+        html += `</select></div>`;
+    }
+
+    // Semielfo: bonificaciones libres
+    if (ch.raza === "semielfo") {
+        html += `<div class="extra-opciones">
+            <h3>Bonificaciones libres: elige 2 atributos (distintos de CAR) para recibir +1</h3>`;
+        const otrosAttrs = ATRIBUTOS.filter(a => a !== "car");
+        const elegidos = Object.keys(ch.mods_libres);
+        for (let i = 0; i < 2; i++) {
+            const val = elegidos[i] || "";
+            html += `<div class="fila-libre"><span>Bono libre ${i + 1}:</span>
+                <select onchange="actualizarLibre(${i}, this.value)">
+                    <option value="">-- Elige --</option>
+                    ${otrosAttrs.map(a => `<option value="${a}" ${val === a ? "selected" : ""}>${NOMBRES_ATTR[a]}</option>`).join("")}
+                </select> <span style="color:#8b7fe0">+1</span>
+            </div>`;
+        }
+        html += `</div>`;
+    }
+
+    document.getElementById("info-raza").innerHTML = html;
+}
+
+function actualizarLibre(i, attr) {
+    const elegidos = Object.keys(ch.mods_libres).filter(a => a !== "");
+    const nuevoMapa = {};
+    if (i === 0) {
+        nuevoMapa[attr] = 1;
+        if (elegidos[1] && elegidos[1] !== attr) nuevoMapa[elegidos[1]] = 1;
+    } else {
+        if (elegidos[0]) nuevoMapa[elegidos[0]] = 1;
+        if (attr && attr !== elegidos[0]) nuevoMapa[attr] = 1;
+    }
+    ch.mods_libres = nuevoMapa;
+}
+
+// ── PASO 3: Clase ─────────────────────────────────────────────────────────────
+function renderClase() {
+    const panel = document.getElementById("panel-paso");
+    let html = `<h2>3. Elige tu Clase</h2><div class="card-grid" id="grid-clases">`;
+
+    for (const [id, clase] of Object.entries(D.clases)) {
+        const seleccionada = ch.clase === id;
+        html += `<div class="card${seleccionada ? " seleccionada" : ""}" onclick="seleccionarClase('${id}')">
+            <div class="card-nombre">${esc(clase.nombre)}</div>
+            <div class="card-desc">${esc(clase.descripcion)}</div>
+            <div class="card-extra">d${clase.dado_golpe} · ${esc(clase.atributo_principal.toUpperCase())}</div>
+        </div>`;
+    }
+    html += `</div><div id="info-clase"></div>`;
+    panel.innerHTML = html;
+    if (ch.clase) actualizarInfoClase();
+}
+
+function seleccionarClase(id) {
+    if (ch.clase !== id) ch.habilidades = [];
+    ch.clase = id;
+    document.querySelectorAll("#grid-clases .card").forEach(c => {
+        c.classList.toggle("seleccionada", c.getAttribute("onclick").includes(`'${id}'`));
+    });
+    actualizarInfoClase();
+    mostrarError(null);
+}
+
+function actualizarInfoClase() {
+    const clase = D.clases[ch.clase];
+    const salvs = (clase.salvaciones || []).map(s => s.toUpperCase()).join(", ");
+    document.getElementById("info-clase").innerHTML = `
+        <div class="info-box">
+            <strong>${clase.nombre}</strong><br>
+            Dado de golpe: d${clase.dado_golpe} &nbsp;·&nbsp; Salvaciones: ${esc(salvs)}<br>
+            Armaduras: ${esc((clase.armaduras || []).join(", ") || "ninguna")}<br>
+            Armas: ${esc((clase.armas || []).join(", ") || "ninguna")}<br>
+            Habilidades: elige ${clase.habilidades_cantidad} de ${clase.habilidades_opciones.length} opciones
+            <ul style="margin-top:6px">${(clase.rasgos_nivel_1 || []).slice(0,3).map(r => `<li>${esc(r)}</li>`).join("")}</ul>
+        </div>`;
+}
+
+// ── PASO 4: Trasfondo ─────────────────────────────────────────────────────────
+function renderTrasfondo() {
+    const panel = document.getElementById("panel-paso");
+    let html = `<h2>4. Elige tu Trasfondo</h2><div class="card-grid" id="grid-trasfondos">`;
+
+    for (const [id, t] of Object.entries(D.trasfondos)) {
+        const seleccionado = ch.trasfondo === id;
+        html += `<div class="card${seleccionado ? " seleccionada" : ""}" onclick="seleccionarTrasfondo('${id}')">
+            <div class="card-nombre">${esc(t.nombre)}</div>
+            <div class="card-desc">${esc(t.descripcion)}</div>
+            <div class="card-extra">${esc((t.habilidades || []).join(" · "))}</div>
+        </div>`;
+    }
+    html += `</div><div id="info-trasfondo"></div>`;
+    panel.innerHTML = html;
+    if (ch.trasfondo) actualizarInfoTrasfondo();
+}
+
+function seleccionarTrasfondo(id) {
+    ch.trasfondo = id;
+    document.querySelectorAll("#grid-trasfondos .card").forEach(c => {
+        c.classList.toggle("seleccionada", c.getAttribute("onclick").includes(`'${id}'`));
+    });
+    actualizarInfoTrasfondo();
+    mostrarError(null);
+}
+
+function actualizarInfoTrasfondo() {
+    const t = D.trasfondos[ch.trasfondo];
+    const herrs = (t.herramientas || []).join(", ") || "ninguna";
+    const idiomas = t.idiomas > 0 ? `${t.idiomas} idioma(s) a elegir` : "ninguno";
+    document.getElementById("info-trasfondo").innerHTML = `
+        <div class="info-box">
+            <strong>${t.nombre}</strong><br>
+            Habilidades: ${esc((t.habilidades || []).join(", "))}<br>
+            Herramientas: ${esc(herrs)} &nbsp;·&nbsp; Idiomas adicionales: ${idiomas}<br>
+            <strong>Rasgo:</strong> ${esc(t.rasgo || "")}
+            ${t.equipo_inicial?.length ? `<ul>${t.equipo_inicial.slice(0,5).map(e => `<li>${esc(e)}</li>`).join("")}</ul>` : ""}
+        </div>`;
+}
+
+// ── PASO 5: Atributos ─────────────────────────────────────────────────────────
+function renderAtributos() {
+    const panel = document.getElementById("panel-paso");
+    let tableRows = ATRIBUTOS.map(a => `
+        <tr>
+            <td>${NOMBRES_ATTR[a]}</td>
+            <td>
+                <select id="sel-${a}" onchange="asignarAttr('${a}', this.value)">
+                    <option value="">--</option>
+                    ${STANDARD_ARRAY.map(v => `<option value="${v}" ${ch.atributos[a] == v ? "selected" : ""}>${v}</option>`).join("")}
+                </select>
+            </td>
+            <td class="col-bonus" id="bonus-${a}">—</td>
+            <td class="col-total" id="total-${a}">--</td>
+            <td class="col-mod" id="mod-${a}">--</td>
+        </tr>`).join("");
+
+    panel.innerHTML = `
+        <h2>5. Asigna tus Atributos</h2>
+        <p style="color:var(--muted);font-size:.88rem;margin-bottom:12px">
+            Standard Array: asigna cada valor exactamente una vez.
+        </p>
+        <div class="chips-array" id="chips-disponibles"></div>
+        <table class="tabla-attrs">
+            <thead><tr>
+                <th>Atributo</th><th>Valor base</th><th>Bonus raza</th><th>Total</th><th>Mod</th>
+            </tr></thead>
+            <tbody>${tableRows}</tbody>
+        </table>
+        <div id="extras-semielfo"></div>
+        <div class="pg-calc">PG nivel 1: <span id="pg-display">--</span></div>
+    `;
+
+    sincronizarSelects();
+}
+
+function asignarAttr(attr, valor) {
+    ch.atributos[attr] = valor ? parseInt(valor) : null;
+    sincronizarSelects();
+    mostrarError(null);
+}
+
+function sincronizarSelects() {
+    const usados = {};
+    ATRIBUTOS.forEach(a => {
+        const v = ch.atributos[a];
+        if (v !== null && v !== undefined) usados[v] = true;
+    });
+
+    // Actualizar opciones deshabilitadas
+    ATRIBUTOS.forEach(a => {
+        const sel = document.getElementById(`sel-${a}`);
+        if (!sel) return;
+        const actual = ch.atributos[a];
+        STANDARD_ARRAY.forEach(v => {
+            const opt = sel.querySelector(`option[value="${v}"]`);
+            if (opt) opt.disabled = usados[v] && actual != v;
+        });
+    });
+
+    actualizarColumnasAttr();
+    actualizarChips(usados);
+}
+
+function actualizarColumnasAttr() {
+    ATRIBUTOS.forEach(a => {
+        const base = ch.atributos[a];
+        const bonus = calcBonusRaza(a);
+        const total = base !== null && base !== undefined ? Math.min(20, base + bonus) : null;
+        const m = total !== null ? mod(total) : null;
+
+        const bonStr = bonus > 0 ? `+${bonus}` : bonus < 0 ? `${bonus}` : "—";
+        document.getElementById(`bonus-${a}`).textContent = bonStr;
+        document.getElementById(`total-${a}`).textContent = total ?? "--";
+        document.getElementById(`mod-${a}`).textContent = m !== null ? (m >= 0 ? `+${m}` : `${m}`) : "--";
+    });
+    actualizarPG();
+}
+
+function actualizarChips(usados) {
+    const el = document.getElementById("chips-disponibles");
+    if (!el) return;
+    el.innerHTML = STANDARD_ARRAY.map(v => {
+        const libre = !usados[v];
+        return `<span class="chip-val${libre ? " disponible" : ""}">${v}</span>`;
+    }).join("");
+}
+
+function actualizarPG() {
+    const el = document.getElementById("pg-display");
+    if (!el) return;
+    if (!ch.clase || !atributosCompletos()) { el.textContent = "--"; return; }
+    const clase = D.clases[ch.clase];
+    const conTotal = Math.min(20, (ch.atributos.con || 10) + calcBonusRaza("con"));
+    const pg = Math.max(1, clase.dado_golpe + mod(conTotal));
+    el.textContent = pg;
+}
+
+// ── PASO 6: Habilidades ───────────────────────────────────────────────────────
+function renderHabilidades() {
+    const clase = D.clases[ch.clase];
+    const trasfondo = D.trasfondos[ch.trasfondo];
+    const raza = D.razas[ch.raza];
+
+    const yaOtorgadas = new Set([
+        ...(trasfondo.habilidades || []),
+        ...(raza.competencias || []),
+        ...(ch.subraza ? (raza.subrazas?.[ch.subraza]?.competencias || []) : []),
+    ]);
+
+    const opciones = clase.habilidades_opciones || [];
+    const cantidad = clase.habilidades_cantidad || 2;
+
+    // Limpiar habilidades que ya no son válidas
+    ch.habilidades = ch.habilidades.filter(h => opciones.includes(h) && !yaOtorgadas.has(h));
+
+    const panel = document.getElementById("panel-paso");
+    panel.innerHTML = `
+        <h2>6. Habilidades</h2>
+        <p style="color:var(--muted);font-size:.88rem;margin-bottom:12px">
+            Elige <strong style="color:var(--gold)">${cantidad}</strong> habilidades adicionales de tu clase.
+        </p>
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:8px">Ya otorgadas (trasfondo + raza):</p>
+        <div class="habs-otorgadas">
+            ${[...yaOtorgadas].map(h => `<span class="hab-chip">${esc(h)}</span>`).join("") || "<span style='color:var(--muted);font-size:.85rem'>ninguna</span>"}
+        </div>
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:4px">Habilidades de clase — elige ${cantidad}:</p>
+        <div class="contador-hab">Seleccionadas: <strong id="contador-num">${ch.habilidades.length}</strong> / ${cantidad}</div>
+        <div class="check-grid">
+            ${opciones.map(h => {
+                const otorgada = yaOtorgadas.has(h);
+                const elegida = ch.habilidades.includes(h);
+                return `<label class="${otorgada ? "otorgada" : ""}">
+                    <input type="checkbox" value="${esc(h)}"
+                        ${otorgada ? "checked disabled" : (elegida ? "checked" : "")}
+                        ${!otorgada ? `onchange="toggleHabilidad(this, ${cantidad})"` : ""}
+                    > ${esc(h)}${otorgada ? " <span style='color:var(--muted);font-size:.75rem'>(ya otorgada)</span>" : ""}
+                </label>`;
+            }).join("")}
+        </div>
+    `;
+}
+
+function toggleHabilidad(checkbox, cantidad) {
+    const h = checkbox.value;
+    if (checkbox.checked) {
+        if (ch.habilidades.length >= cantidad) {
+            checkbox.checked = false;
+            mostrarError(`Solo puedes elegir ${cantidad} habilidades.`);
+            return;
+        }
+        ch.habilidades.push(h);
+    } else {
+        ch.habilidades = ch.habilidades.filter(x => x !== h);
+    }
+    mostrarError(null);
+    const el = document.getElementById("contador-num");
+    if (el) el.textContent = ch.habilidades.length;
+}
+
+// ── PASO 7: Resumen ───────────────────────────────────────────────────────────
+function renderResumen() {
+    const raza = D.razas[ch.raza];
+    const clase = D.clases[ch.clase];
+    const trasfondo = D.trasfondos[ch.trasfondo];
+
+    let nombreRaza = raza.nombre;
+    if (ch.subraza && raza.subrazas?.[ch.subraza])
+        nombreRaza = raza.subrazas[ch.subraza].nombre;
+
+    const conTotal = Math.min(20, (ch.atributos.con || 10) + calcBonusRaza("con"));
+    const pg = Math.max(1, clase.dado_golpe + mod(conTotal));
+    const mana = { barbaro:0, guerrero:0, monje:0, paladin:0, explorador:0, picaro:0, bardo:2, clerigo:2, druida:2, mago:2, hechicero:2, brujo:1 }[ch.clase] ?? 0;
+
+    const todosHabs = new Set([
+        ...(trasfondo.habilidades || []),
+        ...(raza.competencias || []),
+        ...(ch.subraza ? (raza.subrazas?.[ch.subraza]?.competencias || []) : []),
+        ...ch.habilidades,
+    ]);
+
+    const panel = document.getElementById("panel-paso");
+    panel.innerHTML = `
+        <h2>7. Resumen del personaje</h2>
+        <div class="summary-actions">
+            <button class="btn-random" type="button" onclick="aleatorizarPersonajeSinNombre()">
+                Aleatorizar de nuevo
+            </button>
+            <div class="summary-note">
+                Vuelve a generar raza, clase, trasfondo, atributos y habilidades conservando tu nombre actual.
+            </div>
+        </div>
+        <div class="resumen-grid">
+            <div class="resumen-box">
+                <div class="resumen-box-head">
+                    <div class="resumen-k">Nombre</div>
+                    <button class="btn-dado small" type="button" onclick="usarNombreAleatorio(true)" title="Aleatorizar nombre">
+                        d20
+                    </button>
+                </div>
+                <div class="resumen-v">${esc(ch.nombre)}</div>
+            </div>
+            <div class="resumen-box"><div class="resumen-k">Sala</div><div class="resumen-v">${esc(ch.sala)}</div></div>
+            <div class="resumen-box"><div class="resumen-k">Raza</div><div class="resumen-v">${esc(nombreRaza)}</div></div>
+            <div class="resumen-box"><div class="resumen-k">Clase</div><div class="resumen-v">${esc(clase.nombre)} · d${clase.dado_golpe}</div></div>
+            <div class="resumen-box"><div class="resumen-k">Trasfondo</div><div class="resumen-v">${esc(trasfondo.nombre)}</div></div>
+            <div class="resumen-box"><div class="resumen-k">PG nivel 1 · Espacios magia</div><div class="resumen-v">${pg} PG · ${mana} espacios</div></div>
+        </div>
+
+        <h2 style="margin-bottom:12px">Atributos finales</h2>
+        <div class="attrs-grid">
+            ${ATRIBUTOS.map(a => {
+                const base = ch.atributos[a] || 10;
+                const b = calcBonusRaza(a);
+                const total = Math.min(20, base + b);
+                const m = mod(total);
+                return `<div class="attr-box">
+                    <strong>${total}</strong>
+                    <small>${NOMBRES_ATTR[a].toUpperCase()}</small>
+                    <div class="attr-mod">${m >= 0 ? "+" : ""}${m}</div>
+                </div>`;
+            }).join("")}
+        </div>
+
+        <h2 style="margin-bottom:10px">Habilidades competentes</h2>
+        <div class="habs-otorgadas" style="margin-bottom:18px">
+            ${[...todosHabs].map(h => `<span class="hab-chip">${esc(h)}</span>`).join("")}
+        </div>
+
+        <h2 style="margin-bottom:10px">Equipo inicial (muestra)</h2>
+        <div class="info-box" style="font-size:.82rem">
+            <strong>Clase:</strong> ${esc(clase.equipo_inicial?.slice(0,3).map(e => Array.isArray(e) ? e[0] : e).join(", "))}<br>
+            <strong>Trasfondo:</strong> ${esc(trasfondo.equipo_inicial?.slice(0,3).join(", "))}
+        </div>
+    `;
+}
+
+// ─── Crear personaje (POST) ───────────────────────────────────────────────────
+async function crearPersonaje() {
+    const err = validarPaso(7);
+    if (err) { mostrarError(err); return; }
+
+    const payload = {
+        nombre: ch.nombre.trim(),
+        sala_id: ch.sala.trim(),
+        raza: ch.raza,
+        subraza: ch.subraza || null,
+        clase: ch.clase,
+        trasfondo: ch.trasfondo,
+        ascendencia_draconica: ch.ascendencia || null,
+        modificadores_libres: Object.keys(ch.mods_libres).length ? ch.mods_libres : null,
+        atributos: ch.atributos,
+        habilidades_elegidas: ch.habilidades,
+    };
+
+    const btn = document.querySelector(".btn-crear");
+    if (btn) { btn.disabled = true; btn.textContent = "Creando..."; }
+
+    try {
+        const res = await fetch("/api/personaje/preparar", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            mostrarError(data.detail || `Error ${res.status}`);
+            if (btn) { btn.disabled = false; btn.textContent = "Crear personaje ✓"; }
+            return;
+        }
+
+        if (ch.avatar) {
+            if (btn) btn.textContent = "Subiendo imagen...";
+            const fd = new FormData();
+            fd.append("nombre", payload.nombre);
+            fd.append("file", ch.avatar, "avatar.png");
+            await fetch("/api/avatar/subir", { method: "POST", body: fd });
+            // Si falla el avatar, dejamos pasar igual — no bloquea la entrada
+        }
+
+        const sala = encodeURIComponent(payload.sala_id);
+        const nombre = encodeURIComponent(payload.nombre);
+        window.location.href = `/sala/${sala}?nombre=${nombre}`;
+    } catch (e) {
+        mostrarError("Error de red. Comprueba que el servidor está activo.");
+        if (btn) { btn.disabled = false; btn.textContent = "Crear personaje ✓"; }
+    }
+}
+
+// ─── Arranque ─────────────────────────────────────────────────────────────────
+(async () => {
+    try {
+        const [razas, clases, trasfondos, reglas, nombres] = await Promise.all([
+            fetch("/api/dnd/razas").then(r => r.json()),
+            fetch("/api/dnd/clases").then(r => r.json()),
+            fetch("/api/dnd/trasfondos").then(r => r.json()),
+            fetch("/api/dnd/reglas").then(r => r.json()),
+            fetch("/api/dnd/nombres").then(r => r.json()),
+        ]);
+        D = { razas, clases, trasfondos, reglas, nombres };
+    } catch (e) {
+        document.getElementById("panel-paso").innerHTML =
+            `<p style="color:var(--bad)">No se pudo cargar los datos del servidor. ¿Está corriendo Raphael?</p>`;
+        return;
+    }
+
+    renderIndicadores();
+    renderNav();
+    renderPaso(1);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,283 @@
+{
+  "humano": {
+    "nombre": "Humano",
+    "descripcion": "Versátiles y ambiciosos, los humanos prosperan en cualquier tierra.",
+    "modificadores": {
+      "fue": 1, "des": 1, "con": 1, "int": 1, "sab": 1, "car": 1
+    },
+    "velocidad": 30,
+    "rasgos": [
+      "Versatilidad: ganas una competencia adicional en una habilidad de tu elección.",
+      "Idiomas: Común + un idioma adicional."
+    ],
+    "idiomas": ["Común"],
+    "idioma_extra": 1,
+    "competencias_extra": 1,
+    "equipo_inicial": [],
+    "subrazas": {}
+  },
+
+  "elfo": {
+    "nombre": "Elfo",
+    "descripcion": "Seres mágicos de gracia etérea, vinculados a la naturaleza y la magia.",
+    "modificadores_base": {
+      "des": 2
+    },
+    "velocidad": 30,
+    "rasgos": [
+      "Sentidos agudos: competencia en Percepción.",
+      "Ascendencia feérica: ventaja contra ser encantado; inmune a efecto de sueño mágico.",
+      "Trance: no necesitas dormir; meditas 4 horas en lugar de 8.",
+      "Visión en la oscuridad: 60 pies.",
+      "Idiomas: Común y Élfico."
+    ],
+    "idiomas": ["Común", "Élfico"],
+    "competencias": ["Percepción"],
+    "equipo_inicial": [],
+    "subrazas": {
+      "alto_elfo": {
+        "nombre": "Alto Elfo",
+        "modificadores": { "int": 1 },
+        "rasgos": [
+          "Entrenamiento con armas élficas: competencia en espada larga, espada corta, arco corto y arco largo.",
+          "Truco: conoces un truco del mago.",
+          "Idioma extra: un idioma adicional."
+        ],
+        "competencias_armas": ["espada larga", "espada corta", "arco corto", "arco largo"],
+        "equipo_inicial": []
+      },
+      "elfo_del_bosque": {
+        "nombre": "Elfo del Bosque",
+        "modificadores": { "sab": 1 },
+        "rasgos": [
+          "Entrenamiento con armas élficas: competencia en espada larga, espada corta, arco corto y arco largo.",
+          "Velocidad: 35 pies en lugar de 30.",
+          "Máscara en la naturaleza: puedes intentar ocultarte cuando estás ligeramente oscurecido por follaje."
+        ],
+        "velocidad_override": 35,
+        "competencias_armas": ["espada larga", "espada corta", "arco corto", "arco largo"],
+        "equipo_inicial": []
+      },
+      "drow": {
+        "nombre": "Drow (Elfo Oscuro)",
+        "modificadores": { "car": 1 },
+        "rasgos": [
+          "Sensibilidad a la luz solar: desventaja en ataques y Percepción con luz solar.",
+          "Magia drow: truco luces danzantes; al nivel 3, fuego de las hadas; al nivel 5, oscuridad.",
+          "Entrenamiento con armas drow: competencia en rapier, mano de espada y ballesta de mano.",
+          "Visión en la oscuridad superior: 120 pies."
+        ],
+        "vision_oscuridad": 120,
+        "competencias_armas": ["rapier", "mano de espada", "ballesta de mano"],
+        "equipo_inicial": []
+      }
+    }
+  },
+
+  "enano": {
+    "nombre": "Enano",
+    "descripcion": "Valientes y resistentes, artesanos y guerreros de las montañas.",
+    "modificadores_base": {
+      "con": 2
+    },
+    "velocidad": 25,
+    "rasgos": [
+      "Visión en la oscuridad: 60 pies.",
+      "Resistencia enana: ventaja en salvaciones contra veneno; resistencia al daño por veneno.",
+      "Competencia en herramientas: herramientas de albañilería o herramientas de cervecero o instrumentos de músico.",
+      "Entrenamiento con armas enanas: competencia en hacha de guerra, hacha de mano, martillo ligero y martillo de guerra.",
+      "Conocimiento de la piedra: doble competencia en Historia sobre trabajo en piedra."
+    ],
+    "idiomas": ["Común", "Enano"],
+    "competencias_armas": ["hacha de guerra", "hacha de mano", "martillo ligero", "martillo de guerra"],
+    "competencias_herramientas": ["herramientas de albañilería"],
+    "equipo_inicial": [],
+    "subrazas": {
+      "enano_de_las_colinas": {
+        "nombre": "Enano de las Colinas",
+        "modificadores": { "sab": 1 },
+        "rasgos": [
+          "Tenacidad enana: máximo de puntos de golpe aumenta en 1 y +1 por nivel."
+        ],
+        "pg_extra_por_nivel": 1,
+        "equipo_inicial": []
+      },
+      "enano_de_la_montaña": {
+        "nombre": "Enano de la Montaña",
+        "modificadores": { "fue": 2 },
+        "rasgos": [
+          "Entrenamiento con armaduras enanas: competencia en armaduras ligeras y medias."
+        ],
+        "competencias_armadura": ["ligera", "media"],
+        "equipo_inicial": []
+      }
+    }
+  },
+
+  "mediano": {
+    "nombre": "Mediano",
+    "descripcion": "Pequeños y ágiles, con un inagotable optimismo y suerte innata.",
+    "modificadores_base": {
+      "des": 2
+    },
+    "velocidad": 25,
+    "rasgos": [
+      "Suerte: cuando sacas un 1 en un d20 para ataque, prueba o salvación, puedes relanzar y usar el nuevo resultado.",
+      "Valiente: ventaja en salvaciones contra miedo.",
+      "Agilidad medianda: puedes moverte a través del espacio de cualquier criatura de tamaño mayor.",
+      "Idiomas: Común y Mediano."
+    ],
+    "idiomas": ["Común", "Mediano"],
+    "equipo_inicial": [],
+    "subrazas": {
+      "pie_alegre": {
+        "nombre": "Pie Alegre",
+        "modificadores": { "car": 1 },
+        "rasgos": [
+          "Naturaleza afortunada: puedes intentar ocultarte detrás de criaturas de mayor tamaño.",
+          "Naturaleza afable: puedes usar la acción Ayudar para ayudar a criaturas aliadas en ataques."
+        ],
+        "equipo_inicial": []
+      },
+      "sombrio": {
+        "nombre": "Sombrío",
+        "modificadores": { "con": 1 },
+        "rasgos": [
+          "Visión en la oscuridad: 60 pies.",
+          "Resiliencia innata: ventaja en salvaciones contra miedo y ser encantado."
+        ],
+        "vision_oscuridad": 60,
+        "equipo_inicial": []
+      }
+    }
+  },
+
+  "gnomo": {
+    "nombre": "Gnomo",
+    "descripcion": "Curiosos e inventivos, plenos de energía y amor por la vida.",
+    "modificadores_base": {
+      "int": 2
+    },
+    "velocidad": 25,
+    "rasgos": [
+      "Visión en la oscuridad: 60 pies.",
+      "Astucia gnoma: ventaja en todas las salvaciones de INT, SAB y CAR contra magia.",
+      "Idiomas: Común y Gnomo."
+    ],
+    "idiomas": ["Común", "Gnomo"],
+    "equipo_inicial": [],
+    "subrazas": {
+      "gnomo_de_las_rocas": {
+        "nombre": "Gnomo de las Rocas",
+        "modificadores": { "con": 1 },
+        "rasgos": [
+          "Conocimiento del artesano: doble competencia en Historia sobre objetos mágicos, alquimia o artefactos tecnológicos.",
+          "Manitas: puedes crear pequeños autómatas, fuegos artificiales y otros dispositivos."
+        ],
+        "equipo_inicial": []
+      },
+      "gnomo_del_bosque": {
+        "nombre": "Gnomo del Bosque",
+        "modificadores": { "des": 1 },
+        "rasgos": [
+          "Ilusión natural: conoces el truco ilusión menor.",
+          "Hablar con bestias pequeñas: puedes comunicarte con animales pequeños."
+        ],
+        "equipo_inicial": []
+      }
+    }
+  },
+
+  "semielfo": {
+    "nombre": "Semielfo",
+    "descripcion": "Herederos de dos mundos, poseen el carisma élfico y la ambición humana.",
+    "modificadores": {
+      "car": 2,
+      "libre_1": 1,
+      "libre_2": 1
+    },
+    "modificadores_libres": 2,
+    "nota_modificadores": "Elige 2 atributos distintos (no CAR) para recibir +1 cada uno.",
+    "velocidad": 30,
+    "rasgos": [
+      "Visión en la oscuridad: 60 pies.",
+      "Ascendencia feérica: ventaja contra ser encantado; inmune a efecto de sueño mágico.",
+      "Versatilidad: ganas competencia en 2 habilidades de tu elección.",
+      "Idiomas: Común, Élfico y un idioma adicional."
+    ],
+    "idiomas": ["Común", "Élfico"],
+    "idioma_extra": 1,
+    "competencias_libres": 2,
+    "equipo_inicial": {},
+    "subrazas": {}
+  },
+
+  "semiorco": {
+    "nombre": "Semiorco",
+    "descripcion": "Fuertes y resistentes, portadores de la ferocidad orca y determinación humana.",
+    "modificadores": {
+      "fue": 2, "con": 1
+    },
+    "velocidad": 30,
+    "rasgos": [
+      "Visión en la oscuridad: 60 pies.",
+      "Amenazante: competencia en Intimidación.",
+      "Resistencia implacable: cuando caes a 0 PG, puedes caer a 1 PG en su lugar (1 vez por descanso largo).",
+      "Ataques salvajes: en crítico con arma cuerpo a cuerpo, añade un dado de daño adicional.",
+      "Idiomas: Común y Orco."
+    ],
+    "idiomas": ["Común", "Orco"],
+    "competencias": ["Intimidación"],
+    "equipo_inicial": {},
+    "subrazas": {}
+  },
+
+  "tiefling": {
+    "nombre": "Tiefling",
+    "descripcion": "Marcados por un pacto infernal ancestral, poseen poder arcano y resistencia al fuego.",
+    "modificadores": {
+      "int": 1, "car": 2
+    },
+    "velocidad": 30,
+    "rasgos": [
+      "Visión en la oscuridad: 60 pies.",
+      "Resistencia infernal: resistencia al daño de fuego.",
+      "Legado infernal: conoces el truco taumaturgia; al nivel 3, quema las manos; al nivel 5, oscuridad.",
+      "Idiomas: Común e Infernal."
+    ],
+    "idiomas": ["Común", "Infernal"],
+    "resistencias": ["fuego"],
+    "equipo_inicial": {},
+    "subrazas": {}
+  },
+
+  "draconido": {
+    "nombre": "Dracónido",
+    "descripcion": "Orgullosos guerreros con sangre de dragón, capaces de escupir su aliento ancestral.",
+    "modificadores": {
+      "fue": 2, "car": 1
+    },
+    "velocidad": 30,
+    "rasgos": [
+      "Ascendencia dracónica: elige un tipo de dragón que determina tu tipo de daño y forma del aliento.",
+      "Arma de aliento: usa acción para exhalar energía destructiva (CD 8 + mod CON + bon competencia).",
+      "Resistencia al daño: resistencia al tipo de daño de tu ascendencia.",
+      "Idiomas: Común y Dracónico."
+    ],
+    "idiomas": ["Común", "Dracónico"],
+    "ascendencia_draconica": {
+      "negro": { "daño": "ácido", "aliento": "línea 5x30 pies" },
+      "azul": { "daño": "rayo", "aliento": "línea 5x30 pies" },
+      "latón": { "daño": "fuego", "aliento": "línea 5x30 pies" },
+      "bronce": { "daño": "rayo", "aliento": "línea 5x30 pies" },
+      "cobre": { "daño": "ácido", "aliento": "línea 5x30 pies" },
+      "dorado": { "daño": "fuego", "aliento": "cono 15 pies" },
+      "verde": { "daño": "veneno", "aliento": "cono 15 pies" },
+      "plateado": { "daño": "frío", "aliento": "cono 15 pies" },
+      "rojo": { "daño": "fuego", "aliento": "cono 15 pies" },
+      "blanco": { "daño": "frío", "aliento": "cono 15 pies" }
+    },
+    "equipo_inicial": {},
+    "subrazas": {}
+  }
+}

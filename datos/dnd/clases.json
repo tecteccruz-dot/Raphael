@@ -1,0 +1,312 @@
+{
+  "barbaro": {
+    "nombre": "Bárbaro",
+    "descripcion": "Guerrero feroz que entra en una rabia devastadora.",
+    "dado_golpe": 12,
+    "atributo_principal": "fue",
+    "salvaciones": ["fue", "con"],
+    "armaduras": ["ligera", "media", "escudos"],
+    "armas": ["sencillas", "marciales"],
+    "herramientas": [],
+    "habilidades_opciones": ["Atletismo", "Intimidación", "Naturaleza", "Percepción", "Supervivencia", "Trato con animales"],
+    "habilidades_cantidad": 2,
+    "rasgos_nivel_1": [
+      "Ira: entras en ira como acción adicional. Ventaja en FUE, resistencia a daño contundente/perforante/cortante, +2 al daño con armas de FUE. Dura 1 minuto.",
+      "Defensa sin armadura: CA = 10 + mod DES + mod CON (sin armadura)."
+    ],
+    "equipo_inicial": [
+      ["hacha de guerra", "cualquier arma marcial cuerpo a cuerpo"],
+      ["2 hachas de mano", "cualquier arma sencilla"],
+      "4 venablos",
+      "mochila de explorador"
+    ],
+    "pg_nivel_1": 12,
+    "pg_niveles_siguientes": "1d12 (o 7) + mod CON"
+  },
+
+  "bardo": {
+    "nombre": "Bardo",
+    "descripcion": "Artista mágico que inspira a sus aliados y confunde a sus enemigos.",
+    "dado_golpe": 8,
+    "atributo_principal": "car",
+    "salvaciones": ["des", "car"],
+    "armaduras": ["ligera"],
+    "armas": ["sencillas", "ballesta de mano", "espada larga", "rapier", "espada corta"],
+    "herramientas": ["3 instrumentos musicales a elegir"],
+    "habilidades_opciones": ["Atletismo", "Acrobacias", "Arcanos", "Engaño", "Historia", "Intimidación", "Investigación", "Medicina", "Naturaleza", "Percepción", "Actuación", "Persuasión", "Religión", "Juego de manos", "Sigilo", "Trato con animales"],
+    "habilidades_cantidad": 3,
+    "rasgos_nivel_1": [
+      "Lanzamiento de conjuros: usa CAR. Conjuros conocidos: 4 trucos, 2 espacios de nivel 1.",
+      "Inspiración bárdica: acción adicional para otorgar 1d6 a un aliado (número de usos = mod CAR por descanso largo)."
+    ],
+    "equipo_inicial": [
+      ["rapier", "espada larga", "cualquier arma sencilla"],
+      ["paquete de diplomático", "paquete de artista"],
+      ["laúd", "cualquier instrumento musical"],
+      "armadura de cuero",
+      "daga"
+    ],
+    "pg_nivel_1": 8,
+    "pg_niveles_siguientes": "1d8 (o 5) + mod CON"
+  },
+
+  "clerigo": {
+    "nombre": "Clérigo",
+    "descripcion": "Intermediario de los dioses que canaliza poder divino para sanar y proteger.",
+    "dado_golpe": 8,
+    "atributo_principal": "sab",
+    "salvaciones": ["sab", "car"],
+    "armaduras": ["ligera", "media", "escudos"],
+    "armas": ["sencillas"],
+    "herramientas": [],
+    "habilidades_opciones": ["Historia", "Perspicacia", "Medicina", "Persuasión", "Religión"],
+    "habilidades_cantidad": 2,
+    "rasgos_nivel_1": [
+      "Lanzamiento de conjuros: usa SAB. Prepara conjuros diariamente (mod SAB + nivel de clérigo).",
+      "Dominio divino: elige un dominio (vida, guerra, luz, etc.) que otorga conjuros y rasgos adicionales.",
+      "Canal de divinidad: poder especial según dominio (1 uso por descanso corto)."
+    ],
+    "equipo_inicial": [
+      ["maza", "martillo de guerra (si tienes competencia)"],
+      ["armadura de escamas", "armadura de cuero", "cota de mallas (si tienes competencia)"],
+      ["ballesta ligera y 20 virotes", "cualquier arma sencilla"],
+      ["paquete de sacerdote", "paquete de explorador"],
+      "escudo y símbolo sagrado"
+    ],
+    "pg_nivel_1": 8,
+    "pg_niveles_siguientes": "1d8 (o 5) + mod CON"
+  },
+
+  "druida": {
+    "nombre": "Druida",
+    "descripcion": "Guardián de la naturaleza que adopta formas animales y lanza magia primordial.",
+    "dado_golpe": 8,
+    "atributo_principal": "sab",
+    "salvaciones": ["int", "sab"],
+    "armaduras": ["ligera", "media", "escudos (no metal)"],
+    "armas": ["garrote", "daga", "dardo", "venablo", "maza", "bastón", "espada corta", "honda", "hoz"],
+    "herramientas": ["herramientas de herborista"],
+    "habilidades_opciones": ["Arcanos", "Trato con animales", "Naturaleza", "Perspicacia", "Medicina", "Percepción", "Religión", "Supervivencia"],
+    "habilidades_cantidad": 2,
+    "rasgos_nivel_1": [
+      "Lanzamiento de conjuros: usa SAB. Prepara conjuros diariamente.",
+      "Druídico: conoces Druídico, el idioma secreto de los druidas."
+    ],
+    "equipo_inicial": [
+      ["escudo de madera", "cualquier arma sencilla"],
+      ["espada corta", "cualquier arma sencilla o marcial cuerpo a cuerpo"],
+      "mochila de explorador",
+      "foco druídico"
+    ],
+    "pg_nivel_1": 8,
+    "pg_niveles_siguientes": "1d8 (o 5) + mod CON"
+  },
+
+  "guerrero": {
+    "nombre": "Guerrero",
+    "descripcion": "Maestro del combate armado, domina todo tipo de armas y armaduras.",
+    "dado_golpe": 10,
+    "atributo_principal": "fue o des",
+    "salvaciones": ["fue", "con"],
+    "armaduras": ["todas", "escudos"],
+    "armas": ["sencillas", "marciales"],
+    "herramientas": [],
+    "habilidades_opciones": ["Acrobacias", "Trato con animales", "Atletismo", "Historia", "Perspicacia", "Intimidación", "Percepción", "Supervivencia"],
+    "habilidades_cantidad": 2,
+    "rasgos_nivel_1": [
+      "Estilo de combate: elige un estilo (defensa, duelo, lucha con dos armas, arquería, etc.).",
+      "Segundo aliento: acción adicional para recuperar 1d10 + nivel PG (1 uso por descanso corto)."
+    ],
+    "equipo_inicial": [
+      ["cota de mallas", "armadura de cuero + arco largo + 20 flechas"],
+      ["arma marcial y escudo", "2 armas marciales"],
+      ["ballesta ligera y 20 virotes", "2 hachas de mano"],
+      ["paquete de mazmorrero", "paquete de explorador"]
+    ],
+    "pg_nivel_1": 10,
+    "pg_niveles_siguientes": "1d10 (o 6) + mod CON"
+  },
+
+  "monje": {
+    "nombre": "Monje",
+    "descripcion": "Artista marcial que canaliza ki para realizar proezas sobrehumanas.",
+    "dado_golpe": 8,
+    "atributo_principal": "des y sab",
+    "salvaciones": ["fue", "des"],
+    "armaduras": [],
+    "armas": ["sencillas", "espadas cortas"],
+    "herramientas": ["1 instrumento musical o herramientas de artesano a elegir"],
+    "habilidades_opciones": ["Acrobacias", "Atletismo", "Historia", "Perspicacia", "Religión", "Sigilo"],
+    "habilidades_cantidad": 2,
+    "rasgos_nivel_1": [
+      "Defensa sin armadura: CA = 10 + mod DES + mod SAB (sin armadura ni escudo).",
+      "Artes marciales: ataques desarmados y armas de monje usan d4 + mod DES o FUE.",
+      "Ki (nivel 2): puntos de ki = nivel de monje."
+    ],
+    "equipo_inicial": [
+      ["espada corta", "cualquier arma sencilla"],
+      ["paquete de mazmorrero", "paquete de explorador"],
+      "10 dardos"
+    ],
+    "pg_nivel_1": 8,
+    "pg_niveles_siguientes": "1d8 (o 5) + mod CON"
+  },
+
+  "paladin": {
+    "nombre": "Paladín",
+    "descripcion": "Guerrero sagrado unido a un juramento divino que combina combate y magia.",
+    "dado_golpe": 10,
+    "atributo_principal": "fue y car",
+    "salvaciones": ["sab", "car"],
+    "armaduras": ["todas", "escudos"],
+    "armas": ["sencillas", "marciales"],
+    "herramientas": [],
+    "habilidades_opciones": ["Atletismo", "Perspicacia", "Intimidación", "Medicina", "Persuasión", "Religión"],
+    "habilidades_cantidad": 2,
+    "rasgos_nivel_1": [
+      "Sentido divino: detectas criaturas celestiales, infernales y no-muertos cercanas.",
+      "Imposición de manos: curas un total de 5 × nivel PG por descanso largo."
+    ],
+    "equipo_inicial": [
+      ["arma marcial y escudo", "2 armas marciales"],
+      ["5 venablos", "cualquier arma sencilla cuerpo a cuerpo"],
+      ["paquete de sacerdote", "paquete de explorador"],
+      "cota de mallas",
+      "símbolo sagrado"
+    ],
+    "pg_nivel_1": 10,
+    "pg_niveles_siguientes": "1d10 (o 6) + mod CON"
+  },
+
+  "explorador": {
+    "nombre": "Explorador",
+    "descripcion": "Cazador y rastreador hábil, experto en naturaleza y combate a distancia.",
+    "dado_golpe": 10,
+    "atributo_principal": "des y sab",
+    "salvaciones": ["fue", "des"],
+    "armaduras": ["ligera", "media", "escudos"],
+    "armas": ["sencillas", "marciales"],
+    "herramientas": [],
+    "habilidades_opciones": ["Trato con animales", "Atletismo", "Perspicacia", "Investigación", "Naturaleza", "Percepción", "Sigilo", "Supervivencia"],
+    "habilidades_cantidad": 3,
+    "rasgos_nivel_1": [
+      "Enemigo predilecto: elige un tipo de enemigo (bestias, humanoides, etc.); ventaja en Supervivencia para rastrearlos.",
+      "Explorador natural: elige un terreno favorito; beneficios en supervivencia y viaje en ese terreno."
+    ],
+    "equipo_inicial": [
+      ["armadura de escamas", "armadura de cuero"],
+      ["2 espadas cortas", "2 armas sencillas cuerpo a cuerpo"],
+      ["paquete de mazmorrero", "paquete de explorador"],
+      "arco largo",
+      "carcaj con 20 flechas"
+    ],
+    "pg_nivel_1": 10,
+    "pg_niveles_siguientes": "1d10 (o 6) + mod CON"
+  },
+
+  "picaro": {
+    "nombre": "Pícaro",
+    "descripcion": "Maestro del sigilo y la astucia, experto en sorprender a sus enemigos.",
+    "dado_golpe": 8,
+    "atributo_principal": "des",
+    "salvaciones": ["des", "int"],
+    "armaduras": ["ligera"],
+    "armas": ["sencillas", "ballesta de mano", "espada larga", "rapier", "espada corta"],
+    "herramientas": ["herramientas de ladrón"],
+    "habilidades_opciones": ["Acrobacias", "Atletismo", "Engaño", "Perspicacia", "Intimidación", "Investigación", "Percepción", "Actuación", "Persuasión", "Juego de manos", "Sigilo"],
+    "habilidades_cantidad": 4,
+    "rasgos_nivel_1": [
+      "Expertise: doble bonificador de competencia en 2 habilidades o herramientas elegidas.",
+      "Ataque furtivo: 1d6 daño extra cuando tienes ventaja o un aliado adyacente al objetivo.",
+      "Jerga de ladrones: conoces el lenguaje secreto del hampa."
+    ],
+    "equipo_inicial": [
+      ["rapier", "espada corta"],
+      ["arco corto y carcaj con 20 flechas", "espada corta"],
+      ["paquete de burlador", "paquete de mazmorrero", "paquete de explorador"],
+      "armadura de cuero",
+      "2 dagas",
+      "herramientas de ladrón"
+    ],
+    "pg_nivel_1": 8,
+    "pg_niveles_siguientes": "1d8 (o 5) + mod CON"
+  },
+
+  "hechicero": {
+    "nombre": "Hechicero",
+    "descripcion": "Lanzador de magia con un poder arcano innato surgido de su linaje.",
+    "dado_golpe": 6,
+    "atributo_principal": "car",
+    "salvaciones": ["con", "car"],
+    "armaduras": [],
+    "armas": ["daga", "dardo", "honda", "bastón", "ballesta ligera"],
+    "herramientas": [],
+    "habilidades_opciones": ["Arcanos", "Engaño", "Perspicacia", "Intimidación", "Persuasión", "Religión"],
+    "habilidades_cantidad": 2,
+    "rasgos_nivel_1": [
+      "Lanzamiento de conjuros: usa CAR. Conoces 4 trucos y 2 conjuros de nivel 1.",
+      "Origen de hechicero: elige tu origen (linaje dracónico, alma silvestre, etc.) que determina tus poderes adicionales."
+    ],
+    "equipo_inicial": [
+      ["ballesta ligera y 20 virotes", "cualquier arma sencilla"],
+      ["bolsa de componentes", "foco arcano"],
+      ["paquete de mazmorrero", "paquete de explorador"],
+      "2 dagas"
+    ],
+    "pg_nivel_1": 6,
+    "pg_niveles_siguientes": "1d6 (o 4) + mod CON"
+  },
+
+  "brujo": {
+    "nombre": "Brujo",
+    "descripcion": "Lanzador de magia que obtuvo poderes mediante un pacto con un ser poderoso.",
+    "dado_golpe": 8,
+    "atributo_principal": "car",
+    "salvaciones": ["sab", "car"],
+    "armaduras": ["ligera"],
+    "armas": ["sencillas"],
+    "herramientas": [],
+    "habilidades_opciones": ["Arcanos", "Engaño", "Historia", "Intimidación", "Investigación", "Naturaleza", "Religión"],
+    "habilidades_cantidad": 2,
+    "rasgos_nivel_1": [
+      "Patrón de más allá: elige un patrón (el gran anciano, el archidiablo, el soberano feérico, etc.).",
+      "Magia del pacto: usa CAR. Recuperas todos los espacios de conjuro con un descanso corto.",
+      "Invocaciones sobrenaturales (nivel 2): poderes especiales del pacto."
+    ],
+    "equipo_inicial": [
+      ["ballesta ligera y 20 virotes", "cualquier arma sencilla"],
+      ["bolsa de componentes", "foco arcano"],
+      ["paquete de erudito", "paquete de mazmorrero"],
+      "armadura de cuero",
+      "cualquier arma sencilla",
+      "2 dagas"
+    ],
+    "pg_nivel_1": 8,
+    "pg_niveles_siguientes": "1d8 (o 5) + mod CON"
+  },
+
+  "mago": {
+    "nombre": "Mago",
+    "descripcion": "Estudioso de la magia arcana, el más versátil de los lanzadores de conjuros.",
+    "dado_golpe": 6,
+    "atributo_principal": "int",
+    "salvaciones": ["int", "sab"],
+    "armaduras": [],
+    "armas": ["daga", "dardo", "honda", "bastón", "ballesta ligera"],
+    "herramientas": [],
+    "habilidades_opciones": ["Arcanos", "Historia", "Perspicacia", "Investigación", "Medicina", "Religión"],
+    "habilidades_cantidad": 2,
+    "rasgos_nivel_1": [
+      "Lanzamiento de conjuros: usa INT. Libreta de conjuros con 6 conjuros de nivel 1.",
+      "Recuperación arcana: recuperas espacios de conjuro durante un descanso corto (total de niveles = mitad del nivel de mago)."
+    ],
+    "equipo_inicial": [
+      ["bastón", "daga"],
+      ["bolsa de componentes", "foco arcano"],
+      ["paquete de erudito", "paquete de explorador"],
+      "libreta de conjuros"
+    ],
+    "pg_nivel_1": 6,
+    "pg_niveles_siguientes": "1d6 (o 4) + mod CON"
+  }
+}

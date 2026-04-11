@@ -1,0 +1,41 @@
+{
+  "standard_array": [15, 14, 13, 12, 10, 8],
+
+  "atributos": {
+    "fue": { "nombre": "Fuerza",       "abrev": "FUE", "descripcion": "Poder físico, atletismo y combate cuerpo a cuerpo." },
+    "des": { "nombre": "Destreza",     "abrev": "DES", "descripcion": "Agilidad, reflejos, sigilo y combate a distancia." },
+    "con": { "nombre": "Constitución", "abrev": "CON", "descripcion": "Resistencia, salud y puntos de golpe." },
+    "int": { "nombre": "Inteligencia", "abrev": "INT", "descripcion": "Razonamiento, memoria y habilidades arcanas." },
+    "sab": { "nombre": "Sabiduría",    "abrev": "SAB", "descripcion": "Percepción, perspicacia e intuición." },
+    "car": { "nombre": "Carisma",      "abrev": "CAR", "descripcion": "Fuerza de personalidad, persuasión y liderazgo." }
+  },
+
+  "tabla_modificadores": {
+    "1":  -5, "2":  -4, "3":  -4,
+    "4":  -3, "5":  -3,
+    "6":  -2, "7":  -2,
+    "8":  -1, "9":  -1,
+    "10":  0, "11":  0,
+    "12":  1, "13":  1,
+    "14":  2, "15":  2,
+    "16":  3, "17":  3,
+    "18":  4, "19":  4,
+    "20":  5
+  },
+
+  "formula_modificador": "Math.floor((valor - 10) / 2)",
+
+  "reglas_distribucion": {
+    "metodo": "Standard Array",
+    "descripcion": "Tienes 6 valores fijos: [15, 14, 13, 12, 10, 8]. Asigna uno a cada atributo. No puedes repetir ni cambiar los valores.",
+    "maximo_base": 15,
+    "minimo_base": 8,
+    "maximo_con_raza": 20,
+    "nota": "Los modificadores de raza se suman DESPUÉS de asignar el array. El total puede superar 15 pero no puede superar 20."
+  },
+
+  "pg_nivel_1": {
+    "formula": "dado_golpe_maximo + modificador_con",
+    "ejemplo": "Guerrero con CON 14 (mod +2): 10 + 2 = 12 PG"
+  }
+}

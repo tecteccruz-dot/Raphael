@@ -1,0 +1,207 @@
+{
+  "acolito": {
+    "nombre": "Acólito",
+    "descripcion": "Pasaste tu vida al servicio de un templo, aprendiendo los ritos sagrados.",
+    "habilidades": ["Perspicacia", "Religión"],
+    "herramientas": [],
+    "idiomas": 2,
+    "equipo_inicial": [
+      "símbolo sagrado (regalo de un ser querido)",
+      "libro de oraciones o rueda de plegarias",
+      "5 varillas de incienso",
+      "vestiduras",
+      "conjunto de ropa común",
+      "bolsa con 15 po"
+    ],
+    "rasgo": "Refugio de los fieles: puedes recibir ayuda gratuita en templos de tu deidad (comida, curación básica, alojamiento)."
+  },
+
+  "charlatan": {
+    "nombre": "Charlatán",
+    "descripcion": "Siempre has tenido don de gentes y sabías cómo hacer que la gente creyera lo que querías.",
+    "habilidades": ["Engaño", "Juego de manos"],
+    "herramientas": ["kit de disfraz", "herramientas de falsificador"],
+    "idiomas": 0,
+    "equipo_inicial": [
+      "conjunto de ropa fina",
+      "kit de disfraz",
+      "herramientas de estafador (10 botellas falsas, dados cargados, mazo de naipes trucado)",
+      "bolsa con 15 po"
+    ],
+    "rasgo": "Identidad falsa: tienes una segunda identidad con documentación, disfraz establecido y contactos."
+  },
+
+  "criminal": {
+    "nombre": "Criminal",
+    "descripcion": "Eres un experimentado en actividades ilícitas con contactos en el hampa.",
+    "habilidades": ["Engaño", "Sigilo"],
+    "herramientas": ["un juego de dados", "herramientas de ladrón"],
+    "idiomas": 0,
+    "equipo_inicial": [
+      "palanca",
+      "conjunto de ropa oscura con capucha",
+      "herramientas de ladrón",
+      "bolsa con 15 po"
+    ],
+    "rasgo": "Contacto criminal: tienes un contacto de confianza en el mundo del crimen organizado."
+  },
+
+  "entertainador": {
+    "nombre": "Entretenedor",
+    "descripcion": "Has actuado ante multitudes, desde tabernas de mala muerte hasta cortes nobles.",
+    "habilidades": ["Acrobacias", "Actuación"],
+    "herramientas": ["kit de disfraz", "1 instrumento musical a elegir"],
+    "idiomas": 0,
+    "equipo_inicial": [
+      "instrumento musical (de tu elección)",
+      "el favor de un admirador (carta de amor, mechón de cabello, joya)",
+      "traje de actuación",
+      "bolsa con 15 po"
+    ],
+    "rasgo": "Fama del artista: puedes encontrar hospedaje y comida a cambio de actuar; los admiradores a veces se acercan."
+  },
+
+  "heroe_del_pueblo": {
+    "nombre": "Héroe del Pueblo",
+    "descripcion": "Vienes de origen humilde pero estás destinado a algo más grande.",
+    "habilidades": ["Trato con animales", "Supervivencia"],
+    "herramientas": ["herramientas de artesano (a elegir)", "vehículos terrestres"],
+    "idiomas": 0,
+    "equipo_inicial": [
+      "herramientas de artesano (de tu elección)",
+      "pala",
+      "olla de hierro",
+      "conjunto de ropa común",
+      "bolsa con 10 po"
+    ],
+    "rasgo": "Hospitalidad rústica: la gente común te protege y esconde de las autoridades si es necesario."
+  },
+
+  "gremialista": {
+    "nombre": "Gremialista",
+    "descripcion": "Eres miembro de un gremio de artesanos o mercaderes con contactos comerciales.",
+    "habilidades": ["Perspicacia", "Persuasión"],
+    "herramientas": ["herramientas de artesano (a elegir)"],
+    "idiomas": 1,
+    "equipo_inicial": [
+      "herramientas de artesano (de tu elección)",
+      "carta de presentación del gremio",
+      "conjunto de ropa de viajero",
+      "bolsa con 15 po"
+    ],
+    "rasgo": "Membresía del gremio: el gremio te proporciona alojamiento, te defiende legalmente y ofrece préstamos."
+  },
+
+  "ermitano": {
+    "nombre": "Ermitaño",
+    "descripcion": "Viviste en reclusión durante un tiempo, en comunión con la naturaleza o buscando la iluminación.",
+    "habilidades": ["Medicina", "Religión"],
+    "herramientas": ["herramientas de herborista"],
+    "idiomas": 1,
+    "equipo_inicial": [
+      "caja con notas de tus estudios y oraciones",
+      "manta de invierno",
+      "conjunto de ropa común",
+      "herramientas de herborista",
+      "5 po"
+    ],
+    "rasgo": "Descubrimiento: has descubierto una verdad secreta sobre el universo, los dioses o las fuerzas que dan forma al mundo."
+  },
+
+  "noble": {
+    "nombre": "Noble",
+    "descripcion": "Perteneces a la nobleza y comprendes el poder, las intrigas y los privilegios.",
+    "habilidades": ["Historia", "Persuasión"],
+    "herramientas": ["un juego de azar a elegir"],
+    "idiomas": 1,
+    "equipo_inicial": [
+      "conjunto de ropa fina",
+      "anillo con sello familiar",
+      "pergamino de pedigree",
+      "bolsa con 25 po"
+    ],
+    "rasgo": "Posición privilegiada: la gente te trata como miembro de la alta sociedad; tienes acceso a los nobles locales."
+  },
+
+  "forastero": {
+    "nombre": "Forastero",
+    "descripcion": "Creciste en tierras salvajes, lejos de la civilización, entre tribus o clanes.",
+    "habilidades": ["Atletismo", "Supervivencia"],
+    "herramientas": ["instrumento musical a elegir"],
+    "idiomas": 1,
+    "equipo_inicial": [
+      "bastón",
+      "trampa de caza",
+      "trofeo de un animal que hayas cazado",
+      "conjunto de ropa de viajero",
+      "bolsa con 10 po"
+    ],
+    "rasgo": "Andariego: recuerdas la geografía y el terreno que has recorrido; puedes encontrar comida y agua para tu grupo."
+  },
+
+  "sabio": {
+    "nombre": "Sabio",
+    "descripcion": "Pasaste años estudiando el multiverso, sus historias y sus misterios.",
+    "habilidades": ["Arcanos", "Historia"],
+    "herramientas": [],
+    "idiomas": 2,
+    "equipo_inicial": [
+      "botella de tinta negra",
+      "pluma",
+      "cuchillo pequeño",
+      "carta de un colega fallecido con una pregunta sin respuesta",
+      "conjunto de ropa común",
+      "bolsa con 10 po"
+    ],
+    "rasgo": "Investigador: cuando no sabes algo, sueles saber dónde encontrar la información (biblioteca, sabio, archivo)."
+  },
+
+  "marinero": {
+    "nombre": "Marinero",
+    "descripcion": "Navegaste los mares durante años, enfrentando tormentas y piratas.",
+    "habilidades": ["Atletismo", "Percepción"],
+    "herramientas": ["herramientas de navegante", "vehículos acuáticos"],
+    "idiomas": 0,
+    "equipo_inicial": [
+      "palanca",
+      "rollo de cuerda de seda de 15 metros",
+      "un amuleto de la suerte (ojo blanco de vidrio, una escama de pez o cualquier objeto similar)",
+      "conjunto de ropa común",
+      "bolsa con 10 po"
+    ],
+    "rasgo": "Pasaje seguro: cuando necesitas pasaje marítimo, puedes garantizarte a ti y a tus compañeros lugar en un barco."
+  },
+
+  "soldado": {
+    "nombre": "Soldado",
+    "descripcion": "Combatiste en una fuerza militar organizada y conoces la disciplina y la guerra.",
+    "habilidades": ["Atletismo", "Intimidación"],
+    "herramientas": ["un juego de azar a elegir", "vehículos terrestres"],
+    "idiomas": 0,
+    "equipo_inicial": [
+      "insignia de rango",
+      "trofeo de un enemigo caído (daga, pedazo de bandera, etc.)",
+      "conjunto de juego de huesos o baraja de cartas",
+      "conjunto de ropa común",
+      "bolsa con 10 po"
+    ],
+    "rasgo": "Rango militar: los soldados te reconocen como oficial; tienes acceso a campamentos y fuertes militares."
+  },
+
+  "pilluelo": {
+    "nombre": "Pilluelo Urbano",
+    "descripcion": "Creciste en las calles de una ciudad, sobreviviste por tu astucia y tus pies rápidos.",
+    "habilidades": ["Juego de manos", "Sigilo"],
+    "herramientas": ["herramientas de ladrón", "kit de disfraz"],
+    "idiomas": 0,
+    "equipo_inicial": [
+      "pequeño cuchillo",
+      "mapa de la ciudad donde creciste",
+      "ratón mascota",
+      "recuerdo de tus padres",
+      "conjunto de ropa común",
+      "bolsa con 10 po"
+    ],
+    "rasgo": "Conocedor de la ciudad: conoces los callejones, alcantarillas y rutas secretas de cualquier ciudad; la gente de la calle te ayuda."
+  }
+}
