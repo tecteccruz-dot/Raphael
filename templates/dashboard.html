@@ -283,6 +283,7 @@
                 <h1>Raphael Dashboard</h1>
                 <p class="lead">
                     Crea una sala, define el escenario inicial y comparte el enlace o la ID para que los demas entren a crear su personaje y se unan a la partida.
+                    Quien la crea en este navegador queda marcado como host y podra administrarla despues.
                 </p>
                 <div class="hero-actions">
                     <a class="btn" href="#crear-sala">Crear nueva sala</a>
@@ -318,7 +319,7 @@
             <aside class="stack">
                 <div class="panel" id="crear-sala">
                     <h2>Crear Sala</h2>
-                    <p class="sub">La sala queda registrada en el dashboard para que cualquiera pueda entrar con la misma ID.</p>
+                    <p class="sub">La sala queda registrada en el dashboard para que cualquiera pueda entrar con la misma ID. El navegador que la crea recibe automaticamente el rol de host/admin.</p>
                     {% if error %}
                     <div class="error">{{ error }}</div>
                     {% endif %}
@@ -374,9 +375,23 @@
                                     {{ sala.jugadores_activos }} jugador(es) activos
                                 </div>
                                 <div class="chip">Creada {{ sala.creada_en }}</div>
+                                {% if sala.es_host_actual %}
+                                <div class="chip ok">Host en este navegador</div>
+                                {% elif sala.host_configurado %}
+                                <div class="chip">Host asignado</div>
+                                {% else %}
+                                <div class="chip">Sin host</div>
+                                {% endif %}
                             </div>
                             <div class="room-actions">
                                 <a class="btn" href="/personaje?sala={{ sala.id }}">Unirme</a>
+                                {% if sala.es_host_actual %}
+                                <a class="btn-ghost" href="/host/{{ sala.id }}">Administrar</a>
+                                {% elif not sala.host_configurado %}
+                                <form method="post" action="/salas/{{ sala.id }}/reclamar-host" style="display:inline-flex;">
+                                    <button class="btn-ghost" type="submit">Tomar host</button>
+                                </form>
+                                {% endif %}
                                 <button class="btn-link" type="button" onclick='copyInvite({{ sala.id | tojson }})'>
                                     Copiar invitacion
                                 </button>

@@ -167,6 +167,8 @@ const SALA_NOMBRE = {{ sala_nombre | tojson }};
 const ESCENARIO_NOMBRE = {{ escenario_nombre | tojson }};
 const ESCENARIO_DESCRIPCION = {{ escenario_descripcion | tojson }};
 const SALA_NO_ENCONTRADA = {{ sala_no_encontrada | tojson }};
+const ES_HOST = {{ es_host | tojson }};
+const HOST_URL = {{ host_url | tojson }};
 
 // ─── Estado global ────────────────────────────────────────────────────────────
 const ATRIBUTOS = ["fue", "des", "con", "int", "sab", "car"];
@@ -524,6 +526,13 @@ function renderBasico() {
                     No encontramos esta sala en el dashboard. Puedes corregir la ID o seguir en modo libre.
                 </div>
             ` : ""}
+            ${ES_HOST ? `
+                <div class="info-box" style="margin-bottom:10px;border-color:rgba(74,156,106,.35);color:#bfdcc9">
+                    <strong>Modo host activo.</strong><br>
+                    Este navegador puede administrar la sala.
+                    ${HOST_URL ? `<a href="${esc(HOST_URL)}" style="color:#a6debb">Abrir panel host</a>` : ""}
+                </div>
+            ` : ""}
             <input id="inp-sala" type="text" maxlength="24" placeholder="Ej: demo"
                 value="${esc(ch.sala)}" oninput="ch.sala = this.value" ${SALA_BLOQUEADA ? "readonly" : ""} />
         </div>
@@ -662,7 +671,7 @@ function actualizarInfoRaza() {
             <select onchange="ch.ascendencia = this.value;">
                 <option value="">-- Elige ascendencia --</option>`;
         for (const [aid, anc] of Object.entries(ancs)) {
-            html += `<option value="${aid}" ${ch.ascendencia === aid ? "selected" : ""}>${esc(aid.charAt(0).toUpperCase() + aid.slice(1))} (${esc(anc.daño)})</option>`;
+            html += `<option value="${aid}" ${ch.ascendencia === aid ? "selected" : ""}>${esc(aid.charAt(0).toUpperCase() + aid.slice(1))} (${esc(anc["daño"])})</option>`;
         }
         html += `</select></div>`;
     }
@@ -987,6 +996,7 @@ function renderResumen() {
                 <div class="resumen-v">${esc(ch.nombre)}</div>
             </div>
             <div class="resumen-box"><div class="resumen-k">Sala</div><div class="resumen-v">${esc(SALA_NOMBRE ? `${SALA_NOMBRE} · ID ${ch.sala}` : ch.sala)}</div></div>
+            ${ES_HOST ? `<div class="resumen-box"><div class="resumen-k">Rol</div><div class="resumen-v">Host de esta sala</div></div>` : ""}
             ${ESCENARIO_NOMBRE ? `<div class="resumen-box"><div class="resumen-k">Escenario</div><div class="resumen-v">${esc(ESCENARIO_NOMBRE)}</div></div>` : ""}
             <div class="resumen-box"><div class="resumen-k">Raza</div><div class="resumen-v">${esc(nombreRaza)}</div></div>
             <div class="resumen-box"><div class="resumen-k">Clase</div><div class="resumen-v">${esc(clase.nombre)} · d${clase.dado_golpe}</div></div>

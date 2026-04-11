@@ -16,15 +16,36 @@ app.include_router(api_personaje.router)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
+_HOST_COOKIE_MAX_AGE = 60 * 60 * 24 * 180
 
 
-def _salas_dashboard() -> list[dict[str, object]]:
+def _token_host_request(request: Request, sala_id: str) -> str | None:
+    return request.cookies.get(servicio_salas.nombre_cookie_host(sala_id))
+
+
+def _es_host_request(request: Request, sala_id: str) -> bool:
+    return servicio_salas.es_host(sala_id, _token_host_request(request, sala_id))
+
+
+def _aplicar_cookie_host(response: RedirectResponse, sala_id: str, host_token: str) -> None:
+    response.set_cookie(
+        key=servicio_salas.nombre_cookie_host(sala_id),
+        value=host_token,
+        max_age=_HOST_COOKIE_MAX_AGE,
+        httponly=True,
+        samesite="lax",
+        path="/",
+    )
+
+
+def _salas_dashboard(request: Request) -> list[dict[str, object]]:
     resultado: list[dict[str, object]] = []
 
     for sala in servicio_salas.listar_salas():
         sala_id = str(sala.get("id", "")).strip()
         enriquecida = dict(sala)
         enriquecida["jugadores_activos"] = len(gestor_conexiones.obtener_jugadores_sala(sala_id))
+        enriquecida["es_host_actual"] = _es_host_request(request, sala_id)
         resultado.append(enriquecida)
 
     return resultado
@@ -36,7 +57,7 @@ def _render_dashboard(
     error: str | None = None,
     status_code: int = 200,
 ):
-    salas = _salas_dashboard()
+    salas = _salas_dashboard(request)
 
     return templates.TemplateResponse(
         request,
@@ -63,11 +84,28 @@ async def crear_sala(
     escenario_id: str = Form(...),
 ):
     try:
-        sala = servicio_salas.crear_sala(nombre_sala, escenario_id)
+        sala, host_token = servicio_salas.crear_sala(nombre_sala, escenario_id)
     except ValueError as exc:
         return _render_dashboard(request, error=str(exc), status_code=400)
 
-    return RedirectResponse(url=f"/personaje?sala={sala['id']}", status_code=303)
+    response = RedirectResponse(url=f"/personaje?sala={sala['id']}", status_code=303)
+    _aplicar_cookie_host(response, str(sala["id"]), host_token)
+    return response
+
+
+@app.post("/salas/{sala_id}/reclamar-host", response_class=HTMLResponse, summary="Reclamar host")
+async def reclamar_host(
+    request: Request,
+    sala_id: str,
+):
+    try:
+        sala, host_token = servicio_salas.reclamar_host(sala_id)
+    except ValueError as exc:
+        return _render_dashboard(request, error=str(exc), status_code=400)
+
+    response = RedirectResponse(url=f"/host/{sala['id']}", status_code=303)
+    _aplicar_cookie_host(response, str(sala["id"]), host_token)
+    return response
 
 
 @app.get("/personaje", response_class=HTMLResponse, summary="Crear personaje")
@@ -77,6 +115,7 @@ async def crear_personaje_view(
 ):
     sala_actual = servicio_salas.obtener_sala(sala or "")
     sala_id = str(sala_actual.get("id") if sala_actual else (sala or "")).strip()
+    es_host = bool(sala_actual) and _es_host_request(request, sala_id)
 
     return templates.TemplateResponse(
         request,
@@ -88,6 +127,8 @@ async def crear_personaje_view(
             "escenario_nombre": sala_actual.get("escenario_nombre") if sala_actual else None,
             "escenario_descripcion": sala_actual.get("escenario_descripcion") if sala_actual else None,
             "sala_no_encontrada": bool(sala) and not sala_actual,
+            "es_host": es_host,
+            "host_url": f"/host/{sala_id}" if sala_actual and es_host else None,
         },
     )
 
@@ -101,6 +142,36 @@ async def salud():
     }
 
 
+@app.get("/host/{sala_id}", response_class=HTMLResponse, summary="Panel de host")
+async def host_dashboard(
+    request: Request,
+    sala_id: str,
+):
+    sala_actual = servicio_salas.obtener_sala(sala_id)
+    sala_encontrada = bool(sala_actual)
+    es_host = sala_encontrada and _es_host_request(request, sala_id)
+    jugadores_activos = gestor_conexiones.obtener_jugadores_sala(sala_id) if sala_encontrada else []
+    status_code = 200 if es_host else (404 if not sala_encontrada else 403)
+
+    return templates.TemplateResponse(
+        request,
+        "host.html",
+        {
+            "sala_id": sala_id,
+            "sala_encontrada": sala_encontrada,
+            "sala_nombre": sala_actual.get("nombre") if sala_actual else sala_id,
+            "escenario_nombre": sala_actual.get("escenario_nombre") if sala_actual else None,
+            "escenario_descripcion": sala_actual.get("escenario_descripcion") if sala_actual else None,
+            "creada_en": sala_actual.get("creada_en") if sala_actual else None,
+            "host_configurado": bool(sala_actual.get("host_configurado")) if sala_actual else False,
+            "es_host": es_host,
+            "jugadores_activos": jugadores_activos,
+            "total_jugadores_activos": len(jugadores_activos),
+        },
+        status_code=status_code,
+    )
+
+
 @app.get("/sala/{sala_id}", response_class=HTMLResponse, summary="Sala de chat")
 async def ver_sala(
     request: Request,
@@ -108,6 +179,7 @@ async def ver_sala(
     nombre: str = Query(..., min_length=2, max_length=24),
 ):
     sala_actual = servicio_salas.obtener_sala(sala_id)
+    es_host = bool(sala_actual) and _es_host_request(request, sala_id)
 
     return templates.TemplateResponse(
         request,
@@ -118,6 +190,8 @@ async def ver_sala(
             "sala_nombre": sala_actual.get("nombre") if sala_actual else sala_id,
             "escenario_nombre": sala_actual.get("escenario_nombre") if sala_actual else "Sala lista",
             "escenario_descripcion": sala_actual.get("escenario_descripcion") if sala_actual else "Haz clic en tu personaje o en otro jugador para abrir su resumen textual.",
+            "es_host": es_host,
+            "host_url": f"/host/{sala_id}" if sala_actual and es_host else None,
         },
     )
 

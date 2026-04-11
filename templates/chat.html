@@ -10,7 +10,7 @@
         .layout{display:grid;grid-template-columns:280px minmax(0,1fr) 260px;grid-template-rows:52px minmax(0,1fr);height:100vh}
         .topbar,.panel-left,.panel-right,.chat-footer{background:var(--panel)} .topbar{grid-column:1/-1;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:0 16px} .brand,.section-title,.turn-badge,.name-main,.modal-title{font-family:"Times New Roman",serif;letter-spacing:.06em}
         .brand{color:var(--gold);font-size:15px}.scene{color:var(--muted);font-size:13px;display:flex;align-items:center;gap:8px}.spacer{flex:1}.turn-badge{color:#d4bf86;border:1px solid rgba(124,77,189,.5);background:rgba(124,77,189,.18);border-radius:999px;padding:4px 10px;font-size:11px}
-        .conn{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}.dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}.dot.warning{background:var(--gold)}.dot.error{background:var(--bad)}
+        .conn{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}.dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}.dot.warning{background:var(--gold)}.dot.error{background:var(--bad)}.host-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid rgba(74,156,106,.35);background:rgba(74,156,106,.12);color:#a6debb;font-size:11px;text-decoration:none}
         .panel-left,.panel-right{display:flex;flex-direction:column;min-height:0}.panel-left{border-right:1px solid var(--border)}.panel-right{border-left:1px solid var(--border)}
         .section-head{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px}.section-title{color:var(--gold);font-size:11px;text-transform:uppercase}
         .me-card{padding:12px 14px;border-bottom:1px solid var(--border)}.me-top{display:flex;gap:10px;align-items:stretch;margin-bottom:12px}.me-open,.player-open{background:transparent;color:inherit;border:0;text-align:left;cursor:pointer}.me-open{flex:1;display:flex;gap:10px;align-items:center;min-width:0}
@@ -33,7 +33,7 @@
         .tag-accion{background:rgba(232,216,160,.1);border-color:rgba(232,216,160,.4);color:#e8d8a0}
         .tag-default{background:rgba(255,255,255,.04);border-color:var(--border);color:var(--muted)}
         .chat-footer{border-top:1px solid var(--border);padding:10px 14px}.chat-controls{display:flex;gap:8px;align-items:flex-end} textarea{flex:1;resize:none;min-height:42px;max-height:96px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);padding:10px 12px;outline:none}
-        .action{border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);padding:10px 14px;cursor:pointer}.action.send{background:rgba(124,77,189,.18);border-color:rgba(124,77,189,.45)}
+        .action{border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);padding:10px 14px;cursor:pointer}.action.send{background:rgba(124,77,189,.18);border-color:rgba(124,77,189,.45)}.action-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
         .scene-box,.turn-box{padding:10px 14px;border-bottom:1px solid var(--border)}.scene-name{color:var(--gold);font-size:13px;margin-bottom:4px}.turn-box{display:flex;gap:10px;align-items:center}.turn-num{color:var(--gold);font-size:24px}.turn-label{color:var(--muted);font-size:10px;text-transform:uppercase}
         .item{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}.item:last-child{border-bottom:0}.item-emoji{width:22px;text-align:center}.item-name{font-size:13px}.item-desc,.item-count{color:var(--muted);font-size:11px}.summary{padding:12px 14px 14px;border-top:1px solid rgba(255,255,255,.04);line-height:1.5}
         .modal{position:fixed;inset:0;background:var(--overlay);display:flex;align-items:center;justify-content:center;padding:18px;z-index:20}.modal-card{width:min(720px,100%);max-height:88vh;overflow-y:auto;background:linear-gradient(180deg,#1c1722,#120f17);border:1px solid rgba(201,168,76,.3);border-radius:18px}.modal-head{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;align-items:center}.modal-title{color:var(--gold);font-size:17px}.modal-sub{color:var(--muted);font-size:12px;margin-top:4px}.modal-body{padding:18px;display:grid;gap:12px}.modal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -49,6 +49,9 @@
             <div class="scene"><span class="dot"></span><span>{{ sala_nombre }} · ID {{ sala_id }}</span></div>
             <div class="spacer"></div>
             <div class="turn-badge" id="turno-badge">Turno 1</div>
+            {% if es_host and host_url %}
+            <a class="host-pill" href="{{ host_url }}">Panel host</a>
+            {% endif %}
             <div class="conn"><span class="dot warning" id="conn-dot"></span><span id="estado-conexion">Conectando...</span></div>
         </header>
 
@@ -100,6 +103,16 @@
                 <div class="scene-name">{{ escenario_nombre }}</div>
                 <div class="scene-desc">{{ escenario_descripcion }}</div>
             </div>
+            {% if es_host and host_url %}
+            <div class="section-head"><div class="section-title">Host</div></div>
+            <div class="scene-box">
+                <div class="scene-name">Modo host activo</div>
+                <div class="scene-desc">Este navegador puede administrar la sala y queda listo para controlar escenas, turnos y NPCs cuando demos ese siguiente paso.</div>
+                <div style="margin-top:10px;">
+                    <a class="action action-link" href="{{ host_url }}">Abrir panel de host</a>
+                </div>
+            </div>
+            {% endif %}
             <div class="section-head"><div class="section-title">Turno</div></div>
             <div class="turn-box">
                 <div class="turn-num" id="turno-num">1</div>

@@ -10,6 +10,7 @@ _BASE = Path("datos/salas")
 _SALAS = _BASE / "salas.json"
 _ESCENARIOS = _BASE / "escenarios.json"
 _ALFABETO = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+_HOST_COOKIE_PREFIX = "raphael_host_"
 
 
 def _asegurar_archivos() -> None:
@@ -25,6 +26,37 @@ def _cargar_json(path: Path, default: object) -> object:
 
     with path.open("r", encoding="utf-8-sig") as fh:
         return json.load(fh)
+
+
+def _sanitizar_sala_publica(sala: dict[str, object]) -> dict[str, object]:
+    publica = dict(sala)
+    publica.pop("host_token", None)
+    publica["host_configurado"] = bool(sala.get("host_token"))
+    return publica
+
+
+def _listar_salas_privadas() -> list[dict[str, object]]:
+    _asegurar_archivos()
+    data = _cargar_json(_SALAS, {"salas": []})
+    salas = data.get("salas", []) if isinstance(data, dict) else []
+    return [dict(sala) for sala in salas if isinstance(sala, dict)]
+
+
+def _buscar_sala_privada(sala_id: str) -> dict[str, object] | None:
+    buscada = (sala_id or "").strip().upper()
+    if not buscada:
+        return None
+
+    for sala in _listar_salas_privadas():
+        if str(sala.get("id", "")).upper() == buscada:
+            return dict(sala)
+
+    return None
+
+
+def nombre_cookie_host(sala_id: str) -> str:
+    sala_segura = "".join(caracter for caracter in str(sala_id or "").upper() if caracter.isalnum())
+    return f"{_HOST_COOKIE_PREFIX}{sala_segura or 'SALA'}"
 
 
 def listar_escenarios() -> list[dict[str, str]]:
@@ -44,10 +76,7 @@ def obtener_escenario(escenario_id: str) -> dict[str, str] | None:
 
 
 def listar_salas() -> list[dict[str, object]]:
-    _asegurar_archivos()
-    data = _cargar_json(_SALAS, {"salas": []})
-    salas = data.get("salas", []) if isinstance(data, dict) else []
-    return [dict(sala) for sala in salas if isinstance(sala, dict)]
+    return [_sanitizar_sala_publica(sala) for sala in _listar_salas_privadas()]
 
 
 def _guardar_salas(salas: list[dict[str, object]]) -> None:
@@ -57,15 +86,15 @@ def _guardar_salas(salas: list[dict[str, object]]) -> None:
 
 
 def obtener_sala(sala_id: str) -> dict[str, object] | None:
-    buscada = (sala_id or "").strip().upper()
-    if not buscada:
-        return None
+    sala = _buscar_sala_privada(sala_id)
+    return _sanitizar_sala_publica(sala) if sala else None
 
-    for sala in listar_salas():
-        if str(sala.get("id", "")).upper() == buscada:
-            return dict(sala)
 
-    return None
+def es_host(sala_id: str, host_token: str | None) -> bool:
+    sala = _buscar_sala_privada(sala_id)
+    token_esperado = str(sala.get("host_token", "")) if sala else ""
+    token_actual = str(host_token or "")
+    return bool(token_esperado and token_actual) and secrets.compare_digest(token_actual, token_esperado)
 
 
 def _generar_id_sala(ids_existentes: set[str], longitud: int = 6) -> str:
@@ -75,7 +104,7 @@ def _generar_id_sala(ids_existentes: set[str], longitud: int = 6) -> str:
             return sala_id
 
 
-def crear_sala(nombre: str, escenario_id: str) -> dict[str, object]:
+def crear_sala(nombre: str, escenario_id: str) -> tuple[dict[str, object], str]:
     nombre_limpio = (nombre or "").strip()
     if len(nombre_limpio) < 3:
         raise ValueError("El nombre de la sala debe tener al menos 3 caracteres.")
@@ -84,9 +113,10 @@ def crear_sala(nombre: str, escenario_id: str) -> dict[str, object]:
     if not escenario:
         raise ValueError("El escenario seleccionado no existe.")
 
-    salas = listar_salas()
+    salas = _listar_salas_privadas()
     ids_existentes = {str(sala.get("id", "")).upper() for sala in salas}
     sala_id = _generar_id_sala(ids_existentes)
+    host_token = secrets.token_urlsafe(24)
 
     sala = {
         "id": sala_id,
@@ -95,8 +125,33 @@ def crear_sala(nombre: str, escenario_id: str) -> dict[str, object]:
         "escenario_nombre": escenario["nombre"],
         "escenario_descripcion": escenario["descripcion"],
         "creada_en": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "host_token": host_token,
     }
 
     salas.insert(0, sala)
     _guardar_salas(salas)
-    return dict(sala)
+    return _sanitizar_sala_publica(sala), host_token
+
+
+def reclamar_host(sala_id: str) -> tuple[dict[str, object], str]:
+    buscada = (sala_id or "").strip().upper()
+    if not buscada:
+        raise ValueError("La sala indicada no es valida.")
+
+    salas = _listar_salas_privadas()
+
+    for indice, sala in enumerate(salas):
+        if str(sala.get("id", "")).upper() != buscada:
+            continue
+
+        if sala.get("host_token"):
+            raise ValueError("Esta sala ya tiene un host asignado.")
+
+        host_token = secrets.token_urlsafe(24)
+        actualizada = dict(sala)
+        actualizada["host_token"] = host_token
+        salas[indice] = actualizada
+        _guardar_salas(salas)
+        return _sanitizar_sala_publica(actualizada), host_token
+
+    raise ValueError("No encontramos la sala solicitada.")

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Raphael - Host {{ sala_nombre }}</title>
+    <style>
+        :root {
+            --bg: #0d0b10;
+            --panel: #17131d;
+            --panel-strong: #201929;
+            --soft: rgba(255,255,255,.04);
+            --border: rgba(201,168,76,.22);
+            --gold: #c9a84c;
+            --text: #ebe1d2;
+            --muted: #a59884;
+            --accent: #7c4dbd;
+            --ok: #4a9c6a;
+            --bad: #c4473a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(124,77,189,.16), transparent 30%),
+                radial-gradient(circle at right, rgba(201,168,76,.08), transparent 26%),
+                linear-gradient(180deg, #0f0c14 0%, #0b0910 100%);
+            color: var(--text);
+            font-family: Georgia, serif;
+            padding: 28px 16px 40px;
+        }
+
+        .shell { max-width: 1120px; margin: 0 auto; }
+        .hero, .panel {
+            background: linear-gradient(180deg, rgba(29,23,37,.96), rgba(17,13,23,.96));
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 18px 40px rgba(0,0,0,.22);
+        }
+        .hero { padding: 24px; margin-bottom: 18px; }
+        .eyebrow {
+            color: var(--gold);
+            font-size: .78rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        h1 {
+            color: var(--gold);
+            font-family: "Times New Roman", serif;
+            font-size: 2.1rem;
+            margin-bottom: 10px;
+        }
+        .lead {
+            color: var(--muted);
+            line-height: 1.7;
+            max-width: 68ch;
+        }
+        .hero-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: start;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: .85rem;
+            border: 1px solid var(--border);
+            background: var(--soft);
+            white-space: nowrap;
+        }
+        .status-badge.ok {
+            border-color: rgba(74,156,106,.35);
+            background: rgba(74,156,106,.12);
+            color: #a6debb;
+        }
+        .status-badge.bad {
+            border-color: rgba(196,71,58,.35);
+            background: rgba(196,71,58,.12);
+            color: #f3b5ae;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .stat {
+            padding: 12px;
+            border-radius: 12px;
+            background: var(--soft);
+            border: 1px solid var(--border);
+        }
+        .stat strong {
+            display: block;
+            font-size: 1.3rem;
+            color: var(--gold);
+        }
+        .stat span {
+            color: var(--muted);
+            font-size: .8rem;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) 360px;
+            gap: 18px;
+        }
+        .panel { padding: 18px; }
+        .panel h2 {
+            color: var(--gold);
+            font-family: "Times New Roman", serif;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+        }
+        .sub {
+            color: var(--muted);
+            font-size: .92rem;
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+        .info-card, .player-row, .notice {
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,.03);
+        }
+        .info-card {
+            padding: 14px;
+            display: grid;
+            gap: 10px;
+        }
+        .info-k {
+            color: var(--muted);
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+        .info-v {
+            color: var(--text);
+            font-size: 1rem;
+        }
+        .players {
+            display: grid;
+            gap: 10px;
+        }
+        .player-row {
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .player-name {
+            color: var(--text);
+            font-size: 1rem;
+        }
+        .player-state {
+            color: #a6debb;
+            font-size: .82rem;
+        }
+        .player-empty {
+            color: var(--muted);
+            font-size: .9rem;
+        }
+        .notice {
+            padding: 16px;
+            line-height: 1.7;
+            color: var(--muted);
+        }
+        .notice strong { color: var(--text); }
+        .notice.bad {
+            border-color: rgba(196,71,58,.35);
+            background: rgba(196,71,58,.08);
+            color: #f3c2bc;
+        }
+        .notice.ok {
+            border-color: rgba(74,156,106,.35);
+            background: rgba(74,156,106,.08);
+        }
+        .actions, .future-list {
+            display: grid;
+            gap: 10px;
+        }
+        .btn, .btn-ghost, .btn-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            min-height: 44px;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: .96rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform .15s, background .15s, border-color .15s;
+        }
+        .btn:hover, .btn-ghost:hover, .btn-link:hover { transform: translateY(-1px); }
+        .btn {
+            border: 1px solid rgba(201,168,76,.45);
+            background: rgba(201,168,76,.12);
+            color: var(--gold);
+        }
+        .btn-ghost {
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,.04);
+            color: var(--text);
+        }
+        .btn-link {
+            border: 1px solid rgba(124,77,189,.4);
+            background: rgba(124,77,189,.14);
+            color: #d6c5f0;
+        }
+        .future-list li {
+            list-style: none;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,.03);
+            padding: 12px 14px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+        .future-list strong { color: var(--text); }
+        form { margin: 0; }
+
+        @media (max-width: 960px) {
+            .hero-top, .layout { grid-template-columns: 1fr; display: grid; }
+            .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 640px) {
+            .stats { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <section class="hero">
+            <div class="hero-top">
+                <div>
+                    <div class="eyebrow">Host Dashboard</div>
+                    <h1>{{ sala_nombre }}</h1>
+                    {% if sala_encontrada %}
+                    <p class="lead">
+                        Administra esta sala desde el navegador que conserva el acceso de host. Aqui dejamos lista la base para que el siguiente paso sea manejar turnos, actores, NPCs y escenas de combate.
+                    </p>
+                    {% else %}
+                    <p class="lead">
+                        No encontramos la sala solicitada. Vuelve al dashboard principal y entra desde una sala valida.
+                    </p>
+                    {% endif %}
+                </div>
+                {% if es_host %}
+                <div class="status-badge ok">Host activo en este navegador</div>
+                {% elif sala_encontrada %}
+                <div class="status-badge bad">Sin acceso de host aqui</div>
+                {% else %}
+                <div class="status-badge bad">Sala no encontrada</div>
+                {% endif %}
+            </div>
+
+            {% if sala_encontrada %}
+            <div class="stats">
+                <div class="stat">
+                    <strong>{{ sala_id }}</strong>
+                    <span>ID compartible</span>
+                </div>
+                <div class="stat">
+                    <strong>{{ total_jugadores_activos }}</strong>
+                    <span>jugadores activos</span>
+                </div>
+                <div class="stat">
+                    <strong>{{ escenario_nombre }}</strong>
+                    <span>escenario inicial</span>
+                </div>
+                <div class="stat">
+                    <strong>{{ creada_en or "ahora" }}</strong>
+                    <span>registro de sala</span>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+
+        <section class="layout">
+            <main class="panel">
+                <h2>Estado de la Sala</h2>
+
+                {% if not sala_encontrada %}
+                <div class="notice bad">
+                    <strong>La sala no existe o fue eliminada.</strong><br>
+                    Puedes volver al dashboard principal para crear una nueva o revisar la ID.
+                </div>
+                {% elif es_host %}
+                <div class="notice ok" style="margin-bottom:14px;">
+                    <strong>Acceso confirmado.</strong><br>
+                    Este navegador puede convertirse en el panel maestro de la partida. Cuando añadamos turnos, combate y control de NPCs, ese flujo vivira aqui.
+                </div>
+                <div class="info-card" style="margin-bottom:14px;">
+                    <div>
+                        <div class="info-k">Escenario actual</div>
+                        <div class="info-v">{{ escenario_nombre }}</div>
+                    </div>
+                    <div>
+                        <div class="info-k">Descripcion</div>
+                        <div class="info-v">{{ escenario_descripcion }}</div>
+                    </div>
+                </div>
+                <h2>Jugadores Conectados</h2>
+                <p class="sub">Este listado ya nos sirve como base para luego calcular iniciativa, estados y turnos por actor.</p>
+                <div class="players">
+                    {% if jugadores_activos %}
+                        {% for jugador in jugadores_activos %}
+                        <div class="player-row">
+                            <div class="player-name">{{ jugador }}</div>
+                            <div class="player-state">Conectado</div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <div class="notice">
+                        <strong>Aun no hay jugadores dentro.</strong><br>
+                        Comparte la invitacion o entra tu mismo al creador de personaje para iniciar la mesa.
+                    </div>
+                    {% endif %}
+                </div>
+                {% elif not host_configurado %}
+                <div class="notice">
+                    <strong>Esta sala aun no tiene host asignado.</strong><br>
+                    Si esta sala es tuya o quieres administrarla, puedes reclamar el host desde este mismo navegador una sola vez.
+                </div>
+                {% else %}
+                <div class="notice bad">
+                    <strong>Esta sala ya tiene un host.</strong><br>
+                    Solo el navegador que conserva la autorizacion de host puede abrir este panel de administracion.
+                </div>
+                {% endif %}
+            </main>
+
+            <aside class="panel">
+                <h2>Acciones Rapidas</h2>
+                <div class="actions">
+                    {% if sala_encontrada %}
+                    <button class="btn" type="button" onclick='copyInvite({{ sala_id | tojson }})'>Copiar invitacion</button>
+                    <a class="btn-link" href="/personaje?sala={{ sala_id }}">Entrar como jugador</a>
+                    {% if es_host %}
+                    <a class="btn-ghost" href="/">Volver al dashboard</a>
+                    {% elif not host_configurado %}
+                    <form method="post" action="/salas/{{ sala_id }}/reclamar-host">
+                        <button class="btn" type="submit">Reclamar host</button>
+                    </form>
+                    {% else %}
+                    <a class="btn-ghost" href="/">Volver al dashboard</a>
+                    {% endif %}
+                    {% else %}
+                    <a class="btn-ghost" href="/">Volver al dashboard</a>
+                    {% endif %}
+                </div>
+
+                <h2 style="margin-top:20px;">Siguiente Fase</h2>
+                <ul class="future-list">
+                    <li><strong>Turnos y rondas:</strong> el host iniciara la escena de combate y definira el orden por iniciativa.</li>
+                    <li><strong>Actores vivos, heridos o incapacitados:</strong> personajes y NPCs podran saltarse automaticamente si no pueden actuar.</li>
+                    <li><strong>NPCs dinamicos:</strong> si llegan refuerzos como lobos o goblins, el host podra agregarlos a la escena sin reiniciar la sala.</li>
+                </ul>
+            </aside>
+        </section>
+    </div>
+
+    <script>
+        function roomInviteUrl(roomId) {
+            return `${window.location.origin}/personaje?sala=${encodeURIComponent(roomId)}`;
+        }
+
+        async function copyInvite(roomId) {
+            const url = roomInviteUrl(roomId);
+
+            try {
+                await navigator.clipboard.writeText(url);
+                alert(`Invitacion copiada:\n${url}`);
+            } catch (error) {
+                prompt("Copia este enlace para compartir la sala:", url);
+            }
+        }
+    </script>
+</body>
+</html>
