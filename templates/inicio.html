@@ -33,6 +33,7 @@
         label { display: block; margin-bottom: 6px; font-size: .9rem; color: var(--muted); }
         input, select { width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-family: inherit; font-size: 1rem; outline: none; }
         input:focus, select:focus { border-color: var(--gold); }
+        input[readonly] { background: rgba(255,255,255,.04); color: #d4c8b7; cursor: default; }
         select option { background: #1a1520; }
         .input-con-accion { display: flex; gap: 8px; align-items: stretch; }
         .input-con-accion input { flex: 1; }
@@ -160,6 +161,13 @@
 <script>
 "use strict";
 
+const SALA_PREFIJADA = {{ sala_prefijada | tojson }};
+const SALA_BLOQUEADA = {{ sala_bloqueada | tojson }};
+const SALA_NOMBRE = {{ sala_nombre | tojson }};
+const ESCENARIO_NOMBRE = {{ escenario_nombre | tojson }};
+const ESCENARIO_DESCRIPCION = {{ escenario_descripcion | tojson }};
+const SALA_NO_ENCONTRADA = {{ sala_no_encontrada | tojson }};
+
 // ─── Estado global ────────────────────────────────────────────────────────────
 const ATRIBUTOS = ["fue", "des", "con", "int", "sab", "car"];
 const NOMBRES_ATTR = { fue: "Fuerza", des: "Destreza", con: "Constitución", int: "Inteligencia", sab: "Sabiduría", car: "Carisma" };
@@ -169,7 +177,7 @@ const MAX_PASOS = 7;
 let D = null; // datos D&D cargados
 
 const ch = {
-    nombre: "", sala: "demo",
+    nombre: "", sala: SALA_PREFIJADA || "demo",
     raza: null, subraza: null,
     clase: null,
     trasfondo: null,
@@ -504,8 +512,20 @@ function renderBasico() {
         </div>
         <div class="grupo">
             <label for="inp-sala">Sala</label>
+            ${SALA_NOMBRE ? `
+                <div class="info-box" style="margin-bottom:10px">
+                    <strong>${esc(SALA_NOMBRE)}</strong><br>
+                    ID compartible: ${esc(ch.sala)}<br>
+                    Escenario inicial: ${esc(ESCENARIO_NOMBRE || "Por definir")}<br>
+                    <span style="color:var(--muted)">${esc(ESCENARIO_DESCRIPCION || "")}</span>
+                </div>
+            ` : SALA_NO_ENCONTRADA ? `
+                <div class="info-box" style="margin-bottom:10px;border-color:rgba(196,71,58,.35);color:#d6b9b5">
+                    No encontramos esta sala en el dashboard. Puedes corregir la ID o seguir en modo libre.
+                </div>
+            ` : ""}
             <input id="inp-sala" type="text" maxlength="24" placeholder="Ej: demo"
-                value="${esc(ch.sala)}" oninput="ch.sala = this.value" />
+                value="${esc(ch.sala)}" oninput="ch.sala = this.value" ${SALA_BLOQUEADA ? "readonly" : ""} />
         </div>
         <div class="summary-actions">
             <button class="btn-random" type="button" onclick="aleatorizarPersonaje()">
@@ -966,7 +986,8 @@ function renderResumen() {
                 </div>
                 <div class="resumen-v">${esc(ch.nombre)}</div>
             </div>
-            <div class="resumen-box"><div class="resumen-k">Sala</div><div class="resumen-v">${esc(ch.sala)}</div></div>
+            <div class="resumen-box"><div class="resumen-k">Sala</div><div class="resumen-v">${esc(SALA_NOMBRE ? `${SALA_NOMBRE} · ID ${ch.sala}` : ch.sala)}</div></div>
+            ${ESCENARIO_NOMBRE ? `<div class="resumen-box"><div class="resumen-k">Escenario</div><div class="resumen-v">${esc(ESCENARIO_NOMBRE)}</div></div>` : ""}
             <div class="resumen-box"><div class="resumen-k">Raza</div><div class="resumen-v">${esc(nombreRaza)}</div></div>
             <div class="resumen-box"><div class="resumen-k">Clase</div><div class="resumen-v">${esc(clase.nombre)} · d${clase.dado_golpe}</div></div>
             <div class="resumen-box"><div class="resumen-k">Trasfondo</div><div class="resumen-v">${esc(trasfondo.nombre)}</div></div>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Raphael - Sala {{ sala_id }}</title>
+    <title>Raphael - {{ sala_nombre }}</title>
     <style>
         :root{--bg:#0e0c10;--panel:#17131d;--soft:rgba(255,255,255,.03);--border:rgba(201,168,76,.22);--gold:#c9a84c;--text:#ebe1d2;--muted:#a59884;--accent:#7c4dbd;--ok:#4a9c6a;--bad:#c4473a;--hp:#c4473a;--mp:#3a5fa8;--xp:#c9a84c;--overlay:rgba(6,6,10,.76)}
         *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%} body{background:var(--bg);color:var(--text);font-family:Georgia,serif;overflow:hidden} button,textarea{font:inherit} [hidden]{display:none!important}
@@ -46,7 +46,7 @@
     <div class="layout">
         <header class="topbar">
             <div class="brand">&#9876; Raphael</div>
-            <div class="scene"><span class="dot"></span><span>Sala: {{ sala_id }}</span></div>
+            <div class="scene"><span class="dot"></span><span>{{ sala_nombre }} · ID {{ sala_id }}</span></div>
             <div class="spacer"></div>
             <div class="turn-badge" id="turno-badge">Turno 1</div>
             <div class="conn"><span class="dot warning" id="conn-dot"></span><span id="estado-conexion">Conectando...</span></div>
@@ -97,8 +97,8 @@
         <aside class="panel-right">
             <div class="section-head"><div class="section-title">Escena activa</div></div>
             <div class="scene-box">
-                <div class="scene-name">Sala lista</div>
-                <div class="scene-desc">Haz clic en tu personaje o en otro jugador para abrir su resumen textual.</div>
+                <div class="scene-name">{{ escenario_nombre }}</div>
+                <div class="scene-desc">{{ escenario_descripcion }}</div>
             </div>
             <div class="section-head"><div class="section-title">Turno</div></div>
             <div class="turn-box">

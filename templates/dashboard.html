@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Raphael - Dashboard de Salas</title>
+    <style>
+        :root {
+            --bg: #0d0b10;
+            --panel: #17131d;
+            --panel-strong: #201929;
+            --soft: rgba(255,255,255,.04);
+            --border: rgba(201,168,76,.22);
+            --gold: #c9a84c;
+            --text: #ebe1d2;
+            --muted: #a59884;
+            --accent: #7c4dbd;
+            --ok: #4a9c6a;
+            --bad: #c4473a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top, rgba(124,77,189,.16), transparent 32%),
+                radial-gradient(circle at right, rgba(201,168,76,.08), transparent 26%),
+                linear-gradient(180deg, #0f0c14 0%, #0b0910 100%);
+            color: var(--text);
+            font-family: Georgia, serif;
+            padding: 28px 16px 40px;
+        }
+
+        .shell { max-width: 1180px; margin: 0 auto; }
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+        .hero-card, .panel {
+            background: linear-gradient(180deg, rgba(29,23,37,.96), rgba(17,13,23,.96));
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 18px 40px rgba(0,0,0,.22);
+        }
+        .hero-card { padding: 22px; }
+        .eyebrow {
+            color: var(--gold);
+            font-size: .78rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        h1 {
+            color: var(--gold);
+            font-family: "Times New Roman", serif;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        .lead {
+            color: var(--muted);
+            line-height: 1.7;
+            max-width: 62ch;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+        .btn, .btn-ghost, .btn-link {
+            border-radius: 10px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background .15s, border-color .15s, transform .15s;
+        }
+        .btn {
+            border: 1px solid rgba(201,168,76,.45);
+            background: rgba(201,168,76,.12);
+            color: var(--gold);
+            padding: 12px 18px;
+        }
+        .btn:hover, .btn-ghost:hover, .btn-link:hover { transform: translateY(-1px); }
+        .btn-ghost {
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,.04);
+            color: var(--text);
+            padding: 12px 18px;
+        }
+        .btn-link {
+            border: 1px solid rgba(124,77,189,.4);
+            background: rgba(124,77,189,.14);
+            color: #d6c5f0;
+            padding: 10px 14px;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .stat {
+            padding: 12px;
+            border-radius: 12px;
+            background: var(--soft);
+            border: 1px solid var(--border);
+        }
+        .stat strong {
+            display: block;
+            font-size: 1.3rem;
+            color: var(--gold);
+        }
+        .stat span {
+            color: var(--muted);
+            font-size: .8rem;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 380px minmax(0, 1fr);
+            gap: 18px;
+        }
+        .panel { padding: 18px; }
+        .panel h2 {
+            color: var(--gold);
+            font-family: "Times New Roman", serif;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+        }
+        .panel p.sub {
+            color: var(--muted);
+            font-size: .9rem;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+        .error {
+            margin-bottom: 14px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(196,71,58,.3);
+            background: rgba(196,71,58,.1);
+            color: #f3b5ae;
+            font-size: .9rem;
+        }
+        .field { margin-bottom: 14px; }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--muted);
+            font-size: .9rem;
+        }
+        input, select {
+            width: 100%;
+            padding: 11px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #0f0c13;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+        }
+        input:focus, select:focus { border-color: var(--gold); }
+        select option { background: #16111d; }
+
+        .stack { display: grid; gap: 16px; }
+        .quick-join {
+            margin-top: 12px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,.06);
+        }
+        .join-row {
+            display: flex;
+            gap: 8px;
+        }
+        .join-row input { flex: 1; text-transform: uppercase; }
+
+        .rooms-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .rooms-head small { color: var(--muted); }
+        .rooms {
+            display: grid;
+            gap: 12px;
+        }
+        .room-card {
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background:
+                linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
+                linear-gradient(120deg, rgba(124,77,189,.12), transparent 40%);
+            padding: 16px;
+        }
+        .room-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+        .room-name {
+            color: var(--gold);
+            font-size: 1.08rem;
+        }
+        .room-code {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            border: 1px solid rgba(201,168,76,.28);
+            background: rgba(201,168,76,.08);
+            color: #e2c97f;
+            padding: 5px 10px;
+            font-size: .8rem;
+            white-space: nowrap;
+        }
+        .room-scene {
+            color: var(--text);
+            margin-bottom: 6px;
+            font-size: .95rem;
+        }
+        .room-desc {
+            color: var(--muted);
+            font-size: .88rem;
+            line-height: 1.55;
+            margin-bottom: 12px;
+        }
+        .room-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .chip {
+            border-radius: 999px;
+            padding: 5px 10px;
+            font-size: .78rem;
+            border: 1px solid rgba(255,255,255,.08);
+            background: rgba(255,255,255,.04);
+            color: var(--muted);
+        }
+        .chip.ok {
+            border-color: rgba(74,156,106,.35);
+            color: #a6debb;
+            background: rgba(74,156,106,.1);
+        }
+        .room-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .empty {
+            border: 1px dashed var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            color: var(--muted);
+            line-height: 1.6;
+            background: rgba(255,255,255,.02);
+        }
+
+        @media (max-width: 980px) {
+            .hero, .layout { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 640px) {
+            .hero-stats { grid-template-columns: 1fr; }
+            .join-row, .room-actions { flex-direction: column; }
+            .btn, .btn-ghost, .btn-link { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <section class="hero">
+            <article class="hero-card">
+                <div class="eyebrow">Mesa Compartida</div>
+                <h1>Raphael Dashboard</h1>
+                <p class="lead">
+                    Crea una sala, define el escenario inicial y comparte el enlace o la ID para que los demas entren a crear su personaje y se unan a la partida.
+                </p>
+                <div class="hero-actions">
+                    <a class="btn" href="#crear-sala">Crear nueva sala</a>
+                    <a class="btn-ghost" href="/personaje">Modo libre sin dashboard</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <strong>{{ salas|length }}</strong>
+                        <span>salas registradas</span>
+                    </div>
+                    <div class="stat">
+                        <strong>{{ escenarios|length }}</strong>
+                        <span>escenarios iniciales</span>
+                    </div>
+                    <div class="stat">
+                        <strong>{{ total_jugadores_activos }}</strong>
+                        <span>jugadores activos ahora</span>
+                    </div>
+                </div>
+            </article>
+            <article class="hero-card">
+                <div class="eyebrow">Como Funciona</div>
+                <h2 style="margin-bottom:10px;">Lobby rapido para invitar</h2>
+                <p class="lead" style="font-size:.96rem;">
+                    1. Creas la sala y eliges el escenario.
+                    2. Compartes la ID o el enlace.
+                    3. Cada jugador entra, crea su personaje y llega al chat de esa misma sala.
+                </p>
+            </article>
+        </section>
+
+        <section class="layout">
+            <aside class="stack">
+                <div class="panel" id="crear-sala">
+                    <h2>Crear Sala</h2>
+                    <p class="sub">La sala queda registrada en el dashboard para que cualquiera pueda entrar con la misma ID.</p>
+                    {% if error %}
+                    <div class="error">{{ error }}</div>
+                    {% endif %}
+                    <form method="post" action="/salas/crear">
+                        <div class="field">
+                            <label for="nombre_sala">Nombre visible de la sala</label>
+                            <input id="nombre_sala" name="nombre_sala" minlength="3" maxlength="60" placeholder="Ej: Mesa del viernes" required />
+                        </div>
+                        <div class="field">
+                            <label for="escenario_id">Escenario inicial</label>
+                            <select id="escenario_id" name="escenario_id" required>
+                                {% for escenario in escenarios %}
+                                <option value="{{ escenario.id }}">{{ escenario.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button class="btn" type="submit">Crear y entrar</button>
+                    </form>
+
+                    <div class="quick-join">
+                        <h2 style="font-size:1.05rem;">Unirse por ID</h2>
+                        <p class="sub" style="margin-bottom:10px;">Si alguien te compartio la ID, puedes abrir directamente el creador de personaje para esa sala.</p>
+                        <div class="join-row">
+                            <input id="join-room-id" maxlength="12" placeholder="Ej: A7KQ4P" />
+                            <button class="btn-ghost" type="button" onclick="joinById()">Entrar</button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="panel">
+                <div class="rooms-head">
+                    <div>
+                        <h2>Salas Disponibles</h2>
+                        <small>Comparte el enlace o la ID para invitar a tu grupo.</small>
+                    </div>
+                </div>
+
+                <div class="rooms">
+                    {% if salas %}
+                        {% for sala in salas %}
+                        <article class="room-card">
+                            <div class="room-top">
+                                <div>
+                                    <div class="room-name">{{ sala.nombre }}</div>
+                                    <div class="room-scene">{{ sala.escenario_nombre }}</div>
+                                </div>
+                                <div class="room-code">ID {{ sala.id }}</div>
+                            </div>
+                            <div class="room-desc">{{ sala.escenario_descripcion }}</div>
+                            <div class="room-meta">
+                                <div class="chip {% if sala.jugadores_activos %}ok{% endif %}">
+                                    {{ sala.jugadores_activos }} jugador(es) activos
+                                </div>
+                                <div class="chip">Creada {{ sala.creada_en }}</div>
+                            </div>
+                            <div class="room-actions">
+                                <a class="btn" href="/personaje?sala={{ sala.id }}">Unirme</a>
+                                <button class="btn-link" type="button" onclick='copyInvite({{ sala.id | tojson }})'>
+                                    Copiar invitacion
+                                </button>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty">
+                            Aun no hay salas registradas. Crea la primera y comparte su enlace con el grupo.
+                        </div>
+                    {% endif %}
+                </div>
+            </main>
+        </section>
+    </div>
+
+    <script>
+        function roomInviteUrl(roomId) {
+            return `${window.location.origin}/personaje?sala=${encodeURIComponent(roomId)}`;
+        }
+
+        async function copyInvite(roomId) {
+            const url = roomInviteUrl(roomId);
+
+            try {
+                await navigator.clipboard.writeText(url);
+                alert(`Invitacion copiada:\n${url}`);
+            } catch (error) {
+                prompt("Copia este enlace para compartir la sala:", url);
+            }
+        }
+
+        function joinById() {
+            const input = document.getElementById("join-room-id");
+            const value = String(input.value || "").trim().toUpperCase();
+
+            if (!value) {
+                input.focus();
+                return;
+            }
+
+            window.location.href = `/personaje?sala=${encodeURIComponent(value)}`;
+        }
+
+        document.getElementById("join-room-id")?.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                joinById();
+            }
+        });
+    </script>
+</body>
+</html>

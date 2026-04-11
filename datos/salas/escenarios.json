@@ -1,0 +1,32 @@
+[
+  {
+    "id": "taberna_cometa",
+    "nombre": "Taberna del Cometa",
+    "descripcion": "Una posada bulliciosa en el borde del camino. Rumores, mercaderes y un mapa manchado esperan sobre la mesa central."
+  },
+  {
+    "id": "bosque_lunargenta",
+    "nombre": "Bosque Lunargenta",
+    "descripcion": "Un bosque antiguo cubierto por neblina azul. Las hojas brillan de noche y algo observa entre los arboles."
+  },
+  {
+    "id": "ruinas_velkar",
+    "nombre": "Ruinas de Velkar",
+    "descripcion": "Restos de una ciudad de piedra negra enterrada bajo arena y tiempo. Cada pasillo promete tesoros o maldiciones."
+  },
+  {
+    "id": "puerto_ceniza",
+    "nombre": "Puerto Ceniza",
+    "descripcion": "Muelles oscuros, contrabandistas y barcos marcados por guerras viejas. La marea trae secretos y problemas."
+  },
+  {
+    "id": "paso_glacial",
+    "nombre": "Paso Glacial",
+    "descripcion": "Una ruta de montana azotada por el viento. Caravanas desaparecen y huellas imposibles cruzan la nieve."
+  },
+  {
+    "id": "cripta_rey_roto",
+    "nombre": "Cripta del Rey Roto",
+    "descripcion": "Una tumba real sellada con simbolos de hierro. El silencio pesa demasiado para estar vacia."
+  }
+]
