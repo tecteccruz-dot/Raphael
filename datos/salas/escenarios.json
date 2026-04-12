@@ -1,32 +1,17 @@
 [
   {
-    "id": "taberna_cometa",
-    "nombre": "Taberna del Cometa",
-    "descripcion": "Una posada bulliciosa en el borde del camino. Rumores, mercaderes y un mapa manchado esperan sobre la mesa central."
+    "id": "taberna_bruma",
+    "nombre": "La Taberna de la Bruma",
+    "descripcion": "La aventura comienza en una taberna fronteriza donde los rumores sobre desapariciones y criaturas extranas no dejan de crecer."
   },
   {
-    "id": "bosque_lunargenta",
-    "nombre": "Bosque Lunargenta",
-    "descripcion": "Un bosque antiguo cubierto por neblina azul. Las hojas brillan de noche y algo observa entre los arboles."
+    "id": "bosque_susurros",
+    "nombre": "Bosque de los Susurros",
+    "descripcion": "Un sendero antiguo atraviesa un bosque envuelto en niebla, con ruinas ocultas y voces que parecen guiar o confundir a los viajeros."
   },
   {
-    "id": "ruinas_velkar",
-    "nombre": "Ruinas de Velkar",
-    "descripcion": "Restos de una ciudad de piedra negra enterrada bajo arena y tiempo. Cada pasillo promete tesoros o maldiciones."
-  },
-  {
-    "id": "puerto_ceniza",
-    "nombre": "Puerto Ceniza",
-    "descripcion": "Muelles oscuros, contrabandistas y barcos marcados por guerras viejas. La marea trae secretos y problemas."
-  },
-  {
-    "id": "paso_glacial",
-    "nombre": "Paso Glacial",
-    "descripcion": "Una ruta de montana azotada por el viento. Caravanas desaparecen y huellas imposibles cruzan la nieve."
-  },
-  {
-    "id": "cripta_rey_roto",
-    "nombre": "Cripta del Rey Roto",
-    "descripcion": "Una tumba real sellada con simbolos de hierro. El silencio pesa demasiado para estar vacia."
+    "id": "fortin_ceniza",
+    "nombre": "Fortin de la Ceniza",
+    "descripcion": "Las murallas de un fortin castigado por la guerra esconden secretos militares, reliquias perdidas y una amenaza lista para despertar."
   }
 ]

@@ -330,13 +330,20 @@
                         </div>
                         <div class="field">
                             <label for="escenario_id">Escenario inicial</label>
-                            <select id="escenario_id" name="escenario_id" required>
+                            <select id="escenario_id" name="escenario_id" required {% if not escenarios %}disabled{% endif %}>
+                                {% if not escenarios %}
+                                <option value="">No hay escenarios disponibles</option>
+                                {% else %}
                                 {% for escenario in escenarios %}
                                 <option value="{{ escenario.id }}">{{ escenario.nombre }}</option>
                                 {% endfor %}
+                                {% endif %}
                             </select>
                         </div>
-                        <button class="btn" type="submit">Crear y entrar</button>
+                        {% if not escenarios %}
+                        <p class="sub" style="margin-bottom:14px;">No se encontraron escenarios configurados. Revisa el archivo de escenarios antes de crear una sala.</p>
+                        {% endif %}
+                        <button class="btn" type="submit" {% if not escenarios %}disabled{% endif %}>Crear y entrar</button>
                     </form>
 
                     <div class="quick-join">

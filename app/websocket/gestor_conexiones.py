@@ -1,8 +1,9 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 from fastapi import WebSocket
 
 from app.api.avatar import obtener_avatar_url
+from app.servicios import sesiones_jugador
 
 # ---------------------------------------------------------------------------
 # Constantes D&D
@@ -392,6 +393,7 @@ class PerfilJugador:
 class SesionJugador:
     websocket: WebSocket
     perfil: PerfilJugador
+    token_sesion: str | None = None
 
 
 def obtener_iniciales(nombre: str) -> str:
@@ -431,46 +433,145 @@ def crear_perfil_inicial(nombre: str) -> PerfilJugador:
     )
 
 
+def perfil_a_dict(perfil: PerfilJugador) -> dict[str, object]:
+    return asdict(perfil)
+
+
+def perfil_desde_dict(datos: dict[str, object]) -> PerfilJugador:
+    payload = dict(datos or {})
+    return PerfilJugador(
+        nombre=str(payload.get("nombre", "")),
+        clase=str(payload.get("clase", "")),
+        nivel=int(payload.get("nivel", 1) or 1),
+        vida_actual=int(payload.get("vida_actual", 0) or 0),
+        vida_maxima=int(payload.get("vida_maxima", 1) or 1),
+        mana_actual=int(payload.get("mana_actual", 0) or 0),
+        mana_maximo=int(payload.get("mana_maximo", 0) or 0),
+        xp_actual=int(payload.get("xp_actual", 0) or 0),
+        xp_maximo=int(payload.get("xp_maximo", 0) or 0),
+        estadisticas=dict(payload.get("estadisticas") or {}),
+        habilidades=list(payload.get("habilidades") or []),
+        pasivas=list(payload.get("pasivas") or []),
+        tiradas=list(payload.get("tiradas") or []),
+        inventario=[dict(item) for item in (payload.get("inventario") or []) if isinstance(item, dict)],
+        resumen=str(payload.get("resumen", "")),
+        privacidad_bloqueada=bool(payload.get("privacidad_bloqueada", False)),
+        raza=str(payload.get("raza", "")),
+        trasfondo=str(payload.get("trasfondo", "")),
+        avatar_url=payload.get("avatar_url"),
+    )
+
+
 class GestorConexiones:
     def __init__(self) -> None:
         # sala_id -> { nombre_jugador: sesion }
         self.conexiones_por_sala: dict[str, dict[str, SesionJugador]] = {}
-        # (sala_id, nombre) -> datos de personaje pendientes de conectar
+        # (sala_id, token_o_nombre) -> datos de personaje pendientes de conectar
         self.personajes_pendientes: dict[tuple[str, str], dict] = {}
+        # sala_id -> eventos recientes relevantes para la IA
+        self.historial_por_sala: dict[str, list[dict[str, str]]] = {}
 
-    def registrar_personaje_pendiente(self, sala_id: str, nombre: str, datos: dict) -> None:
-        self.personajes_pendientes[(sala_id, nombre)] = datos
+    def registrar_personaje_pendiente(
+        self,
+        sala_id: str,
+        nombre: str,
+        datos: dict,
+        token_sesion: str | None = None,
+    ) -> None:
+        clave = (token_sesion or "").strip() or nombre
+        self.personajes_pendientes[(sala_id, clave)] = dict(datos)
+        sesiones_jugador.registrar_preparacion(sala_id, nombre, token_sesion, dict(datos))
 
     async def conectar(self, sala_id: str, nombre: str, websocket: WebSocket) -> tuple[bool, str]:
         await websocket.accept()
+        token_sesion = (websocket.query_params.get("token") or "").strip() or None
 
         sala = self.conexiones_por_sala.setdefault(sala_id, {})
 
         if nombre in sala:
-            await websocket.send_json(
-                {
-                    "tipo": "error",
-                    "mensaje": f"Ya existe un jugador con el nombre '{nombre}' en la sala '{sala_id}'.",
-                }
-            )
-            await websocket.close(code=1008)
-            return False, "nombre_duplicado"
+            sesion_existente = sala[nombre]
+            if token_sesion and sesion_existente.token_sesion == token_sesion:
+                try:
+                    await sesion_existente.websocket.close(code=4001)
+                except Exception:
+                    pass
+                self.desconectar(sala_id, nombre)
+            else:
+                await websocket.send_json(
+                    {
+                        "tipo": "error",
+                        "mensaje": f"Ya existe un jugador con el nombre '{nombre}' en la sala '{sala_id}'.",
+                    }
+                )
+                await websocket.close(code=1008)
+                return False, "nombre_duplicado"
 
-        datos_pendientes = self.personajes_pendientes.pop((sala_id, nombre), None)
+        datos_pendientes = None
+        if token_sesion:
+            datos_pendientes = self.personajes_pendientes.pop((sala_id, token_sesion), None)
+
+        if not datos_pendientes:
+            datos_pendientes = self.personajes_pendientes.pop((sala_id, nombre), None)
+
+        perfil: PerfilJugador | None = None
         if datos_pendientes:
             try:
                 perfil = crear_perfil_desde_datos(datos_pendientes)
             except Exception:
-                perfil = crear_perfil_inicial(nombre)
-        else:
+                perfil = None
+
+        if perfil is None and token_sesion:
+            sesion_guardada = sesiones_jugador.obtener_sesion(sala_id, token_sesion)
+            if sesion_guardada:
+                perfil_guardado = sesion_guardada.get("perfil")
+                datos_guardados = sesion_guardada.get("datos_creacion")
+                try:
+                    if isinstance(perfil_guardado, dict):
+                        perfil = perfil_desde_dict(perfil_guardado)
+                    elif isinstance(datos_guardados, dict):
+                        perfil = crear_perfil_desde_datos(datos_guardados)
+                except Exception:
+                    perfil = None
+
+        if perfil is None:
             perfil = crear_perfil_inicial(nombre)
 
-        sala[nombre] = SesionJugador(websocket=websocket, perfil=perfil)
+        try:
+            from app.servicios.combate import gestor_combate as _gestor_combate
+
+            combate = _gestor_combate.contexto_ia(sala_id)
+            for actor in combate.get("actores", []):
+                if str(actor.get("jugador_nombre") or actor.get("nombre") or "").casefold() == nombre.casefold():
+                    if actor.get("vida_actual") is not None:
+                        perfil.vida_actual = int(actor["vida_actual"])
+                    if actor.get("vida_maxima") is not None:
+                        perfil.vida_maxima = int(actor["vida_maxima"])
+                    if actor.get("mana_actual") is not None:
+                        perfil.mana_actual = int(actor["mana_actual"])
+                    if actor.get("mana_maximo") is not None:
+                        perfil.mana_maximo = int(actor["mana_maximo"])
+                    if actor.get("xp_actual") is not None:
+                        perfil.xp_actual = int(actor["xp_actual"])
+                    if actor.get("xp_maximo") is not None:
+                        perfil.xp_maximo = int(actor["xp_maximo"])
+                    if actor.get("raza"):
+                        perfil.raza = str(actor["raza"])
+                    if actor.get("trasfondo"):
+                        perfil.trasfondo = str(actor["trasfondo"])
+                    if actor.get("resumen"):
+                        perfil.resumen = str(actor["resumen"])
+                    break
+        except Exception:
+            pass
+
+        sala[nombre] = SesionJugador(websocket=websocket, perfil=perfil, token_sesion=token_sesion)
+        sesiones_jugador.guardar_perfil(sala_id, nombre, token_sesion, perfil_a_dict(perfil))
 
         await websocket.send_json(
             {
                 "tipo": "conexion_ok",
                 "mensaje": f"Conectado a la sala '{sala_id}' como '{nombre}'.",
+                "session_token": token_sesion,
             }
         )
 
@@ -482,7 +583,14 @@ class GestorConexiones:
         if not sala:
             return
 
-        sala.pop(nombre, None)
+        sesion = sala.pop(nombre, None)
+        if sesion:
+            sesiones_jugador.guardar_perfil(
+                sala_id,
+                nombre,
+                sesion.token_sesion,
+                perfil_a_dict(sesion.perfil),
+            )
 
         if not sala:
             self.conexiones_por_sala.pop(sala_id, None)
@@ -493,6 +601,7 @@ class GestorConexiones:
     async def enviar_json_a_sala(self, sala_id: str, datos: dict) -> None:
         sala = self.conexiones_por_sala.get(sala_id, {})
         nombres_a_quitar: list[str] = []
+        self._registrar_evento_historial(sala_id, datos)
 
         for nombre, sesion in list(sala.items()):
             try:
@@ -511,6 +620,58 @@ class GestorConexiones:
             return False
 
         sesion.perfil.privacidad_bloqueada = bloqueado
+        sesiones_jugador.guardar_perfil(
+            sala_id,
+            nombre,
+            sesion.token_sesion,
+            perfil_a_dict(sesion.perfil),
+        )
+        return True
+
+    def _registrar_evento_historial(self, sala_id: str, datos: dict[str, object]) -> None:
+        tipo = str(datos.get("tipo") or "").strip().lower()
+        if tipo not in {"chat", "ia", "sistema"}:
+            return
+
+        mensaje = str(datos.get("mensaje") or "").strip()
+        if not mensaje:
+            return
+
+        historial = self.historial_por_sala.setdefault(sala_id, [])
+        historial.append(
+            {
+                "tipo": tipo,
+                "autor": str(datos.get("autor") or ("Sistema" if tipo == "sistema" else "Raphael")).strip(),
+                "mensaje": mensaje,
+            }
+        )
+
+        if len(historial) > 40:
+            del historial[:-40]
+
+    def obtener_historial_sala(self, sala_id: str, limite: int = 12) -> list[dict[str, str]]:
+        historial = self.historial_por_sala.get(sala_id, [])
+        if limite <= 0:
+            return [dict(item) for item in historial]
+        return [dict(item) for item in historial[-limite:]]
+
+    def limpiar_historial(self, sala_id: str) -> None:
+        self.historial_por_sala.pop(sala_id, None)
+
+    async def expulsar_jugador(self, sala_id: str, nombre: str) -> bool:
+        sala = self.conexiones_por_sala.get(sala_id, {})
+        sesion = sala.get(nombre)
+        if not sesion:
+            return False
+        try:
+            await sesion.websocket.send_json({
+                "tipo": "expulsado",
+                "mensaje": "El host te ha expulsado de la sala.",
+            })
+            await sesion.websocket.close(code=4000)
+        except Exception:
+            pass
+        self.desconectar(sala_id, nombre)
         return True
 
     def _serializar_perfil_para(self, perfil: PerfilJugador, destinatario: str) -> dict[str, object]:
@@ -586,6 +747,117 @@ class GestorConexiones:
     def obtener_jugadores_sala(self, sala_id: str) -> list[str]:
         sala = self.conexiones_por_sala.get(sala_id, {})
         return sorted(sala.keys())
+
+    def obtener_perfiles_sala(self, sala_id: str) -> list[PerfilJugador]:
+        sala = self.conexiones_por_sala.get(sala_id, {})
+        return [sesion.perfil for _, sesion in sorted(sala.items(), key=lambda item: item[0].casefold())]
+
+    def obtener_resumen_jugadores_sala(self, sala_id: str) -> list[dict[str, object]]:
+        resumenes: list[dict[str, object]] = []
+
+        for perfil in self.obtener_perfiles_sala(sala_id):
+            resumenes.append(
+                {
+                    "nombre": perfil.nombre,
+                    "clase": perfil.clase,
+                    "raza": perfil.raza,
+                    "nivel": perfil.nivel,
+                    "vida_actual": perfil.vida_actual,
+                    "vida_maxima": perfil.vida_maxima,
+                    "mana_actual": perfil.mana_actual,
+                    "mana_maximo": perfil.mana_maximo,
+                    "xp_actual": perfil.xp_actual,
+                    "xp_maximo": perfil.xp_maximo,
+                    "estadisticas": dict(perfil.estadisticas),
+                    "habilidades": list(perfil.habilidades),
+                    "pasivas": list(perfil.pasivas),
+                    "tiradas": list(perfil.tiradas),
+                    "inventario": [dict(item) for item in perfil.inventario],
+                    "trasfondo": perfil.trasfondo,
+                    "resumen": perfil.resumen,
+                    "avatar_url": perfil.avatar_url,
+                }
+            )
+
+        return resumenes
+
+    def actualizar_perfil_jugador(
+        self,
+        sala_id: str,
+        nombre: str,
+        *,
+        vida_actual: int | None = None,
+        vida_maxima: int | None = None,
+        mana_actual: int | None = None,
+        mana_maximo: int | None = None,
+        xp_actual: int | None = None,
+        xp_maximo: int | None = None,
+        resumen: str | None = None,
+    ) -> bool:
+        sala = self.conexiones_por_sala.get(sala_id, {})
+        sesion = sala.get(nombre)
+        perfil = sesion.perfil if sesion else None
+
+        if not perfil:
+            sesion_guardada = sesiones_jugador.obtener_sesion_por_nombre(sala_id, nombre)
+            perfil_guardado = sesion_guardada.get("perfil") if sesion_guardada else None
+            if not isinstance(perfil_guardado, dict):
+                return False
+            try:
+                perfil = perfil_desde_dict(perfil_guardado)
+            except Exception:
+                return False
+
+        if vida_maxima is not None:
+            perfil.vida_maxima = max(1, int(vida_maxima))
+
+        if vida_actual is not None:
+            maximo = int(perfil.vida_maxima or 1)
+            perfil.vida_actual = max(0, min(int(vida_actual), maximo))
+
+        if mana_maximo is not None:
+            perfil.mana_maximo = max(0, int(mana_maximo))
+
+        if mana_actual is not None:
+            maximo_mana = int(perfil.mana_maximo or 0)
+            perfil.mana_actual = max(0, min(int(mana_actual), maximo_mana))
+
+        if xp_maximo is not None:
+            perfil.xp_maximo = max(0, int(xp_maximo))
+
+        if xp_actual is not None:
+            maximo_xp = int(perfil.xp_maximo or 0)
+            if maximo_xp > 0:
+                perfil.xp_actual = max(0, min(int(xp_actual), maximo_xp))
+            else:
+                perfil.xp_actual = max(0, int(xp_actual))
+
+        if resumen is not None:
+            perfil.resumen = str(resumen)
+
+        sesiones_jugador.guardar_perfil(
+            sala_id,
+            nombre,
+            sesion.token_sesion if sesion else None,
+            perfil_a_dict(perfil),
+        )
+        sesiones_jugador.guardar_perfil_por_nombre(sala_id, nombre, perfil_a_dict(perfil))
+        return True
+
+    def actualizar_vida_jugador(
+        self,
+        sala_id: str,
+        nombre: str,
+        *,
+        vida_actual: int | None = None,
+        vida_maxima: int | None = None,
+    ) -> bool:
+        return self.actualizar_perfil_jugador(
+            sala_id,
+            nombre,
+            vida_actual=vida_actual,
+            vida_maxima=vida_maxima,
+        )
 
     async def enviar_presencia_a_sala(self, sala_id: str) -> None:
         sala = self.conexiones_por_sala.get(sala_id, {})

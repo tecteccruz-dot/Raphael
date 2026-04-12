@@ -196,6 +196,70 @@ let pasoActual = 1;
 const esc = s => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const mod = v => Math.floor((v - 10) / 2);
 const fmod = v => { const m = mod(v); return (m >= 0 ? "+" : "") + m; };
+const SESSION_PREFIX = "raphael:session:";
+
+function claveSesion(salaId) {
+    return `${SESSION_PREFIX}${String(salaId || "").trim().toUpperCase()}`;
+}
+
+function leerSesionGuardada(salaId = ch.sala) {
+    const sala = String(salaId || "").trim().toUpperCase();
+    if (!sala) return null;
+
+    try {
+        const raw = localStorage.getItem(claveSesion(sala));
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        if (!data || data.sala_id !== sala || !data.nombre || !data.session_token) return null;
+        return data;
+    } catch (error) {
+        return null;
+    }
+}
+
+function guardarSesionGuardada(datos) {
+    const sala = String(datos?.sala_id || "").trim().toUpperCase();
+    if (!sala) return;
+
+    localStorage.setItem(claveSesion(sala), JSON.stringify({
+        sala_id: sala,
+        nombre: String(datos?.nombre || "").trim(),
+        session_token: String(datos?.session_token || "").trim(),
+        sala_nombre: datos?.sala_nombre || null,
+        updated_at: new Date().toISOString(),
+    }));
+}
+
+function olvidarSesionGuardada(salaId = ch.sala) {
+    const sala = String(salaId || "").trim().toUpperCase();
+    if (!sala) return;
+    const actual = leerSesionGuardada(sala);
+    localStorage.removeItem(claveSesion(sala));
+    if (actual && String(actual.nombre || "").trim() === String(ch.nombre || "").trim()) {
+        ch.nombre = "";
+    }
+    renderPaso(pasoActual);
+}
+
+function generarSessionToken() {
+    if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+    return `rp-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function reanudarSesionGuardada() {
+    const sesion = leerSesionGuardada(ch.sala);
+    if (!sesion) {
+        mostrarError("No encontramos una sesion guardada para esta sala.");
+        return;
+    }
+
+    window.location.href = `/sala/${encodeURIComponent(sesion.sala_id)}?nombre=${encodeURIComponent(sesion.nombre)}`;
+}
+
+const sesionInicial = leerSesionGuardada(ch.sala);
+if (sesionInicial && !ch.nombre) {
+    ch.nombre = sesionInicial.nombre;
+}
 
 function elegirAleatorio(lista) {
     if (!Array.isArray(lista) || !lista.length) return null;
@@ -482,6 +546,7 @@ function renderPaso(n) {
 // ── PASO 1: Básico ────────────────────────────────────────────────────────────
 function renderBasico() {
     const tieneAvatar = !!ch.avatar;
+    const sesionGuardada = leerSesionGuardada(ch.sala);
     document.getElementById("panel-paso").innerHTML = `
         <h2>1. Información básica</h2>
         <div class="avatar-row">
@@ -514,6 +579,16 @@ function renderBasico() {
         </div>
         <div class="grupo">
             <label for="inp-sala">Sala</label>
+            ${sesionGuardada ? `
+                <div class="info-box" style="margin-bottom:10px;border-color:rgba(74,156,106,.35);color:#bfdcc9">
+                    <strong>Sesion guardada encontrada.</strong><br>
+                    Puedes volver a entrar como ${esc(sesionGuardada.nombre)} sin recrear el personaje.
+                    <div class="summary-actions" style="margin-top:10px;margin-bottom:0">
+                        <button class="btn-random small" type="button" onclick="reanudarSesionGuardada()">Reanudar personaje</button>
+                        <button class="btn" type="button" onclick="olvidarSesionGuardada()">Crear otro personaje</button>
+                    </div>
+                </div>
+            ` : ""}
             ${SALA_NOMBRE ? `
                 <div class="info-box" style="margin-bottom:10px">
                     <strong>${esc(SALA_NOMBRE)}</strong><br>
@@ -1037,9 +1112,16 @@ async function crearPersonaje() {
     const err = validarPaso(7);
     if (err) { mostrarError(err); return; }
 
+    const sesionExistente = leerSesionGuardada(ch.sala);
+    const nombreNormalizado = ch.nombre.trim().toLowerCase();
+    const sessionToken = sesionExistente && String(sesionExistente.nombre || "").trim().toLowerCase() === nombreNormalizado
+        ? sesionExistente.session_token
+        : generarSessionToken();
+
     const payload = {
         nombre: ch.nombre.trim(),
         sala_id: ch.sala.trim(),
+        session_token: sessionToken,
         raza: ch.raza,
         subraza: ch.subraza || null,
         clase: ch.clase,
@@ -1075,6 +1157,13 @@ async function crearPersonaje() {
             await fetch("/api/avatar/subir", { method: "POST", body: fd });
             // Si falla el avatar, dejamos pasar igual — no bloquea la entrada
         }
+
+        guardarSesionGuardada({
+            sala_id: payload.sala_id,
+            nombre: payload.nombre,
+            session_token: sessionToken,
+            sala_nombre: SALA_NOMBRE || null,
+        });
 
         const sala = encodeURIComponent(payload.sala_id);
         const nombre = encodeURIComponent(payload.nombre);

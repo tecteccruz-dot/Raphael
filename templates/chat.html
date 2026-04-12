@@ -19,10 +19,15 @@
         .lock-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--gold);cursor:pointer}.lock-btn.readonly,.lock-btn:disabled{cursor:default;opacity:.75}
         .bar-row{display:flex;gap:8px;align-items:center;margin-bottom:6px}.bar-row span:first-child{width:24px;color:var(--muted);font-size:11px}.bar-track{flex:1;height:6px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}.bar-fill{height:100%;width:0%}.bar-fill.hp{background:var(--hp)}.bar-fill.mp{background:var(--mp)}.bar-fill.xp{background:var(--xp)}.bar-value{width:58px;text-align:right;color:var(--muted);font-size:11px}
         .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 14px;border-bottom:1px solid var(--border)}.stat{background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:6px 4px;text-align:center}.stat strong{display:block;font-size:14px}.stat small{color:var(--muted);font-size:9px}
-        .players,.inventory{flex:1;overflow-y:auto;padding:10px 14px}.player-row{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;margin-bottom:6px}.player-row.active{background:rgba(201,168,76,.08)}.player-open{flex:1;min-width:0;display:flex;align-items:center;gap:8px}.player-name{color:var(--text);font-size:13px}
+        .players,.inventory{flex:1;overflow-y:auto;padding:10px 14px}.player-row{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;margin-bottom:6px}.player-row.active{background:rgba(201,168,76,.08)}.player-row.turn-current{outline:1px solid rgba(201,168,76,.28);background:rgba(201,168,76,.06)}.player-open{flex:1;min-width:0;display:flex;align-items:center;gap:8px}.player-name{color:var(--text);font-size:13px}
         .chat{display:flex;flex-direction:column;min-width:0;min-height:0}.messages{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:5px}.msg{max-width:92%;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.04)}.msg.normal{border-radius:4px 12px 12px 12px}.msg.propio{align-self:flex-end;background:rgba(124,77,189,.16);border-color:rgba(124,77,189,.38);border-radius:12px 4px 12px 12px}.msg.ia{max-width:96%;border-radius:4px 16px 16px 16px;border-left:3px solid var(--gold);background:rgba(130,90,30,.14);border-color:rgba(201,168,76,.3)}.msg.sistema,.msg.error{align-self:center;max-width:none;border-radius:999px;font-size:12px}.msg.sistema{background:rgba(201,168,76,.12);color:#e0c57d}.msg.error{background:rgba(196,71,58,.14);color:#f1b2ac}.msg-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;min-width:0}.msg.propio .msg-head{justify-content:flex-end}.msg-author{color:var(--gold);font-size:11px;margin-bottom:0;line-height:1.2}.msg-author.ia-autor{color:#d4bf86;font-style:italic;letter-spacing:.04em}
         .pensamiento{color:#9b8ed4;font-style:italic}
         .accion{color:#e8d8a0;font-style:italic}
+        .typing-dots{display:flex;align-items:center;gap:6px;padding:6px 2px}
+        .typing-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);opacity:.35;animation:typing-bounce 1.3s infinite ease-in-out}
+        .typing-dot:nth-child(2){animation-delay:.2s}
+        .typing-dot:nth-child(3){animation-delay:.4s}
+        @keyframes typing-bounce{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-7px);opacity:1}}
         .tag-badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:10px;font-weight:bold;vertical-align:middle;margin-right:5px;border:1px solid}
         .tag-narracion{background:rgba(124,77,189,.18);border-color:rgba(124,77,189,.5);color:#c4b0f0}
         .tag-tirada{background:rgba(201,168,76,.15);border-color:rgba(201,168,76,.5);color:#e0c57d}
@@ -32,7 +37,7 @@
         .tag-ooc{background:rgba(74,156,106,.12);border-color:rgba(74,156,106,.4);color:#a0ddb7}
         .tag-accion{background:rgba(232,216,160,.1);border-color:rgba(232,216,160,.4);color:#e8d8a0}
         .tag-default{background:rgba(255,255,255,.04);border-color:var(--border);color:var(--muted)}
-        .chat-footer{border-top:1px solid var(--border);padding:10px 14px}.chat-controls{display:flex;gap:8px;align-items:flex-end} textarea{flex:1;resize:none;min-height:42px;max-height:96px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);padding:10px 12px;outline:none}
+        .chat-footer{border-top:1px solid var(--border);padding:10px 14px}.chat-controls{display:flex;gap:8px;align-items:flex-end} textarea{flex:1;resize:none;min-height:42px;max-height:96px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);padding:10px 12px;outline:none}.chat-note{margin-top:8px;min-height:18px;color:var(--muted);font-size:12px}.chat-note.error{color:#f1b2ac}
         .action{border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);padding:10px 14px;cursor:pointer}.action.send{background:rgba(124,77,189,.18);border-color:rgba(124,77,189,.45)}.action-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
         .scene-box,.turn-box{padding:10px 14px;border-bottom:1px solid var(--border)}.scene-name{color:var(--gold);font-size:13px;margin-bottom:4px}.turn-box{display:flex;gap:10px;align-items:center}.turn-num{color:var(--gold);font-size:24px}.turn-label{color:var(--muted);font-size:10px;text-transform:uppercase}
         .item{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}.item:last-child{border-bottom:0}.item-emoji{width:22px;text-align:center}.item-name{font-size:13px}.item-desc,.item-count{color:var(--muted);font-size:11px}.summary{padding:12px 14px 14px;border-top:1px solid rgba(255,255,255,.04);line-height:1.5}
@@ -94,6 +99,7 @@
                     <button class="action" id="btn-saltar" type="button">Saltar</button>
                     <button class="action send" id="btn-enviar" type="button">Enviar</button>
                 </div>
+                <div class="chat-note" id="chat-note">Chat libre. Sin escena de turnos activa.</div>
             </div>
         </main>
 
@@ -151,6 +157,9 @@
         const elTurnoBadge = document.getElementById("turno-badge");
         const elMensajes = document.getElementById("mensajes");
         const elEntrada = document.getElementById("entrada-mensaje");
+        const elBtnEnviar = document.getElementById("btn-enviar");
+        const elBtnSaltar = document.getElementById("btn-saltar");
+        const elChatNote = document.getElementById("chat-note");
         const elListaJug = document.getElementById("lista-jugadores");
         const elLabelJug = document.getElementById("label-jugadores");
         const elAvatar = document.getElementById("avatar-iniciales");
@@ -167,6 +176,8 @@
         const elModalTitulo = document.getElementById("modal-titulo");
         const elModalSubtitulo = document.getElementById("modal-subtitulo");
         const elModalCuerpo = document.getElementById("modal-cuerpo");
+
+        let fueExpulsado = false;
 
         const elStats = {
             int: document.getElementById("stat-int"),
@@ -185,6 +196,36 @@
 
         const jugadores = new Map();
         let jugadorEnModal = null;
+        let combateActual = { activa: false, ronda: 0, espera_resolucion: false, actor_actual: null, actores: [] };
+        const SESSION_PREFIX = "raphael:session:";
+
+        function claveSesion(sala) {
+            return `${SESSION_PREFIX}${String(sala || "").trim().toUpperCase()}`;
+        }
+
+        function leerSesionLocal() {
+            try {
+                const raw = localStorage.getItem(claveSesion(salaId));
+                if (!raw) return null;
+                const data = JSON.parse(raw);
+                if (!data || data.sala_id !== String(salaId).trim().toUpperCase()) return null;
+                return data;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function guardarSesionLocal(token) {
+            const tokenLimpio = String(token || "").trim();
+            if (!tokenLimpio) return;
+
+            localStorage.setItem(claveSesion(salaId), JSON.stringify({
+                sala_id: String(salaId).trim().toUpperCase(),
+                nombre: nombreJugador,
+                session_token: tokenLimpio,
+                updated_at: new Date().toISOString(),
+            }));
+        }
 
         function initials(nombre) {
             const partes = nombre.trim().split(/\s+/).filter(Boolean);
@@ -376,6 +417,33 @@
             };
         }
 
+        let _burbujaEscribiendo = null;
+
+        function mostrarEscribiendo() {
+            ocultarEscribiendo();
+            const div = document.createElement("div");
+            div.className = "msg ia";
+            const head = document.createElement("div");
+            head.className = "msg-head";
+            head.insertAdjacentHTML("beforeend", avatarMarkup({ nombre: "Raphael", iniciales: "R", avatar_url: null }, "msg-avatar"));
+            const autor = document.createElement("div");
+            autor.className = "msg-author ia-autor";
+            autor.textContent = "Raphael";
+            head.appendChild(autor);
+            div.appendChild(head);
+            div.insertAdjacentHTML("beforeend", '<div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>');
+            elMensajes.appendChild(div);
+            elMensajes.scrollTop = elMensajes.scrollHeight;
+            _burbujaEscribiendo = div;
+        }
+
+        function ocultarEscribiendo() {
+            if (_burbujaEscribiendo) {
+                _burbujaEscribiendo.remove();
+                _burbujaEscribiendo = null;
+            }
+        }
+
         function message(type, text, author = "", meta = {}) {
             const div = document.createElement("div");
             div.className = `msg ${type}`;
@@ -457,13 +525,155 @@
             `).join("");
         }
 
+        function actorDeJugador(nombre) {
+            const buscado = String(nombre || "").trim().toLowerCase();
+            if (!buscado) {
+                return null;
+            }
+
+            return (combateActual.actores || []).find((actor) => {
+                const referencia = String(actor.jugador_nombre || actor.nombre || "").trim().toLowerCase();
+                return referencia === buscado;
+            }) || null;
+        }
+
+        function textoEstadoActor(estado) {
+            switch (estado) {
+                case "caido":
+                    return "Caido";
+                case "incapacitado":
+                    return "Incapacitado";
+                case "muerto":
+                    return "Muerto";
+                default:
+                    return "Listo";
+            }
+        }
+
+        function fijarNotaChat(texto, isError = false) {
+            elChatNote.textContent = texto;
+            elChatNote.classList.toggle("error", Boolean(isError));
+        }
+
+        function actualizarControlesCombate() {
+            const conectado = socket.readyState === WebSocket.OPEN;
+
+            if (!conectado) {
+                elEntrada.disabled = true;
+                elBtnEnviar.disabled = true;
+                elBtnSaltar.disabled = true;
+                fijarNotaChat("Sin conexion con el servidor.", true);
+                return;
+            }
+
+            if (!combateActual.activa) {
+                elEntrada.disabled = false;
+                elBtnEnviar.disabled = false;
+                elBtnSaltar.disabled = true;
+                elEntrada.placeholder = "Describe tu accion o habla como tu personaje...";
+                fijarNotaChat("Chat libre. Sin escena de turnos activa.");
+                return;
+            }
+
+            const miActor = actorDeJugador(nombreJugador);
+            const actorActual = combateActual.actor_actual;
+
+            if (!miActor) {
+                elEntrada.disabled = true;
+                elBtnEnviar.disabled = true;
+                elBtnSaltar.disabled = true;
+                elEntrada.placeholder = "No participas en la escena activa.";
+                fijarNotaChat("No participas en la escena activa.", true);
+                return;
+            }
+
+            if (miActor.estado === "muerto") {
+                elEntrada.disabled = true;
+                elBtnEnviar.disabled = true;
+                elBtnSaltar.disabled = true;
+                elEntrada.placeholder = "Tu personaje murio y no puede actuar.";
+                fijarNotaChat("Tu personaje esta muerto y queda fuera del orden de turnos.", true);
+                return;
+            }
+
+            if (miActor.estado === "caido") {
+                elEntrada.disabled = true;
+                elBtnEnviar.disabled = true;
+                elBtnSaltar.disabled = true;
+                elEntrada.placeholder = "Estas caido y pendiente de una tirada.";
+                fijarNotaChat("Estas caido. El host debe resolver tu tirada de salvacion.", true);
+                return;
+            }
+
+            if (miActor.estado === "incapacitado") {
+                elEntrada.disabled = true;
+                elBtnEnviar.disabled = true;
+                elBtnSaltar.disabled = true;
+                elEntrada.placeholder = "Estas incapacitado.";
+                fijarNotaChat("Estas incapacitado y tu turno se omite hasta que alguien te recupere.", true);
+                return;
+            }
+
+            if (!actorActual || actorActual.id !== miActor.id) {
+                elEntrada.disabled = true;
+                elBtnEnviar.disabled = true;
+                elBtnSaltar.disabled = true;
+                elEntrada.placeholder = "Espera a que llegue tu turno.";
+                fijarNotaChat(`Turno actual: ${actorActual?.nombre || "sin actor"}.`, false);
+                return;
+            }
+
+            if (combateActual.espera_resolucion) {
+                elEntrada.disabled = true;
+                elBtnEnviar.disabled = true;
+                elBtnSaltar.disabled = true;
+                elEntrada.placeholder = "Tu accion ya fue enviada.";
+                fijarNotaChat("Tu accion ya fue enviada. Espera la resolucion de Raphael o del host.", false);
+                return;
+            }
+
+            elEntrada.disabled = false;
+            elBtnEnviar.disabled = false;
+            elBtnSaltar.disabled = false;
+            elEntrada.placeholder = "Es tu turno. Describe tu accion...";
+            fijarNotaChat("Es tu turno. Puedes actuar o saltarlo.", false);
+        }
+
+        function renderCombatState(combate) {
+            combateActual = combate && typeof combate === "object"
+                ? {
+                    activa: Boolean(combate.activa),
+                    ronda: Number(combate.ronda || 0),
+                    espera_resolucion: Boolean(combate.espera_resolucion),
+                    actor_actual: combate.actor_actual || null,
+                    actores: Array.isArray(combate.actores) ? combate.actores : []
+                }
+                : { activa: false, ronda: 0, espera_resolucion: false, actor_actual: null, actores: [] };
+
+            if (combateActual.activa) {
+                elTurnoBadge.textContent = `Ronda ${combateActual.ronda || 1}`;
+                elTurnoNum.textContent = String(combateActual.ronda || 1);
+                elTurnoJugador.textContent = combateActual.actor_actual
+                    ? `${combateActual.actor_actual.nombre}${combateActual.espera_resolucion ? " · Resolucion" : ""}`
+                    : "Sin actor listo";
+            } else {
+                elTurnoBadge.textContent = "Modo libre";
+                elTurnoNum.textContent = "--";
+                elTurnoJugador.textContent = "Sin escena activa";
+            }
+
+            renderPlayers([...jugadores.values()]);
+            actualizarControlesCombate();
+        }
+
         function renderPlayers(list) {
             elLabelJug.textContent = `Jugadores - ${list.length}`;
             elListaJug.innerHTML = "";
 
             for (const player of list) {
+                const actor = actorDeJugador(player.nombre);
                 const row = document.createElement("div");
-                row.className = `player-row${player.nombre === nombreJugador ? " active" : ""}`;
+                row.className = `player-row${player.nombre === nombreJugador ? " active" : ""}${actor?.es_actual ? " turn-current" : ""}`;
 
                 const open = document.createElement("button");
                 open.type = "button";
@@ -472,7 +682,7 @@
                     ${avatarMarkup(player, "small")}
                     <div style="min-width:0;">
                         <div class="player-name">${esc(player.nombre)}</div>
-                        <div class="player-sub">${esc(player.puede_ver ? `${player.clase || "Sin clase"}${player.nivel ? ` | Nivel ${player.nivel}` : ""}` : "Ficha bloqueada")}</div>
+                        <div class="player-sub">${esc(player.puede_ver ? `${player.clase || "Sin clase"}${player.nivel ? ` | Nivel ${player.nivel}` : ""}` : "Ficha bloqueada")}${actor ? ` · ${esc(textoEstadoActor(actor.estado))}` : ""}</div>
                     </div>
                 `;
                 open.addEventListener("click", () => openSummary(player.nombre));
@@ -621,11 +831,8 @@
                 renderSelf(me);
             }
 
-            const current = list[0];
-            elTurnoBadge.textContent = "Turno 1";
-            elTurnoNum.textContent = "1";
-            elTurnoJugador.textContent = current ? current.nombre : "Esperando...";
             refreshModal();
+            renderCombatState(combateActual);
         }
 
         function togglePrivacy() {
@@ -646,7 +853,7 @@
         function sendMessage() {
             const texto = elEntrada.value.trim();
 
-            if (!texto) {
+            if (!texto || elBtnEnviar.disabled) {
                 return;
             }
 
@@ -662,35 +869,49 @@
         }
 
         function skipTurn() {
+            if (elBtnSaltar.disabled) {
+                return;
+            }
+
             if (socket.readyState !== WebSocket.OPEN) {
                 message("error", "No hay conexion activa con el servidor.");
                 return;
             }
 
-            socket.send(JSON.stringify({ tipo: "mensaje", mensaje: `${nombreJugador} salto el turno.` }));
+            socket.send(JSON.stringify({ tipo: "saltar_turno" }));
         }
 
         setAvatarElement(elAvatar, { nombre: nombreJugador });
 
         const protocolo = window.location.protocol === "https:" ? "wss" : "ws";
-        const urlWS = `${protocolo}://${window.location.host}/ws/${encodeURIComponent(salaId)}/${encodeURIComponent(nombreJugador)}`;
+        const sesionLocal = leerSesionLocal();
+        const tokenSesion = sesionLocal && String(sesionLocal.nombre || "").trim().toLowerCase() === String(nombreJugador).trim().toLowerCase()
+            ? String(sesionLocal.session_token || "").trim()
+            : "";
+        const tokenQuery = tokenSesion ? `?token=${encodeURIComponent(tokenSesion)}` : "";
+        const urlWS = `${protocolo}://${window.location.host}/ws/${encodeURIComponent(salaId)}/${encodeURIComponent(nombreJugador)}${tokenQuery}`;
         const socket = new WebSocket(urlWS);
 
         socket.addEventListener("open", () => {
             elEstado.textContent = "Conectado";
             elConnDot.className = "dot";
+            actualizarControlesCombate();
         });
 
         socket.addEventListener("close", () => {
-            elEstado.textContent = "Desconectado";
+            elEstado.textContent = fueExpulsado ? "Expulsado" : "Desconectado";
             elConnDot.className = "dot error";
-            message("sistema", "La conexion con el servidor se cerro.");
+            if (!fueExpulsado) {
+                message("sistema", "La conexion con el servidor se cerro.");
+            }
+            actualizarControlesCombate();
         });
 
         socket.addEventListener("error", () => {
             elEstado.textContent = "Error";
             elConnDot.className = "dot error";
             message("error", "Hubo un problema con el WebSocket.");
+            actualizarControlesCombate();
         });
 
         socket.addEventListener("message", (event) => {
@@ -698,6 +919,9 @@
 
             switch (data.tipo) {
                 case "conexion_ok":
+                    if (data.session_token) {
+                        guardarSesionLocal(data.session_token);
+                    }
                     message("sistema", data.mensaje);
                     break;
                 case "sistema":
@@ -709,19 +933,37 @@
                 case "chat":
                     message(data.autor === nombreJugador ? "propio" : "normal", data.mensaje, data.autor, data);
                     break;
+                case "expulsado":
+                    fueExpulsado = true;
+                    message("error", data.mensaje || "Has sido expulsado de la sala.");
+                    elEntrada.disabled = true;
+                    elBtnEnviar.disabled = true;
+                    elBtnSaltar.disabled = true;
+                    fijarNotaChat("Has sido expulsado de la sala.", true);
+                    break;
+                case "ia_escribiendo":
+                    mostrarEscribiendo();
+                    break;
+                case "ia_escribiendo_fin":
+                    ocultarEscribiendo();
+                    break;
                 case "ia":
+                    ocultarEscribiendo();
                     message("ia", data.mensaje, data.autor || "Raphael", data);
                     break;
                 case "presencia":
                     syncPresence(data.jugadores || []);
+                    break;
+                case "combate_estado":
+                    renderCombatState(data.combate || {});
                     break;
                 case "pong":
                     break;
             }
         });
 
-        document.getElementById("btn-enviar").addEventListener("click", sendMessage);
-        document.getElementById("btn-saltar").addEventListener("click", skipTurn);
+        elBtnEnviar.addEventListener("click", sendMessage);
+        elBtnSaltar.addEventListener("click", skipTurn);
         document.getElementById("btn-ver-mi-ficha").addEventListener("click", () => openSummary(nombreJugador));
         document.getElementById("btn-privacidad").addEventListener("click", togglePrivacy);
         document.getElementById("btn-cerrar-modal").addEventListener("click", closeModal);
@@ -755,6 +997,8 @@
                 socket.send(JSON.stringify({ tipo: "ping" }));
             }
         }, 15000);
+
+        renderCombatState(combateActual);
     </script>
 </body>
 </html>

@@ -1,13 +1,14 @@
 {
   "salas": [
     {
-      "id": "3LP77W",
-      "nombre": "Mesa",
-      "escenario_id": "ruinas_velkar",
-      "escenario_nombre": "Ruinas de Velkar",
-      "escenario_descripcion": "Restos de una ciudad de piedra negra enterrada bajo arena y tiempo. Cada pasillo promete tesoros o maldiciones.",
-      "creada_en": "2026-04-11 17:11",
-      "host_token": "qhh2oN5FS6PfdA1DmoveDhiXTCXf7sYx"
+      "id": "KGRTN9",
+      "nombre": "Colombia",
+      "escenario_id": "taberna_bruma",
+      "escenario_nombre": "La Taberna de la Bruma",
+      "escenario_descripcion": "La aventura comienza en una taberna fronteriza donde los rumores sobre desapariciones y criaturas extranas no dejan de crecer.",
+      "resumen_partida": "La aventura comienza en una taberna fronteriza donde los rumores sobre desapariciones y criaturas extranas no dejan de crecer.\nEl arquí galopa dentro con estrépito\nJna lanza un ataque narrativo sobre la entrada triunfalista y desordenada.\n\"Un estrépito ensordecedor retumba por La Taberna de la Bruma mientras los jugadores se abalanzaron en una locura caótica.\"\n\"El arqui interrumpe al锅炉 con urgencia tras recibir la iniciativa del combate.\"\n\"El hechizo que lanzó convirtió erróneamente el objetivo\"\n\"El Boiler carga furioso hacia la entrada de los jugadores.\"\nEl arquí exhibe su belleza física para distraer al entorno.\nJna señala el momento crítico; la curiosita del grupo se fija ahora donde nunca antes lo hizo.\nBoiler rompe la tensión teatral para atacar a su objetivo principal.\n\"El arqui se sentó y pidió cerveza tras la carga de Boiler\"\n\"Jna declara un acto romántico frente todos los ojos\"\nEl Boiler rompe su propia embestida para centrarse de nuevo sobre los jugadores.\nEl arquí interrumpe con un mensaje de calma teatral\nJná apuñala simultáneamente cuello de Arquí e impacto del Boiler\nJuna ejecuta un ataque combinado que rompe su propia pausa dramática\nLa pregunta doméstica rompe la tensión del combate\nEl arqui lanza al aire de forma teatral y absurda\nEl beso teatral conecta con Gwen\nLa pregunta de El arquí resuenó en la taberna, dejando a todos con una expresión entre asombro e incredulidad.\nLa curiosidad por una simple frase detiene al grupo",
+      "creada_en": "2026-04-11 21:27",
+      "host_token": "gz0xgIRvdm8AE-Fsy-0NhpThaZ-I-5OE"
     }
   ]
 }

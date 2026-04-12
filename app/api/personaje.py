@@ -48,6 +48,6 @@ def preparar_personaje(datos: CreacionPersonaje):
         raise HTTPException(status_code=400, detail=f"Trasfondo '{datos.trasfondo}' no reconocido.")
 
     gestor_conexiones.registrar_personaje_pendiente(
-        datos.sala_id, datos.nombre, datos.model_dump()
+        datos.sala_id, datos.nombre, datos.model_dump(), datos.session_token
     )
-    return {"ok": True}
+    return {"ok": True, "session_token": datos.session_token}

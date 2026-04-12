@@ -6,11 +6,28 @@ from datetime import datetime
 from pathlib import Path
 
 
-_BASE = Path("datos/salas")
+_BASE = Path(__file__).resolve().parents[2] / "datos" / "salas"
 _SALAS = _BASE / "salas.json"
 _ESCENARIOS = _BASE / "escenarios.json"
 _ALFABETO = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 _HOST_COOKIE_PREFIX = "raphael_host_"
+_ESCENARIOS_POR_DEFECTO = [
+    {
+        "id": "taberna_bruma",
+        "nombre": "La Taberna de la Bruma",
+        "descripcion": "La aventura comienza en una taberna fronteriza donde los rumores sobre desapariciones y criaturas extranas no dejan de crecer.",
+    },
+    {
+        "id": "bosque_susurros",
+        "nombre": "Bosque de los Susurros",
+        "descripcion": "Un sendero antiguo atraviesa un bosque envuelto en niebla, con ruinas ocultas y voces que parecen guiar o confundir a los viajeros.",
+    },
+    {
+        "id": "fortin_ceniza",
+        "nombre": "Fortin de la Ceniza",
+        "descripcion": "Las murallas de un fortin castigado por la guerra esconden secretos militares, reliquias perdidas y una amenaza lista para despertar.",
+    },
+]
 
 
 def _asegurar_archivos() -> None:
@@ -18,6 +35,9 @@ def _asegurar_archivos() -> None:
 
     if not _SALAS.exists():
         _SALAS.write_text(json.dumps({"salas": []}, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    if not _ESCENARIOS.exists():
+        _ESCENARIOS.write_text(json.dumps(_ESCENARIOS_POR_DEFECTO, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def _cargar_json(path: Path, default: object) -> object:
@@ -60,7 +80,34 @@ def nombre_cookie_host(sala_id: str) -> str:
 
 
 def listar_escenarios() -> list[dict[str, str]]:
-    return list(_cargar_json(_ESCENARIOS, []))
+    _asegurar_archivos()
+    data = _cargar_json(_ESCENARIOS, _ESCENARIOS_POR_DEFECTO)
+    if not isinstance(data, list):
+        return [dict(escenario) for escenario in _ESCENARIOS_POR_DEFECTO]
+
+    escenarios: list[dict[str, str]] = []
+    for escenario in data:
+        if not isinstance(escenario, dict):
+            continue
+
+        escenario_id = str(escenario.get("id", "")).strip()
+        nombre = str(escenario.get("nombre", "")).strip()
+        descripcion = str(escenario.get("descripcion", "")).strip()
+        if not escenario_id or not nombre or not descripcion:
+            continue
+
+        escenarios.append(
+            {
+                "id": escenario_id,
+                "nombre": nombre,
+                "descripcion": descripcion,
+            }
+        )
+
+    if escenarios:
+        return escenarios
+
+    return [dict(escenario) for escenario in _ESCENARIOS_POR_DEFECTO]
 
 
 def obtener_escenario(escenario_id: str) -> dict[str, str] | None:
@@ -124,6 +171,7 @@ def crear_sala(nombre: str, escenario_id: str) -> tuple[dict[str, object], str]:
         "escenario_id": escenario["id"],
         "escenario_nombre": escenario["nombre"],
         "escenario_descripcion": escenario["descripcion"],
+        "resumen_partida": escenario["descripcion"],
         "creada_en": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "host_token": host_token,
     }
@@ -155,3 +203,52 @@ def reclamar_host(sala_id: str) -> tuple[dict[str, object], str]:
         return _sanitizar_sala_publica(actualizada), host_token
 
     raise ValueError("No encontramos la sala solicitada.")
+
+
+def obtener_resumen_partida(sala_id: str) -> str:
+    sala = _buscar_sala_privada(sala_id)
+    if not sala:
+        return ""
+    return str(sala.get("resumen_partida") or "").strip()
+
+
+def actualizar_resumen_partida(
+    sala_id: str,
+    resumen: str,
+    *,
+    append: bool = False,
+    limite: int = 2400,
+) -> dict[str, object] | None:
+    buscada = (sala_id or "").strip().upper()
+    texto = str(resumen or "").strip()
+    if not buscada:
+        return None
+
+    salas = _listar_salas_privadas()
+
+    for indice, sala in enumerate(salas):
+        if str(sala.get("id", "")).upper() != buscada:
+            continue
+
+        actual = str(sala.get("resumen_partida") or "").strip()
+        if append and texto:
+            if texto.casefold() in actual.casefold():
+                combinado = actual
+            elif actual:
+                combinado = f"{actual}\n{texto}"
+            else:
+                combinado = texto
+        else:
+            combinado = texto
+
+        combinado = combinado.strip()
+        if limite > 0 and len(combinado) > limite:
+            combinado = combinado[-limite:].lstrip()
+
+        actualizada = dict(sala)
+        actualizada["resumen_partida"] = combinado
+        salas[indice] = actualizada
+        _guardar_salas(salas)
+        return _sanitizar_sala_publica(actualizada)
+
+    return None

@@ -5,237 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Raphael - Host {{ sala_nombre }}</title>
     <style>
-        :root {
-            --bg: #0d0b10;
-            --panel: #17131d;
-            --panel-strong: #201929;
-            --soft: rgba(255,255,255,.04);
-            --border: rgba(201,168,76,.22);
-            --gold: #c9a84c;
-            --text: #ebe1d2;
-            --muted: #a59884;
-            --accent: #7c4dbd;
-            --ok: #4a9c6a;
-            --bad: #c4473a;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            min-height: 100vh;
-            background:
-                radial-gradient(circle at top left, rgba(124,77,189,.16), transparent 30%),
-                radial-gradient(circle at right, rgba(201,168,76,.08), transparent 26%),
-                linear-gradient(180deg, #0f0c14 0%, #0b0910 100%);
-            color: var(--text);
-            font-family: Georgia, serif;
-            padding: 28px 16px 40px;
-        }
-
-        .shell { max-width: 1120px; margin: 0 auto; }
-        .hero, .panel {
-            background: linear-gradient(180deg, rgba(29,23,37,.96), rgba(17,13,23,.96));
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            box-shadow: 0 18px 40px rgba(0,0,0,.22);
-        }
-        .hero { padding: 24px; margin-bottom: 18px; }
-        .eyebrow {
-            color: var(--gold);
-            font-size: .78rem;
-            letter-spacing: .18em;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-        h1 {
-            color: var(--gold);
-            font-family: "Times New Roman", serif;
-            font-size: 2.1rem;
-            margin-bottom: 10px;
-        }
-        .lead {
-            color: var(--muted);
-            line-height: 1.7;
-            max-width: 68ch;
-        }
-        .hero-top {
-            display: flex;
-            justify-content: space-between;
-            gap: 16px;
-            align-items: start;
-        }
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            border-radius: 999px;
-            font-size: .85rem;
-            border: 1px solid var(--border);
-            background: var(--soft);
-            white-space: nowrap;
-        }
-        .status-badge.ok {
-            border-color: rgba(74,156,106,.35);
-            background: rgba(74,156,106,.12);
-            color: #a6debb;
-        }
-        .status-badge.bad {
-            border-color: rgba(196,71,58,.35);
-            background: rgba(196,71,58,.12);
-            color: #f3b5ae;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 10px;
-            margin-top: 18px;
-        }
-        .stat {
-            padding: 12px;
-            border-radius: 12px;
-            background: var(--soft);
-            border: 1px solid var(--border);
-        }
-        .stat strong {
-            display: block;
-            font-size: 1.3rem;
-            color: var(--gold);
-        }
-        .stat span {
-            color: var(--muted);
-            font-size: .8rem;
-        }
-
-        .layout {
-            display: grid;
-            grid-template-columns: minmax(0, 1.2fr) 360px;
-            gap: 18px;
-        }
-        .panel { padding: 18px; }
-        .panel h2 {
-            color: var(--gold);
-            font-family: "Times New Roman", serif;
-            font-size: 1.2rem;
-            margin-bottom: 12px;
-        }
-        .sub {
-            color: var(--muted);
-            font-size: .92rem;
-            line-height: 1.6;
-            margin-bottom: 14px;
-        }
-        .info-card, .player-row, .notice {
-            border-radius: 14px;
-            border: 1px solid var(--border);
-            background: rgba(255,255,255,.03);
-        }
-        .info-card {
-            padding: 14px;
-            display: grid;
-            gap: 10px;
-        }
-        .info-k {
-            color: var(--muted);
-            font-size: .78rem;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-        }
-        .info-v {
-            color: var(--text);
-            font-size: 1rem;
-        }
-        .players {
-            display: grid;
-            gap: 10px;
-        }
-        .player-row {
-            padding: 12px 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-        }
-        .player-name {
-            color: var(--text);
-            font-size: 1rem;
-        }
-        .player-state {
-            color: #a6debb;
-            font-size: .82rem;
-        }
-        .player-empty {
-            color: var(--muted);
-            font-size: .9rem;
-        }
-        .notice {
-            padding: 16px;
-            line-height: 1.7;
-            color: var(--muted);
-        }
-        .notice strong { color: var(--text); }
-        .notice.bad {
-            border-color: rgba(196,71,58,.35);
-            background: rgba(196,71,58,.08);
-            color: #f3c2bc;
-        }
-        .notice.ok {
-            border-color: rgba(74,156,106,.35);
-            background: rgba(74,156,106,.08);
-        }
-        .actions, .future-list {
-            display: grid;
-            gap: 10px;
-        }
-        .btn, .btn-ghost, .btn-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            min-height: 44px;
-            border-radius: 10px;
-            font-family: inherit;
-            font-size: .96rem;
-            text-decoration: none;
-            cursor: pointer;
-            transition: transform .15s, background .15s, border-color .15s;
-        }
-        .btn:hover, .btn-ghost:hover, .btn-link:hover { transform: translateY(-1px); }
-        .btn {
-            border: 1px solid rgba(201,168,76,.45);
-            background: rgba(201,168,76,.12);
-            color: var(--gold);
-        }
-        .btn-ghost {
-            border: 1px solid var(--border);
-            background: rgba(255,255,255,.04);
-            color: var(--text);
-        }
-        .btn-link {
-            border: 1px solid rgba(124,77,189,.4);
-            background: rgba(124,77,189,.14);
-            color: #d6c5f0;
-        }
-        .future-list li {
-            list-style: none;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: rgba(255,255,255,.03);
-            padding: 12px 14px;
-            color: var(--muted);
-            line-height: 1.5;
-        }
-        .future-list strong { color: var(--text); }
-        form { margin: 0; }
-
-        @media (max-width: 960px) {
-            .hero-top, .layout { grid-template-columns: 1fr; display: grid; }
-            .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        }
-
-        @media (max-width: 640px) {
-            .stats { grid-template-columns: 1fr; }
-        }
+        :root { --bg:#0d0b10; --panel:#17131d; --soft:rgba(255,255,255,.04); --border:rgba(201,168,76,.22); --gold:#c9a84c; --text:#ebe1d2; --muted:#a59884; --ok:#4a9c6a; --warn:#c97935; --bad:#c4473a; --accent:#7c4dbd; }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { min-height:100vh; background:radial-gradient(circle at top left, rgba(124,77,189,.16), transparent 32%), radial-gradient(circle at right, rgba(201,168,76,.08), transparent 26%), linear-gradient(180deg, #0f0c14 0%, #0b0910 100%); color:var(--text); font-family:Georgia,serif; padding:28px 16px 40px; }
+        .shell { max-width:1200px; margin:0 auto; }
+        .hero,.panel { background:linear-gradient(180deg, rgba(29,23,37,.96), rgba(17,13,23,.96)); border:1px solid var(--border); border-radius:18px; box-shadow:0 18px 40px rgba(0,0,0,.22); }
+        .hero { padding:24px; margin-bottom:18px; }
+        .hero-top { display:flex; justify-content:space-between; gap:16px; align-items:start; }
+        .eyebrow { color:var(--gold); font-size:.78rem; letter-spacing:.18em; text-transform:uppercase; margin-bottom:10px; }
+        h1,h2 { color:var(--gold); font-family:"Times New Roman",serif; }
+        h1 { font-size:2.1rem; margin-bottom:10px; }
+        h2 { font-size:1.2rem; margin-bottom:12px; }
+        .lead,.sub,.muted { color:var(--muted); line-height:1.65; }
+        .badge { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; font-size:.85rem; border:1px solid var(--border); background:var(--soft); white-space:nowrap; }
+        .badge.ok { border-color:rgba(74,156,106,.35); background:rgba(74,156,106,.12); color:#a6debb; }
+        .badge.bad { border-color:rgba(196,71,58,.35); background:rgba(196,71,58,.12); color:#f3b5ae; }
+        .stats,.layout,.stack,.list,.actions,.fields { display:grid; gap:10px; }
+        .stats { grid-template-columns:repeat(4,minmax(0,1fr)); margin-top:18px; }
+        .stat,.card,.notice { border-radius:14px; border:1px solid var(--border); background:rgba(255,255,255,.03); padding:14px; }
+        .stat strong { display:block; color:var(--gold); font-size:1.2rem; }
+        .stat span { color:var(--muted); font-size:.8rem; }
+        .layout { grid-template-columns:minmax(0,1.25fr) 340px; }
+        .panel { padding:18px; }
+        .toolbar,.row,.chips { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+        .toolbar { margin-bottom:12px; }
+        .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:40px; border-radius:10px; border:1px solid var(--border); background:rgba(255,255,255,.04); color:var(--text); text-decoration:none; font-family:inherit; font-size:.93rem; cursor:pointer; padding:10px 14px; }
+        .btn.gold { border-color:rgba(201,168,76,.45); background:rgba(201,168,76,.12); color:var(--gold); }
+        .btn.purple { border-color:rgba(124,77,189,.4); background:rgba(124,77,189,.14); color:#d6c5f0; }
+        .btn.bad { border-color:rgba(196,71,58,.35); background:rgba(196,71,58,.12); color:#f2bbb5; }
+        .btn.ok { border-color:rgba(74,156,106,.35); background:rgba(74,156,106,.12); color:#a6debb; }
+        .btn[disabled] { opacity:.55; cursor:default; }
+        .chip { border-radius:999px; padding:5px 10px; font-size:.78rem; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.04); color:var(--muted); }
+        .chip.ok { border-color:rgba(74,156,106,.35); background:rgba(74,156,106,.1); color:#a6debb; }
+        .chip.warn { border-color:rgba(201,121,53,.35); background:rgba(201,121,53,.1); color:#efc39a; }
+        .chip.bad { border-color:rgba(196,71,58,.35); background:rgba(196,71,58,.1); color:#f3b5ae; }
+        .chip.current { border-color:rgba(201,168,76,.4); background:rgba(201,168,76,.12); color:var(--gold); }
+        .turn-card { display:grid; grid-template-columns:90px minmax(0,1fr); gap:14px; }
+        .round { border-radius:12px; background:rgba(124,77,189,.16); border:1px solid rgba(124,77,189,.4); color:#dbc9f8; display:flex; align-items:center; justify-content:center; text-align:center; padding:10px; font-family:"Times New Roman",serif; font-size:1.3rem; }
+        .fields { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        .field { display:grid; gap:6px; }
+        .field.full,.field.wide { grid-column:1 / -1; }
+        label { color:var(--muted); font-size:.84rem; }
+        input,select { width:100%; min-height:40px; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:#0f0c13; color:var(--text); font-family:inherit; font-size:.93rem; outline:none; }
+        .notice.bad { border-color:rgba(196,71,58,.35); background:rgba(196,71,58,.08); color:#f3c2bc; }
+        .empty { border-radius:14px; border:1px dashed var(--border); background:rgba(255,255,255,.02); padding:16px; color:var(--muted); line-height:1.6; }
+        .note { display:none; margin-bottom:12px; padding:10px 12px; border-radius:10px; border:1px solid rgba(74,156,106,.35); background:rgba(74,156,106,.1); color:#c8ead4; font-size:.9rem; }
+        .note.error { border-color:rgba(196,71,58,.35); background:rgba(196,71,58,.1); color:#f3c2bc; }
+        @media (max-width: 960px) { .hero-top,.layout { display:grid; grid-template-columns:1fr; } .stats { grid-template-columns:repeat(2,minmax(0,1fr)); } .turn-card { grid-template-columns:1fr; } }
+        @media (max-width: 640px) { .stats,.fields { grid-template-columns:1fr; } .toolbar,.row { flex-direction:column; align-items:stretch; } .btn { width:100%; } }
     </style>
 </head>
 <body>
@@ -246,145 +63,271 @@
                     <div class="eyebrow">Host Dashboard</div>
                     <h1>{{ sala_nombre }}</h1>
                     {% if sala_encontrada %}
-                    <p class="lead">
-                        Administra esta sala desde el navegador que conserva el acceso de host. Aqui dejamos lista la base para que el siguiente paso sea manejar turnos, actores, NPCs y escenas de combate.
-                    </p>
+                    <p class="lead">Este panel ya controla la escena de turnos de la sala. Desde aqui puedes iniciar el encuentro, agregar NPCs, marcar caidas, resolver salvaciones y dejar que Raphael resuelva acciones y turnos con LM Studio.</p>
                     {% else %}
-                    <p class="lead">
-                        No encontramos la sala solicitada. Vuelve al dashboard principal y entra desde una sala valida.
-                    </p>
+                    <p class="lead">No encontramos la sala solicitada. Vuelve al dashboard y entra desde una sala valida.</p>
                     {% endif %}
                 </div>
                 {% if es_host %}
-                <div class="status-badge ok">Host activo en este navegador</div>
+                <div class="badge ok">Host activo en este navegador</div>
                 {% elif sala_encontrada %}
-                <div class="status-badge bad">Sin acceso de host aqui</div>
+                <div class="badge bad">Sin acceso de host aqui</div>
                 {% else %}
-                <div class="status-badge bad">Sala no encontrada</div>
+                <div class="badge bad">Sala no encontrada</div>
                 {% endif %}
             </div>
-
             {% if sala_encontrada %}
             <div class="stats">
-                <div class="stat">
-                    <strong>{{ sala_id }}</strong>
-                    <span>ID compartible</span>
-                </div>
-                <div class="stat">
-                    <strong>{{ total_jugadores_activos }}</strong>
-                    <span>jugadores activos</span>
-                </div>
-                <div class="stat">
-                    <strong>{{ escenario_nombre }}</strong>
-                    <span>escenario inicial</span>
-                </div>
-                <div class="stat">
-                    <strong>{{ creada_en or "ahora" }}</strong>
-                    <span>registro de sala</span>
-                </div>
+                <div class="stat"><strong>{{ sala_id }}</strong><span>ID compartible</span></div>
+                <div class="stat"><strong>{{ escenario_nombre or "Sin escenario" }}</strong><span>escenario inicial</span></div>
+                <div class="stat"><strong>{{ total_jugadores_activos }}</strong><span>jugadores conectados ahora</span></div>
+                <div class="stat"><strong>{{ creada_en or "ahora" }}</strong><span>registro de sala</span></div>
             </div>
             {% endif %}
         </section>
 
-        <section class="layout">
-            <main class="panel">
-                <h2>Estado de la Sala</h2>
-
-                {% if not sala_encontrada %}
-                <div class="notice bad">
-                    <strong>La sala no existe o fue eliminada.</strong><br>
-                    Puedes volver al dashboard principal para crear una nueva o revisar la ID.
-                </div>
-                {% elif es_host %}
-                <div class="notice ok" style="margin-bottom:14px;">
-                    <strong>Acceso confirmado.</strong><br>
-                    Este navegador puede convertirse en el panel maestro de la partida. Cuando añadamos turnos, combate y control de NPCs, ese flujo vivira aqui.
-                </div>
-                <div class="info-card" style="margin-bottom:14px;">
-                    <div>
-                        <div class="info-k">Escenario actual</div>
-                        <div class="info-v">{{ escenario_nombre }}</div>
-                    </div>
-                    <div>
-                        <div class="info-k">Descripcion</div>
-                        <div class="info-v">{{ escenario_descripcion }}</div>
-                    </div>
-                </div>
-                <h2>Jugadores Conectados</h2>
-                <p class="sub">Este listado ya nos sirve como base para luego calcular iniciativa, estados y turnos por actor.</p>
-                <div class="players">
-                    {% if jugadores_activos %}
-                        {% for jugador in jugadores_activos %}
-                        <div class="player-row">
-                            <div class="player-name">{{ jugador }}</div>
-                            <div class="player-state">Conectado</div>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                    <div class="notice">
-                        <strong>Aun no hay jugadores dentro.</strong><br>
-                        Comparte la invitacion o entra tu mismo al creador de personaje para iniciar la mesa.
-                    </div>
-                    {% endif %}
-                </div>
-                {% elif not host_configurado %}
-                <div class="notice">
-                    <strong>Esta sala aun no tiene host asignado.</strong><br>
-                    Si esta sala es tuya o quieres administrarla, puedes reclamar el host desde este mismo navegador una sola vez.
-                </div>
-                {% else %}
-                <div class="notice bad">
-                    <strong>Esta sala ya tiene un host.</strong><br>
-                    Solo el navegador que conserva la autorizacion de host puede abrir este panel de administracion.
-                </div>
+        {% if not sala_encontrada %}
+        <section class="panel">
+            <div class="notice bad"><strong>La sala no existe o fue eliminada.</strong><br>Puedes volver al dashboard principal para crear otra.</div>
+            <div class="toolbar" style="margin-top:14px;"><a class="btn" href="/">Volver al dashboard</a></div>
+        </section>
+        {% elif not es_host %}
+        <section class="panel">
+            <div class="notice bad"><strong>Este navegador no tiene acceso de host.</strong><br>Solo el navegador que creo la sala o reclamo el host puede administrar escenas y turnos.</div>
+            <div class="toolbar" style="margin-top:14px;">
+                {% if not host_configurado %}
+                <form method="post" action="/salas/{{ sala_id }}/reclamar-host"><button class="btn gold" type="submit">Reclamar host</button></form>
                 {% endif %}
+                <a class="btn" href="/">Volver al dashboard</a>
+            </div>
+        </section>
+        {% else %}
+        <section class="layout">
+            <main class="stack">
+                <section class="panel">
+                    <div id="host-note" class="note"></div>
+                    <h2>Escena de Turnos</h2>
+                    <p class="sub">Flujo recomendado: jugador actua o salta, Raphael resuelve automaticamente y el host solo interviene para ajustes especiales. Los caidos, incapacitados y muertos se saltan automaticamente.</p>
+                    <div class="toolbar">
+                        <button class="btn gold" id="btn-iniciar" type="button" onclick="startCombat()">Iniciar encuentro</button>
+                        <button class="btn purple" id="btn-avanzar" type="button" onclick="advanceTurn()">Resolver y pasar</button>
+                        <button class="btn bad" id="btn-detener" type="button" onclick="stopCombat()">Cerrar escena</button>
+                        <a class="btn" href="/personaje?sala={{ sala_id }}">Entrar como jugador</a>
+                        <button class="btn" type="button" onclick="copyInvite()">Copiar invitacion</button>
+                        <button class="btn bad" type="button" onclick="clearHistory()">Limpiar sala</button>
+                    </div>
+                    <div id="bloque-turno"></div>
+                </section>
+
+                <section class="panel">
+                    <h2>Jugadores Conectados</h2>
+                    <p class="sub">Se usan para iniciar el encuentro. Si alguien entra despues, puedes reiniciar la escena o meterlo en la siguiente iteracion.</p>
+                    <div id="lista-jugadores" class="list"></div>
+                </section>
+
+                <section class="panel">
+                    <h2>Actores en Escena</h2>
+                    <p class="sub">Ordenados por iniciativa. Aqui puedes editar HP, estado e iniciativa, resolver caidas o quitar NPCs.</p>
+                    <div id="lista-actores" class="list"></div>
+                </section>
             </main>
 
-            <aside class="panel">
-                <h2>Acciones Rapidas</h2>
-                <div class="actions">
-                    {% if sala_encontrada %}
-                    <button class="btn" type="button" onclick='copyInvite({{ sala_id | tojson }})'>Copiar invitacion</button>
-                    <a class="btn-link" href="/personaje?sala={{ sala_id }}">Entrar como jugador</a>
-                    {% if es_host %}
-                    <a class="btn-ghost" href="/">Volver al dashboard</a>
-                    {% elif not host_configurado %}
-                    <form method="post" action="/salas/{{ sala_id }}/reclamar-host">
-                        <button class="btn" type="submit">Reclamar host</button>
+            <aside class="stack">
+                <section class="panel">
+                    <h2>Agregar NPC</h2>
+                    <form id="form-npc">
+                        <div class="fields">
+                            <div class="field full"><label for="npc-nombre">Nombre del actor</label><input id="npc-nombre" maxlength="40" placeholder="Ej: Lobo gris 2" /></div>
+                            <div class="field"><label for="npc-iniciativa">Iniciativa</label><input id="npc-iniciativa" type="number" min="-10" max="40" value="10" /></div>
+                            <div class="field"><label for="npc-control">Control</label><select id="npc-control"><option value="ia">IA</option><option value="jugador">Jugador</option></select></div>
+                            <div class="field"><label for="npc-vida-max">Vida maxima</label><input id="npc-vida-max" type="number" min="1" max="999" value="11" /></div>
+                            <div class="field"><label for="npc-vida-actual">Vida actual</label><input id="npc-vida-actual" type="number" min="0" max="999" value="11" /></div>
+                        </div>
+                        <div class="toolbar" style="margin-top:12px;"><button class="btn gold" type="submit">Agregar NPC</button></div>
                     </form>
-                    {% else %}
-                    <a class="btn-ghost" href="/">Volver al dashboard</a>
-                    {% endif %}
-                    {% else %}
-                    <a class="btn-ghost" href="/">Volver al dashboard</a>
-                    {% endif %}
-                </div>
+                </section>
 
-                <h2 style="margin-top:20px;">Siguiente Fase</h2>
-                <ul class="future-list">
-                    <li><strong>Turnos y rondas:</strong> el host iniciara la escena de combate y definira el orden por iniciativa.</li>
-                    <li><strong>Actores vivos, heridos o incapacitados:</strong> personajes y NPCs podran saltarse automaticamente si no pueden actuar.</li>
-                    <li><strong>NPCs dinamicos:</strong> si llegan refuerzos como lobos o goblins, el host podra agregarlos a la escena sin reiniciar la sala.</li>
-                </ul>
+                <section class="panel">
+                    <h2>Escenario</h2>
+                    <div class="notice"><strong>{{ escenario_nombre }}</strong><br>{{ escenario_descripcion }}</div>
+                </section>
+
+                <section class="panel">
+                    <h2>IA Local</h2>
+                    <div class="notice" id="ia-status"><strong>Consultando LM Studio...</strong><br>En cuanto cargue el panel veremos si hay un modelo listo para narrar y resolver acciones.</div>
+                    <div class="toolbar" style="margin-top:12px;">
+                        <button class="btn purple" type="button" onclick="refreshIa()">Actualizar estado</button>
+                        <button class="btn gold" type="button" onclick="testIa()">Probar LM Studio</button>
+                    </div>
+                </section>
             </aside>
         </section>
+        {% endif %}
     </div>
 
+    {% if sala_encontrada and es_host %}
     <script>
-        function roomInviteUrl(roomId) {
-            return `${window.location.origin}/personaje?sala=${encodeURIComponent(roomId)}`;
+        const salaId = {{ sala_id | tojson }};
+        const estadoUrl = `/api/host/sala/${encodeURIComponent(salaId)}/combate`;
+        const elNote = document.getElementById("host-note");
+        const elTurno = document.getElementById("bloque-turno");
+        const elJugadores = document.getElementById("lista-jugadores");
+        const elActores = document.getElementById("lista-actores");
+        const elIaStatus = document.getElementById("ia-status");
+
+        const esc = (texto) => String(texto ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+
+        function showNote(texto, error = false) {
+            if (!texto) { elNote.style.display = "none"; elNote.textContent = ""; elNote.classList.remove("error"); return; }
+            elNote.textContent = texto; elNote.style.display = "block"; elNote.classList.toggle("error", Boolean(error));
         }
 
-        async function copyInvite(roomId) {
-            const url = roomInviteUrl(roomId);
+        async function fetchJson(url, options = {}) {
+            const response = await fetch(url, { headers: { "Content-Type": "application/json", ...(options.headers || {}) }, ...options });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.detail || `Error ${response.status}`);
+            return data;
+        }
 
+        async function copyInvite() {
+            const url = `${window.location.origin}/personaje?sala=${encodeURIComponent(salaId)}`;
+            try { await navigator.clipboard.writeText(url); showNote("Invitacion copiada al portapapeles."); }
+            catch (error) { prompt("Copia este enlace para compartir la sala:", url); }
+        }
+
+        function stateChip(estado) {
+            if (estado === "listo") return '<span class="chip ok">Listo</span>';
+            if (estado === "caido") return '<span class="chip warn">Caido</span>';
+            if (estado === "incapacitado") return '<span class="chip warn">Incapacitado</span>';
+            if (estado === "muerto") return '<span class="chip bad">Muerto</span>';
+            return `<span class="chip">${esc(estado || "Sin estado")}</span>`;
+        }
+
+        function renderTurn(combate) {
+            if (!combate?.activa) {
+                elTurno.innerHTML = `<div class="empty">No hay una escena activa todavia. Cuando pulses <strong>Iniciar encuentro</strong>, se tomaran los jugadores conectados, se tirara iniciativa usando su Destreza y se abrira el orden de turnos.</div>`;
+                return;
+            }
+            const actor = combate.actor_actual;
+            const nota = combate.espera_resolucion
+                ? "Esperando la resolucion de Raphael o la decision del host."
+                : (actor?.control === "ia" ? "Actor controlado por la IA." : "Esperando la accion del jugador actual.");
+            elTurno.innerHTML = `<div class="card turn-card"><div class="round">Ronda ${esc(combate.ronda || 1)}</div><div><strong>${esc(actor?.nombre || "Sin actor actual")}</strong><p class="muted">${actor ? `${esc(actor.tipo)} · ${esc(actor.control)} · iniciativa ${esc(actor.iniciativa)}` : "No hay actores listos para actuar."}<br>${nota}</p><div class="chips" style="margin-top:10px;">${actor ? stateChip(actor.estado) : '<span class="chip">Sin turno</span>'}${combate.espera_resolucion ? '<span class="chip current">Pendiente de resolucion</span>' : ""}</div></div></div>`;
+        }
+
+        function renderPlayers(jugadores, combate) {
+            if (!jugadores?.length) { elJugadores.innerHTML = `<div class="empty">No hay jugadores conectados ahora mismo. Primero entra alguien al chat para poder iniciar un encuentro.</div>`; return; }
+            const map = new Map((combate?.actores || []).filter(a => a?.jugador_nombre).map(a => [String(a.jugador_nombre), a]));
+            elJugadores.innerHTML = jugadores.map((jugador) => {
+                const actor = map.get(jugador.nombre);
+                const nombreSeguro = esc(jugador.nombre);
+                const nombreAttr = JSON.stringify(jugador.nombre);
+                return `<article class="card"><div class="row" style="justify-content:space-between;align-items:start;"><div><div>${nombreSeguro}</div><div class="muted">${esc(jugador.raza || "Aventurero")} · ${esc(jugador.clase || "Sin clase")} · nivel ${esc(jugador.nivel || 1)}</div></div><div class="chips">${actor ? '<span class="chip ok">En escena</span>' : '<span class="chip">Fuera de escena</span>'}${actor?.es_actual ? '<span class="chip current">Turno actual</span>' : ""}</div></div><div class="chips" style="margin-top:8px;"><span class="chip">HP ${esc(jugador.vida_actual ?? "--")} / ${esc(jugador.vida_maxima ?? "--")}</span><span class="chip">DES ${esc(jugador.estadisticas?.des ?? "--")}</span>${actor ? stateChip(actor.estado) : ""}</div><div class="row" style="margin-top:10px;"><button class="btn bad" type="button" onclick="kickPlayer(${nombreAttr})">Expulsar</button></div></article>`;
+            }).join("");
+        }
+
+        function actorActions(actor) {
+            const canSave = actor.estado === "caido";
+            const canRevive = actor.estado === "incapacitado" || actor.estado === "muerto" || actor.estado === "caido";
+            const canRemove = actor.tipo === "npc";
+            return `<div class="row"><button class="btn purple" type="button" onclick="saveActor('${actor.id}')">Guardar</button><button class="btn" type="button" onclick="markFallen('${actor.id}')">Marcar caida</button><button class="btn" type="button" onclick="resolveSave('${actor.id}')" ${canSave ? "" : "disabled"}>Tirada</button><button class="btn ok" type="button" onclick="reviveActor('${actor.id}')" ${canRevive ? "" : "disabled"}>Revivir</button>${canRemove ? `<button class="btn bad" type="button" onclick="removeActor('${actor.id}')">Quitar</button>` : ""}</div>`;
+        }
+
+        function renderActors(combate) {
+            if (!combate?.actores?.length) { elActores.innerHTML = `<div class="empty">Todavia no hay actores cargados en la escena. Inicia el encuentro para traer a los jugadores conectados y luego agrega NPCs.</div>`; return; }
+            elActores.innerHTML = combate.actores.map((actor) => `<article class="card"><div class="row" style="justify-content:space-between;align-items:start;"><div><div>${esc(actor.nombre)}</div><div class="muted">${esc(actor.tipo)} · ${esc(actor.control)}${actor.clase ? ` · ${esc(actor.clase)}` : ""}</div></div><div class="chips">${stateChip(actor.estado)}${actor.es_actual ? '<span class="chip current">Actuando ahora</span>' : ""}</div></div><div class="chips" style="margin-top:8px;"><span class="chip">Iniciativa ${esc(actor.iniciativa)}</span><span class="chip">HP ${esc(actor.vida_actual ?? "--")} / ${esc(actor.vida_maxima ?? "--")}</span></div><div class="fields" style="margin-top:12px;"><div class="field"><label for="init-${esc(actor.id)}">Iniciativa</label><input id="init-${esc(actor.id)}" type="number" min="-10" max="40" value="${esc(actor.iniciativa)}" /></div><div class="field"><label for="hp-${esc(actor.id)}">Vida actual</label><input id="hp-${esc(actor.id)}" type="number" min="0" max="999" value="${esc(actor.vida_actual ?? 0)}" /></div><div class="field"><label for="hpmax-${esc(actor.id)}">Vida maxima</label><input id="hpmax-${esc(actor.id)}" type="number" min="1" max="999" value="${esc(actor.vida_maxima ?? 1)}" /></div><div class="field"><label for="estado-${esc(actor.id)}">Estado</label><select id="estado-${esc(actor.id)}"><option value="listo" ${actor.estado === "listo" ? "selected" : ""}>Listo</option><option value="caido" ${actor.estado === "caido" ? "selected" : ""}>Caido</option><option value="incapacitado" ${actor.estado === "incapacitado" ? "selected" : ""}>Incapacitado</option><option value="muerto" ${actor.estado === "muerto" ? "selected" : ""}>Muerto</option></select></div></div><div style="margin-top:12px;">${actorActions(actor)}</div></article>`).join("");
+        }
+
+        function updateButtons(combate, jugadores) {
+            document.getElementById("btn-iniciar").disabled = !jugadores?.length;
+            document.getElementById("btn-avanzar").disabled = !combate?.activa || !combate?.actor_actual;
+            document.getElementById("btn-detener").disabled = !combate?.activa;
+        }
+
+        async function refreshHost(success = "") {
             try {
-                await navigator.clipboard.writeText(url);
-                alert(`Invitacion copiada:\n${url}`);
+                const data = await fetchJson(estadoUrl, { headers: {} });
+                renderTurn(data.combate); renderPlayers(data.jugadores_conectados || [], data.combate || {}); renderActors(data.combate || {}); updateButtons(data.combate || {}, data.jugadores_conectados || []); if (success) showNote(success);
+            } catch (error) { showNote(error.message || "No se pudo actualizar el panel del host.", true); }
+        }
+
+        function renderIaStatus(payload) {
+            const ia = payload?.ia || {};
+            if (!elIaStatus) return;
+            if (!ia.ok) {
+                elIaStatus.innerHTML = `<strong>LM Studio no disponible.</strong><br>${esc(ia.detalle || "No pudimos conectar con el servidor local.")}`;
+                return;
+            }
+            const modelo = ia.modelo_activo || ia.modelo_configurado || "Sin modelo activo";
+            const modelos = Array.isArray(ia.modelos) && ia.modelos.length ? ia.modelos.join(", ") : "Sin modelos detectados";
+            elIaStatus.innerHTML = `<strong>LM Studio listo.</strong><br>Base URL: ${esc(ia.base_url || "--")}<br>Modelo activo: ${esc(modelo)}<br>Modelos visibles: ${esc(modelos)}`;
+        }
+
+        async function refreshIa(success = "") {
+            try {
+                const data = await fetchJson(`/api/host/sala/${encodeURIComponent(salaId)}/ia/estado`, { headers: {} });
+                renderIaStatus(data);
+                if (success) showNote(success);
             } catch (error) {
-                prompt("Copia este enlace para compartir la sala:", url);
+                if (elIaStatus) {
+                    elIaStatus.innerHTML = `<strong>LM Studio no disponible.</strong><br>${esc(error.message || "No pudimos consultar el estado.")}`;
+                }
             }
         }
+
+        async function testIa() {
+            try {
+                const data = await fetchJson(`/api/host/sala/${encodeURIComponent(salaId)}/ia/probar`, { method: "POST" });
+                await refreshIa();
+                showNote(data.resultado?.mensaje || "LM Studio respondio correctamente.");
+            } catch (error) {
+                showNote(error.message || "LM Studio no respondio como esperabamos.", true);
+            }
+        }
+
+        async function clearHistory() {
+            if (!confirm("Limpiar el historial de la sala?\nLa IA no recordara conversaciones anteriores.")) return;
+            try { await fetchJson(`/api/host/sala/${encodeURIComponent(salaId)}/limpiar-historial`, { method: "POST" }); await refreshHost("Historial de sala limpiado."); } catch (error) { showNote(error.message || "No se pudo limpiar el historial.", true); }
+        }
+
+        async function kickPlayer(nombre) {
+            if (!confirm(`Expulsar a ${nombre} de la sala?`)) return;
+            try { await fetchJson(`/api/host/sala/${encodeURIComponent(salaId)}/jugador/${encodeURIComponent(nombre)}/expulsar`, { method: "POST" }); await refreshHost(`${nombre} fue expulsado.`); } catch (error) { showNote(error.message || "No se pudo expulsar al jugador.", true); }
+        }
+
+        async function startCombat() { try { await fetchJson(`${estadoUrl}/iniciar`, { method: "POST" }); await refreshHost("Encuentro iniciado."); } catch (error) { showNote(error.message || "No se pudo iniciar el encuentro.", true); } }
+        async function advanceTurn() { try { await fetchJson(`${estadoUrl}/avanzar`, { method: "POST" }); await refreshHost("Turno avanzado."); } catch (error) { showNote(error.message || "No se pudo avanzar el turno.", true); } }
+        async function stopCombat() { try { await fetchJson(`${estadoUrl}/detener`, { method: "POST" }); await refreshHost("Escena de turnos cerrada."); } catch (error) { showNote(error.message || "No se pudo cerrar la escena.", true); } }
+
+        async function saveActor(actorId) {
+            const payload = { iniciativa: document.getElementById(`init-${actorId}`)?.value, vida_actual: document.getElementById(`hp-${actorId}`)?.value, vida_maxima: document.getElementById(`hpmax-${actorId}`)?.value, estado: document.getElementById(`estado-${actorId}`)?.value };
+            try { await fetchJson(`${estadoUrl}/actor/${encodeURIComponent(actorId)}/editar`, { method: "POST", body: JSON.stringify(payload) }); await refreshHost("Actor actualizado."); } catch (error) { showNote(error.message || "No se pudieron guardar los cambios del actor.", true); }
+        }
+        async function markFallen(actorId) { try { await fetchJson(`${estadoUrl}/actor/${encodeURIComponent(actorId)}/caida`, { method: "POST" }); await refreshHost("Actor marcado como caido."); } catch (error) { showNote(error.message || "No se pudo marcar la caida.", true); } }
+        async function resolveSave(actorId) { try { const data = await fetchJson(`${estadoUrl}/actor/${encodeURIComponent(actorId)}/salvacion`, { method: "POST" }); await refreshHost(`Tirada resuelta: ${data.tirada}.`); } catch (error) { showNote(error.message || "No se pudo resolver la salvacion.", true); } }
+        async function reviveActor(actorId) {
+            const vidaActual = prompt("Vida actual al revivir:", "1"); if (vidaActual === null) return;
+            try { await fetchJson(`${estadoUrl}/actor/${encodeURIComponent(actorId)}/revivir`, { method: "POST", body: JSON.stringify({ vida_actual: vidaActual }) }); await refreshHost("Actor revivido."); } catch (error) { showNote(error.message || "No se pudo revivir al actor.", true); }
+        }
+        async function removeActor(actorId) {
+            if (!confirm("Quitar este actor de la escena de turnos?")) return;
+            try { await fetchJson(`${estadoUrl}/actor/${encodeURIComponent(actorId)}/quitar`, { method: "POST" }); await refreshHost("Actor retirado de la escena."); } catch (error) { showNote(error.message || "No se pudo quitar el actor.", true); }
+        }
+
+        document.getElementById("form-npc")?.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const payload = { nombre: document.getElementById("npc-nombre").value.trim(), iniciativa: document.getElementById("npc-iniciativa").value, vida_maxima: document.getElementById("npc-vida-max").value, vida_actual: document.getElementById("npc-vida-actual").value, control: document.getElementById("npc-control").value };
+            try {
+                await fetchJson(`${estadoUrl}/agregar-npc`, { method: "POST", body: JSON.stringify(payload) });
+                event.target.reset(); document.getElementById("npc-iniciativa").value = "10"; document.getElementById("npc-vida-max").value = "11"; document.getElementById("npc-vida-actual").value = "11"; document.getElementById("npc-control").value = "ia";
+                await refreshHost("NPC agregado a la escena.");
+            } catch (error) { showNote(error.message || "No se pudo agregar el NPC.", true); }
+        });
+
+        refreshHost();
+        refreshIa();
+        setInterval(() => refreshHost(), 4000);
     </script>
+    {% endif %}
 </body>
 </html>

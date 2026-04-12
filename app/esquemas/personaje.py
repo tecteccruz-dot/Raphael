@@ -9,6 +9,7 @@ _ATRIBUTOS = frozenset({"fue", "des", "con", "int", "sab", "car"})
 class CreacionPersonaje(BaseModel):
     nombre: str
     sala_id: str
+    session_token: str | None = None
     raza: str
     subraza: str | None = None
     clase: str
