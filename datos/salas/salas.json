@@ -1,14 +1,14 @@
 {
   "salas": [
     {
-      "id": "XMJ43Q",
-      "nombre": "Recodo",
+      "id": "TLQXN9",
+      "nombre": "Koma",
       "escenario_id": "taberna_bruma",
       "escenario_nombre": "La Taberna de la Bruma",
       "escenario_descripcion": "La aventura comienza en una taberna fronteriza donde los rumores sobre desapariciones y criaturas extranas no dejan de crecer.",
-      "resumen_partida": "La aventura comienza en una taberna fronteriza donde los rumores sobre desapariciones y criaturas extranas no dejan de crecer.\nRosi inicia su turno moviéndose hacia Juan en un estado de alerta.\nJhon interviene preguntando sobre la situación mientras Rosi se acerca a Juan.\nJuan le asegura a Jhon que tiene tiempo libre para conversar.\nRosi se acerca cautelosamente a Juan y Jhon tras la conversación inicial.\nJhon interroga a Juan y Rosi sobre la situación en la taberna.\nJuan invita a Jhon a unirse a su grupo de aventureros.\nRosi observa la invitación de Juan a Jhon unirse a su grupo de aventureros.\nJhon acepta la invitación de Juan para unirse a su grupo de aventureros.\nJuan pregunta el nombre de Rosi.\nRosi responde a la pregunta de Juan y revela su nombre.\nJhon acepta el nombre de Rosi y comenta sobre los rumores de la taberna.",
-      "creada_en": "2026-04-12 03:09",
-      "host_token": "O4tIREVvUAwU3ICmksbEX6fBt09QH3Gz"
+      "resumen_partida": "La aventura comienza en una taberna fronteriza donde los rumores sobre desapariciones y criaturas extranas no dejan de crecer.\nBenimaru hace un comentario sobre el Lobo.\nEl Lobo ataca a Benimaru con Mordida tras el comentario del jugador.\nBenimaru esquiva exitosamente la mordida del Lobo.\nEl Lobo reacciona a esquivar el ataque de Benimaru y amenaza con volver a atacar.",
+      "creada_en": "2026-04-12 04:07",
+      "host_token": "GZxWmuZ28G8mIa589Ogz0GoOUjYEVCsM"
     }
   ]
 }

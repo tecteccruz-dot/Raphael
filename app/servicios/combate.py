@@ -26,6 +26,7 @@ class ActorCombate:
     tipo: str
     control: str
     iniciativa: int
+    plantilla_id: str | None = None
     vida_actual: int | None = None
     vida_maxima: int | None = None
     estado: str = "listo"
@@ -44,7 +45,10 @@ class ActorCombate:
     tiradas: list[str] = field(default_factory=list)
     inventario: list[dict[str, object]] = field(default_factory=list)
     resumen: str = ""
+    persistente: bool = False
+    reclutado: bool = False
     jugador_nombre: str | None = None
+    sala_id: str | None = None
     orden_creacion: int = 0
 
 
@@ -99,6 +103,131 @@ class GestorCombate:
 
         return None
 
+    def _datos_actor(self, actor_o_datos: object | None) -> dict[str, object]:
+        if actor_o_datos is None:
+            return {}
+
+        if isinstance(actor_o_datos, dict):
+            return dict(actor_o_datos)
+
+        a_dict = getattr(actor_o_datos, "a_dict", None)
+        if callable(a_dict):
+            datos = a_dict()
+            if isinstance(datos, dict):
+                return dict(datos)
+
+        datos: dict[str, object] = {}
+        for campo in (
+            "id",
+            "plantilla_id",
+            "nombre",
+            "tipo",
+            "control",
+            "vida_actual",
+            "vida_maxima",
+            "estado",
+            "avatar_url",
+            "raza",
+            "trasfondo",
+            "clase",
+            "nivel",
+            "mana_actual",
+            "mana_maximo",
+            "xp_actual",
+            "xp_maximo",
+            "estadisticas",
+            "habilidades",
+            "pasivas",
+            "tiradas",
+            "inventario",
+            "resumen",
+            "persistente",
+            "reclutado",
+            "jugador_nombre",
+            "sala_id",
+            "iniciativa",
+        ):
+            if hasattr(actor_o_datos, campo):
+                datos[campo] = getattr(actor_o_datos, campo)
+
+        return datos
+
+    def _crear_actor_desde_payload(
+        self,
+        sala_id: str,
+        datos_actor: dict[str, object],
+        *,
+        orden_creacion: int,
+        iniciativa: int | None = None,
+        control: str = "ia",
+    ) -> ActorCombate:
+        nombre_limpio = str(datos_actor.get("nombre") or "").strip()
+        if len(nombre_limpio) < 2:
+            raise ValueError("El NPC debe tener al menos 2 caracteres en el nombre.")
+
+        control_limpio = str(control or datos_actor.get("control") or "ia").strip().lower() or "ia"
+        if control_limpio not in CONTROLES_ACTOR:
+            raise ValueError("El control del actor no es valido.")
+
+        tipo_limpio = str(datos_actor.get("tipo") or "npc").strip().lower() or "npc"
+        if tipo_limpio not in TIPOS_ACTOR:
+            tipo_limpio = "npc"
+
+        estadisticas = dict(datos_actor.get("estadisticas") or {})
+        iniciativa_base = datos_actor.get("iniciativa")
+        if iniciativa is not None:
+            iniciativa_final = int(iniciativa)
+        elif iniciativa_base not in (None, ""):
+            iniciativa_final = int(iniciativa_base)
+        else:
+            iniciativa_final = random.randint(1, 20) + _mod(estadisticas.get("des"))
+
+        vida_max = max(1, int(datos_actor.get("vida_maxima") or 1))
+        vida_now = int(datos_actor.get("vida_actual") if datos_actor.get("vida_actual") is not None else vida_max)
+        vida_now = max(0, min(vida_now, vida_max))
+
+        estado = str(datos_actor.get("estado") or "listo").strip().lower() or "listo"
+        if estado not in ESTADOS_ACTOR:
+            estado = "listo"
+        if vida_now <= 0 and estado == "listo":
+            estado = "caido"
+
+        actor_id = str(datos_actor.get("id") or _nuevo_actor_id("npc")).strip()
+        if not actor_id:
+            actor_id = _nuevo_actor_id("npc")
+
+        return ActorCombate(
+            id=actor_id,
+            nombre=nombre_limpio[:40],
+            tipo=tipo_limpio,
+            control=control_limpio,
+            iniciativa=iniciativa_final,
+            plantilla_id=str(datos_actor.get("plantilla_id") or "").strip() or None,
+            vida_actual=vida_now,
+            vida_maxima=vida_max,
+            estado=estado,
+            avatar_url=datos_actor.get("avatar_url"),
+            raza=str(datos_actor.get("raza") or ""),
+            trasfondo=str(datos_actor.get("trasfondo") or ""),
+            clase=str(datos_actor.get("clase") or ""),
+            nivel=int(datos_actor.get("nivel") or 1),
+            mana_actual=int(datos_actor.get("mana_actual") or 0),
+            mana_maximo=int(datos_actor.get("mana_maximo") or 0),
+            xp_actual=int(datos_actor.get("xp_actual") or 0),
+            xp_maximo=int(datos_actor.get("xp_maximo") or 0),
+            estadisticas=estadisticas,
+            habilidades=list(datos_actor.get("habilidades") or []),
+            pasivas=list(datos_actor.get("pasivas") or []),
+            tiradas=list(datos_actor.get("tiradas") or []),
+            inventario=[dict(item) for item in (datos_actor.get("inventario") or []) if isinstance(item, dict)],
+            resumen=str(datos_actor.get("resumen") or ""),
+            persistente=bool(datos_actor.get("persistente", False)),
+            reclutado=bool(datos_actor.get("reclutado", False)),
+            jugador_nombre=str(datos_actor.get("jugador_nombre") or "") or None,
+            sala_id=str(datos_actor.get("sala_id") or sala_id).strip().upper() or None,
+            orden_creacion=orden_creacion,
+        )
+
     def _serializar_actor(self, actor: ActorCombate, *, es_actual: bool) -> dict[str, object]:
         return {
             "id": actor.id,
@@ -106,13 +235,29 @@ class GestorCombate:
             "tipo": actor.tipo,
             "control": actor.control,
             "iniciativa": actor.iniciativa,
+            "plantilla_id": actor.plantilla_id,
             "vida_actual": actor.vida_actual,
             "vida_maxima": actor.vida_maxima,
+            "mana_actual": actor.mana_actual,
+            "mana_maximo": actor.mana_maximo,
+            "xp_actual": actor.xp_actual,
+            "xp_maximo": actor.xp_maximo,
             "estado": actor.estado,
             "avatar_url": actor.avatar_url,
+            "raza": actor.raza,
+            "trasfondo": actor.trasfondo,
             "clase": actor.clase,
             "nivel": actor.nivel,
+            "estadisticas": dict(actor.estadisticas),
+            "habilidades": list(actor.habilidades),
+            "pasivas": list(actor.pasivas),
+            "tiradas": list(actor.tiradas),
+            "inventario": [dict(item) for item in actor.inventario],
+            "resumen": actor.resumen,
+            "persistente": actor.persistente,
+            "reclutado": actor.reclutado,
             "jugador_nombre": actor.jugador_nombre,
+            "sala_id": actor.sala_id,
             "es_actual": es_actual,
         }
 
@@ -136,6 +281,7 @@ class GestorCombate:
             "tipo": actor.tipo,
             "control": actor.control,
             "iniciativa": actor.iniciativa,
+            "plantilla_id": actor.plantilla_id,
             "vida_actual": actor.vida_actual,
             "vida_maxima": actor.vida_maxima,
             "mana_actual": actor.mana_actual,
@@ -143,6 +289,8 @@ class GestorCombate:
             "estado": actor.estado,
             "clase": actor.clase,
             "nivel": actor.nivel,
+            "persistente": actor.persistente,
+            "reclutado": actor.reclutado,
             "jugador_nombre": actor.jugador_nombre,
             "es_actual": es_actual,
             "puede_actuar": puede_actuar,
@@ -150,14 +298,18 @@ class GestorCombate:
         # Datos detallados: solo para el actor que tiene el turno
         if es_actual:
             datos.update({
+                "avatar_url": actor.avatar_url,
                 "raza": actor.raza,
+                "trasfondo": actor.trasfondo,
                 "xp_actual": actor.xp_actual,
                 "xp_maximo": actor.xp_maximo,
                 "estadisticas": dict(actor.estadisticas),
                 "habilidades": list(actor.habilidades),
                 "pasivas": list(actor.pasivas),
                 "tiradas": list(actor.tiradas),
+                "inventario": [dict(item) for item in actor.inventario],
                 "resumen": actor.resumen,
+                "sala_id": actor.sala_id,
             })
         return datos
 
@@ -354,6 +506,7 @@ class GestorCombate:
                     inventario=[dict(item) for item in (jugador.get("inventario") or []) if isinstance(item, dict)],
                     resumen=str(jugador.get("resumen") or ""),
                     jugador_nombre=str(jugador.get("nombre") or ""),
+                    sala_id=sala_id.upper(),
                     orden_creacion=escena.secuencia,
                 )
             )
@@ -377,44 +530,78 @@ class GestorCombate:
         self,
         sala_id: str,
         *,
-        nombre: str,
-        iniciativa: int,
-        vida_maxima: int,
+        nombre: str | None = None,
+        iniciativa: int | None = None,
+        vida_maxima: int | None = None,
         vida_actual: int | None = None,
         control: str = "ia",
         ajustar_turno: bool = True,
+        plantilla_id: str | None = None,
+        plantilla: object | None = None,
+        actor_base: object | None = None,
+        overrides: dict[str, object] | None = None,
     ) -> dict[str, object]:
         escena = self._escena(sala_id)
         if not escena.activa:
             raise ValueError("Primero inicia un encuentro para agregar actores.")
-
-        nombre_limpio = (nombre or "").strip()
-        if len(nombre_limpio) < 2:
-            raise ValueError("El NPC debe tener al menos 2 caracteres en el nombre.")
-
-        control_limpio = (control or "ia").strip().lower()
-        if control_limpio not in CONTROLES_ACTOR:
-            raise ValueError("El control del actor no es valido.")
-
-        vida_max = max(1, int(vida_maxima or 1))
-        vida_now = int(vida_actual if vida_actual is not None else vida_max)
-        vida_now = max(0, min(vida_now, vida_max))
         actual_id = escena.turno_actor_id
 
-        escena.secuencia += 1
-        escena.actores.append(
-            ActorCombate(
-                id=_nuevo_actor_id("npc"),
-                nombre=nombre_limpio[:40],
-                tipo="npc",
-                control=control_limpio,
-                iniciativa=int(iniciativa),
-                vida_actual=vida_now,
-                vida_maxima=vida_max,
-                estado="listo" if vida_now > 0 else "caido",
-                orden_creacion=escena.secuencia,
+        datos_actor: dict[str, object] = {}
+
+        if plantilla is not None:
+            datos_actor.update(self._datos_actor(plantilla))
+            if not datos_actor.get("plantilla_id"):
+                datos_actor["plantilla_id"] = str(datos_actor.get("id") or "").strip() or None
+            datos_actor["id"] = _nuevo_actor_id("npc")
+        elif plantilla_id:
+            from app.servicios import personajes_npc as servicio_personajes_npc
+
+            instancia = servicio_personajes_npc.crear_instancia_desde_plantilla(
+                plantilla_id,
+                nombre=nombre,
+                sala_id=sala_id,
+                overrides=overrides,
             )
+            datos_actor.update(instancia.a_dict())
+        elif actor_base is not None:
+            datos_actor.update(self._datos_actor(actor_base))
+        else:
+            datos_actor.update({})
+
+        if overrides:
+            datos_actor.update(dict(overrides))
+
+        if nombre is not None and str(nombre).strip():
+            datos_actor["nombre"] = str(nombre).strip()
+        if vida_maxima is not None:
+            datos_actor["vida_maxima"] = int(vida_maxima)
+        if vida_actual is not None:
+            datos_actor["vida_actual"] = int(vida_actual)
+        if control is not None:
+            datos_actor["control"] = control
+        if plantilla_id and not datos_actor.get("plantilla_id"):
+            datos_actor["plantilla_id"] = plantilla_id
+        if not datos_actor.get("sala_id"):
+            datos_actor["sala_id"] = sala_id
+
+        if not datos_actor.get("nombre"):
+            raise ValueError("El NPC debe tener al menos 2 caracteres en el nombre.")
+        if not datos_actor.get("vida_maxima"):
+            raise ValueError("El NPC necesita una vida maxima valida.")
+
+        escena.secuencia += 1
+        actor = self._crear_actor_desde_payload(
+            sala_id,
+            datos_actor,
+            orden_creacion=escena.secuencia,
+            iniciativa=iniciativa,
+            control=str(datos_actor.get("control") or control or "ia"),
         )
+
+        if self._actor_por_id(escena, actor.id):
+            raise ValueError("Ya existe un actor con ese identificador en la escena.")
+
+        escena.actores.append(actor)
 
         self._ordenar_actores(escena)
         escena.turno_actor_id = actual_id or escena.turno_actor_id

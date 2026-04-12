@@ -10,6 +10,7 @@ from app.api import avatar as api_avatar
 from app.api import personaje as api_personaje
 from app.servicios import lmstudio as servicio_lmstudio
 from app.servicios.combate import ActorCombate, gestor_combate
+from app.servicios import personajes_npc as servicio_personajes_npc
 from app.servicios import salas as servicio_salas
 from app.servicios import sesiones_jugador
 from app.websocket.gestor_conexiones import gestor_conexiones
@@ -262,6 +263,10 @@ def _resumen_host_sala(sala_id: str) -> dict[str, object]:
     return {
         "jugadores_conectados": gestor_conexiones.obtener_resumen_jugadores_sala(sala_id),
         "combate": gestor_combate.estado_publico(sala_id),
+        "actores_persistentes": [
+            personaje.a_dict()
+            for personaje in servicio_personajes_npc.listar_actores_persistentes(sala_id)
+        ],
     }
 
 
@@ -393,6 +398,60 @@ def _sincronizar_actor_jugador(sala_id: str, actor: ActorCombate) -> bool:
     )
 
 
+def _sincronizar_actor_persistente(sala_id: str, actor: ActorCombate) -> bool:
+    if actor.tipo != "npc" or not actor.persistente:
+        return False
+
+    servicio_personajes_npc.guardar_actor_persistente(sala_id, actor)
+    return True
+
+
+def _payload_persistente_desde_actor(
+    sala_id: str,
+    actor: ActorCombate,
+    *,
+    reclutado: bool | None = None,
+    nombre: str | None = None,
+) -> dict[str, object]:
+    return {
+        "id": actor.id,
+        "plantilla_id": actor.plantilla_id,
+        "nombre": (nombre or actor.nombre).strip(),
+        "tipo": actor.tipo,
+        "control": actor.control,
+        "raza": actor.raza or "",
+        "clase": actor.clase or "",
+        "trasfondo": actor.trasfondo or "",
+        "nivel": int(actor.nivel or 1),
+        "vida_actual": int(actor.vida_actual or 0),
+        "vida_maxima": int(actor.vida_maxima or 1),
+        "mana_actual": int(actor.mana_actual or 0),
+        "mana_maximo": int(actor.mana_maximo or 0),
+        "xp_actual": int(actor.xp_actual or 0),
+        "xp_maximo": int(actor.xp_maximo or 0),
+        "estado": actor.estado,
+        "estadisticas": dict(actor.estadisticas),
+        "habilidades": list(actor.habilidades),
+        "pasivas": list(actor.pasivas),
+        "tiradas": list(actor.tiradas),
+        "inventario": [dict(item) for item in actor.inventario],
+        "resumen": actor.resumen,
+        "reclutado": actor.reclutado if reclutado is None else bool(reclutado),
+        "persistente": True,
+        "jugador_nombre": actor.jugador_nombre,
+        "sala_id": sala_id,
+        "avatar_url": actor.avatar_url,
+    }
+
+
+def _aplicar_personaje_persistente_a_actor(actor: ActorCombate, personaje: object) -> None:
+    actor.plantilla_id = getattr(personaje, "plantilla_id", actor.plantilla_id) or actor.plantilla_id
+    actor.persistente = bool(getattr(personaje, "persistente", True))
+    actor.reclutado = bool(getattr(personaje, "reclutado", False))
+    actor.sala_id = str(getattr(personaje, "sala_id", actor.sala_id or "") or "").strip().upper() or actor.sala_id
+    actor.resumen = str(getattr(personaje, "resumen", actor.resumen) or actor.resumen)
+
+
 def _acotar_entero(valor: object, *, minimo: int, maximo: int) -> int | None:
     try:
         numero = int(valor)
@@ -418,24 +477,43 @@ def _aplicar_acciones_ia(sala_id: str, acciones: list[object]) -> dict[str, obje
 
         if tipo == "agregar_actor":
             nombre = str(accion.get("nombre") or "").strip()
+            plantilla_id = str(accion.get("plantilla_id") or "").strip() or None
+            npc_unico_id = str(accion.get("npc_unico_id") or "").strip() or None
+            personaje_id = str(accion.get("personaje_id") or "").strip() or None
             iniciativa = _acotar_entero(accion.get("iniciativa"), minimo=-10, maximo=40)
             vida_maxima = _acotar_entero(accion.get("vida_maxima"), minimo=1, maximo=999)
             vida_actual = _acotar_entero(accion.get("vida_actual"), minimo=0, maximo=999)
             control = str(accion.get("control") or "ia").strip().lower() or "ia"
-            if not nombre or iniciativa is None or vida_maxima is None:
+            actor_base = None
+
+            if personaje_id:
+                actor_base = servicio_personajes_npc.cargar_actor_persistente(sala_id, personaje_id)
+                if not actor_base:
+                    ignoradas.append(f"No encontramos el actor persistente '{personaje_id}'.")
+                    continue
+            elif npc_unico_id:
+                actor_base = servicio_personajes_npc.obtener_npc_unico(npc_unico_id)
+                if not actor_base:
+                    ignoradas.append(f"No encontramos el NPC unico '{npc_unico_id}'.")
+                    continue
+
+            if not (plantilla_id or npc_unico_id or personaje_id) and (not nombre or iniciativa is None or vida_maxima is None):
                 ignoradas.append("Se ignoro un refuerzo sin nombre, iniciativa o vida validos.")
                 continue
             try:
                 gestor_combate.agregar_npc(
                     sala_id,
-                    nombre=nombre,
+                    nombre=nombre or None,
                     iniciativa=iniciativa,
                     vida_maxima=vida_maxima,
                     vida_actual=vida_actual,
                     control=control,
                     ajustar_turno=False,
+                    plantilla_id=plantilla_id,
+                    actor_base=actor_base,
                 )
-                aplicadas.append(f"Entra {nombre}.")
+                nombre_actor = nombre or getattr(actor_base, "nombre", "") or plantilla_id or npc_unico_id or personaje_id or "un actor"
+                aplicadas.append(f"Entra {nombre_actor}.")
             except ValueError as exc:
                 ignoradas.append(str(exc))
             continue
@@ -453,13 +531,14 @@ def _aplicar_acciones_ia(sala_id: str, acciones: list[object]) -> dict[str, obje
                 if not actor:
                     continue
                 nuevo_xp = int(actor.xp_actual or 0) + cantidad
-                _, actor = gestor_combate.editar_actor(
-                    sala_id,
-                    actor.id,
-                    xp_actual=nuevo_xp,
-                    ajustar_turno=False,
-                )
-                cambios_jugadores = _sincronizar_actor_jugador(sala_id, actor) or cambios_jugadores
+            _, actor = gestor_combate.editar_actor(
+                sala_id,
+                actor.id,
+                xp_actual=nuevo_xp,
+                ajustar_turno=False,
+            )
+            cambios_jugadores = _sincronizar_actor_jugador(sala_id, actor) or cambios_jugadores
+            _sincronizar_actor_persistente(sala_id, actor)
 
             aplicadas.append(f"El grupo recibe {cantidad} XP.")
             continue
@@ -482,6 +561,7 @@ def _aplicar_acciones_ia(sala_id: str, acciones: list[object]) -> dict[str, obje
                 ajustar_turno=False,
             )
             cambios_jugadores = _sincronizar_actor_jugador(sala_id, actor) or cambios_jugadores
+            _sincronizar_actor_persistente(sala_id, actor)
             aplicadas.append(f"{actor.nombre} recibe {cantidad} de dano.")
             continue
 
@@ -502,6 +582,7 @@ def _aplicar_acciones_ia(sala_id: str, acciones: list[object]) -> dict[str, obje
                 ajustar_turno=False,
             )
             cambios_jugadores = _sincronizar_actor_jugador(sala_id, actor) or cambios_jugadores
+            _sincronizar_actor_persistente(sala_id, actor)
             aplicadas.append(f"{actor.nombre} recupera {cantidad} PG.")
             continue
 
@@ -518,6 +599,7 @@ def _aplicar_acciones_ia(sala_id: str, acciones: list[object]) -> dict[str, obje
                     ajustar_turno=False,
                 )
                 cambios_jugadores = _sincronizar_actor_jugador(sala_id, actor) or cambios_jugadores
+                _sincronizar_actor_persistente(sala_id, actor)
                 aplicadas.append(f"{actor.nombre} queda en estado {estado}.")
             except ValueError as exc:
                 ignoradas.append(str(exc))
@@ -535,6 +617,7 @@ def _aplicar_acciones_ia(sala_id: str, acciones: list[object]) -> dict[str, obje
                 ajustar_turno=False,
             )
             cambios_jugadores = _sincronizar_actor_jugador(sala_id, actor) or cambios_jugadores
+            _sincronizar_actor_persistente(sala_id, actor)
             aplicadas.append(f"{actor.nombre} recibe {cantidad} XP.")
             continue
 
@@ -620,10 +703,15 @@ def _respuesta_ia_es_valida(respuesta: dict[str, object]) -> tuple[bool, str]:
                 return False, f"La accion {tipo} tiene cantidad invalida."
 
         if tipo == "agregar_actor":
+            plantilla_id = str(accion.get("plantilla_id") or "").strip()
+            npc_unico_id = str(accion.get("npc_unico_id") or "").strip()
+            personaje_id = str(accion.get("personaje_id") or "").strip()
             nombre = str(accion.get("nombre") or "").strip()
             iniciativa = accion.get("iniciativa")
             vida_maxima = accion.get("vida_maxima")
 
+            if plantilla_id or npc_unico_id or personaje_id:
+                continue
             if not nombre:
                 return False, "agregar_actor no tiene nombre."
             if not isinstance(iniciativa, int):
@@ -755,6 +843,18 @@ async def api_host_estado_combate(request: Request, sala_id: str):
     }
 
 
+@app.get("/api/host/sala/{sala_id}/actores-persistentes", response_class=JSONResponse, summary="Listar actores persistentes")
+async def api_host_listar_actores_persistentes(request: Request, sala_id: str):
+    _asegurar_host_request(request, sala_id)
+    return {
+        "ok": True,
+        "actores_persistentes": [
+            personaje.a_dict()
+            for personaje in servicio_personajes_npc.listar_actores_persistentes(sala_id)
+        ],
+    }
+
+
 @app.get("/api/host/sala/{sala_id}/ia/estado", response_class=JSONResponse, summary="Estado de LM Studio")
 async def api_host_estado_ia(request: Request, sala_id: str):
     _asegurar_host_request(request, sala_id)
@@ -818,24 +918,53 @@ async def api_host_detener_combate(request: Request, sala_id: str):
 async def api_host_agregar_npc(request: Request, sala_id: str):
     _asegurar_host_request(request, sala_id)
     payload = await request.json()
+    nombre = str(payload.get("nombre") or "").strip() or None
+    plantilla_id = str(payload.get("plantilla_id") or "").strip() or None
+    npc_unico_id = str(payload.get("npc_unico_id") or "").strip() or None
+    personaje_id = str(payload.get("personaje_id") or "").strip() or None
+    plantilla = payload.get("plantilla") if isinstance(payload.get("plantilla"), dict) else None
+    actor_base = None
+
+    if personaje_id:
+        actor_base = servicio_personajes_npc.cargar_actor_persistente(sala_id, personaje_id)
+        if not actor_base:
+            raise HTTPException(status_code=404, detail="No encontramos el actor persistente solicitado.")
+    elif npc_unico_id:
+        actor_base = servicio_personajes_npc.obtener_npc_unico(npc_unico_id)
+        if not actor_base:
+            raise HTTPException(status_code=404, detail="No encontramos el NPC unico solicitado.")
 
     try:
         combate = gestor_combate.agregar_npc(
             sala_id,
-            nombre=str(payload.get("nombre") or ""),
-            iniciativa=int(payload.get("iniciativa") or 0),
-            vida_maxima=int(payload.get("vida_maxima") or 1),
+            nombre=nombre,
+            iniciativa=int(payload["iniciativa"]) if payload.get("iniciativa") not in (None, "") else None,
+            vida_maxima=int(payload["vida_maxima"]) if payload.get("vida_maxima") not in (None, "") else None,
             vida_actual=int(payload["vida_actual"]) if payload.get("vida_actual") not in (None, "") else None,
-            control=str(payload.get("control") or "ia"),
+            control=str(payload.get("control") or getattr(actor_base, "control", "ia")),
+            plantilla_id=plantilla_id,
+            plantilla=plantilla,
+            actor_base=actor_base,
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    nombre_evento = nombre or getattr(actor_base, "nombre", "")
+    if not nombre_evento and plantilla_id:
+        plantilla_ref = servicio_personajes_npc.obtener_plantilla_npc(plantilla_id)
+        nombre_evento = plantilla_ref.nombre if plantilla_ref else plantilla_id
+    if not nombre_evento and npc_unico_id:
+        nombre_evento = npc_unico_id
+    if not nombre_evento and personaje_id:
+        nombre_evento = personaje_id
+    if not nombre_evento:
+        nombre_evento = "Un NPC"
 
     await gestor_conexiones.enviar_json_a_sala(
         sala_id,
         {
             "tipo": "sistema",
-            "mensaje": f"{str(payload.get('nombre') or 'Un NPC')} entra en la escena.",
+            "mensaje": f"{nombre_evento} entra en la escena.",
         },
     )
     await publicar_combate(sala_id)
@@ -901,8 +1030,58 @@ async def api_host_editar_actor(request: Request, sala_id: str, actor_id: str):
         )
         await publicar_presencia(sala_id)
 
+    _sincronizar_actor_persistente(sala_id, actor)
     await publicar_combate(sala_id)
     return {"ok": True, "combate": combate}
+
+
+@app.post("/api/host/sala/{sala_id}/combate/actor/{actor_id}/persistir", response_class=JSONResponse, summary="Persistir actor")
+async def api_host_persistir_actor(request: Request, sala_id: str, actor_id: str):
+    _asegurar_host_request(request, sala_id)
+    payload = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
+
+    actor = gestor_combate.buscar_actor(sala_id, actor_id=actor_id, referencia=actor_id)
+    if not actor:
+        raise HTTPException(status_code=404, detail="No encontramos el actor solicitado.")
+    if actor.tipo == "jugador":
+        raise HTTPException(status_code=400, detail="Los jugadores ya tienen su propia persistencia.")
+
+    reclutado = bool(payload.get("reclutado", actor.reclutado))
+    nombre = str(payload.get("nombre") or actor.nombre).strip()
+
+    try:
+        personaje = servicio_personajes_npc.guardar_actor_persistente(
+            sala_id,
+            _payload_persistente_desde_actor(
+                sala_id,
+                actor,
+                reclutado=reclutado,
+                nombre=nombre,
+            ),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    actor.nombre = personaje.nombre
+    _aplicar_personaje_persistente_a_actor(actor, personaje)
+
+    await gestor_conexiones.enviar_json_a_sala(
+        sala_id,
+        {
+            "tipo": "sistema",
+            "mensaje": (
+                f"{personaje.nombre} queda guardado como personaje persistente."
+                if not personaje.reclutado
+                else f"{personaje.nombre} queda guardado como personaje persistente reclutado."
+            ),
+        },
+    )
+    await publicar_combate(sala_id)
+    return {
+        "ok": True,
+        "personaje": personaje.a_dict(),
+        "combate": gestor_combate.estado_publico(sala_id),
+    }
 
 
 @app.post("/api/host/sala/{sala_id}/combate/actor/{actor_id}/caida", response_class=JSONResponse, summary="Marcar caida")
@@ -923,6 +1102,7 @@ async def api_host_marcar_caida(request: Request, sala_id: str, actor_id: str):
         )
         await publicar_presencia(sala_id)
 
+    _sincronizar_actor_persistente(sala_id, actor)
     await gestor_conexiones.enviar_json_a_sala(
         sala_id,
         {
@@ -952,6 +1132,7 @@ async def api_host_resolver_salvacion(request: Request, sala_id: str, actor_id: 
         )
         await publicar_presencia(sala_id)
 
+    _sincronizar_actor_persistente(sala_id, actor)
     mensaje = (
         f"{actor.nombre} supera la tirada de salvacion ({tirada}) y queda incapacitado."
         if exito
@@ -991,6 +1172,7 @@ async def api_host_revivir_actor(request: Request, sala_id: str, actor_id: str):
         )
         await publicar_presencia(sala_id)
 
+    _sincronizar_actor_persistente(sala_id, actor)
     await gestor_conexiones.enviar_json_a_sala(
         sala_id,
         {

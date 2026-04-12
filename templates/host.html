@@ -127,7 +127,7 @@
 
                 <section class="panel">
                     <h2>Actores en Escena</h2>
-                    <p class="sub">Ordenados por iniciativa. Aqui puedes editar HP, estado e iniciativa, resolver caidas o quitar NPCs.</p>
+                    <p class="sub">Ordenados por iniciativa. Aqui puedes editar HP, estado e iniciativa, resolver caidas, persistir NPCs importantes y quitar actores.</p>
                     <div id="lista-actores" class="list"></div>
                 </section>
             </main>
@@ -135,8 +135,11 @@
             <aside class="stack">
                 <section class="panel">
                     <h2>Agregar NPC</h2>
+                    <p class="sub">Si indicas un <code>plantilla_id</code> se cargara la ficha completa. Si indicas un <code>personaje_id</code> se reinyectara un actor persistente de esta sala.</p>
                     <form id="form-npc">
                         <div class="fields">
+                            <div class="field full"><label for="npc-plantilla-id">Plantilla_id opcional</label><input id="npc-plantilla-id" maxlength="40" placeholder="Ej: lobo_generico" /></div>
+                            <div class="field full"><label for="npc-personaje-id">Personaje_id opcional</label><input id="npc-personaje-id" maxlength="60" placeholder="Ej: npc_1234abcd" /></div>
                             <div class="field full"><label for="npc-nombre">Nombre del actor</label><input id="npc-nombre" maxlength="40" placeholder="Ej: Lobo gris 2" /></div>
                             <div class="field"><label for="npc-iniciativa">Iniciativa</label><input id="npc-iniciativa" type="number" min="-10" max="40" value="10" /></div>
                             <div class="field"><label for="npc-control">Control</label><select id="npc-control"><option value="ia">IA</option><option value="jugador">Jugador</option></select></div>
@@ -150,6 +153,12 @@
                 <section class="panel">
                     <h2>Escenario</h2>
                     <div class="notice"><strong>{{ escenario_nombre }}</strong><br>{{ escenario_descripcion }}</div>
+                </section>
+
+                <section class="panel">
+                    <h2>Actores Persistentes</h2>
+                    <p class="sub">Quedan guardados por sala y puedes volver a meterlos con un clic cuando haya una escena activa.</p>
+                    <div id="lista-persistentes" class="list"></div>
                 </section>
 
                 <section class="panel">
@@ -173,6 +182,7 @@
         const elTurno = document.getElementById("bloque-turno");
         const elJugadores = document.getElementById("lista-jugadores");
         const elActores = document.getElementById("lista-actores");
+        const elPersistentes = document.getElementById("lista-persistentes");
         const elIaStatus = document.getElementById("ia-status");
 
         const esc = (texto) => String(texto ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
@@ -230,12 +240,18 @@
             const canSave = actor.estado === "caido";
             const canRevive = actor.estado === "incapacitado" || actor.estado === "muerto" || actor.estado === "caido";
             const canRemove = actor.tipo === "npc";
-            return `<div class="row"><button class="btn purple" type="button" onclick="saveActor('${actor.id}')">Guardar</button><button class="btn" type="button" onclick="markFallen('${actor.id}')">Marcar caida</button><button class="btn" type="button" onclick="resolveSave('${actor.id}')" ${canSave ? "" : "disabled"}>Tirada</button><button class="btn ok" type="button" onclick="reviveActor('${actor.id}')" ${canRevive ? "" : "disabled"}>Revivir</button>${canRemove ? `<button class="btn bad" type="button" onclick="removeActor('${actor.id}')">Quitar</button>` : ""}</div>`;
+            return `<div class="row"><button class="btn purple" type="button" onclick="saveActor('${actor.id}')">Guardar</button>${canRemove ? `<button class="btn gold" type="button" onclick="persistActor('${actor.id}')">Persistir</button>` : ""}<button class="btn" type="button" onclick="markFallen('${actor.id}')">Marcar caida</button><button class="btn" type="button" onclick="resolveSave('${actor.id}')" ${canSave ? "" : "disabled"}>Tirada</button><button class="btn ok" type="button" onclick="reviveActor('${actor.id}')" ${canRevive ? "" : "disabled"}>Revivir</button>${canRemove ? `<button class="btn bad" type="button" onclick="removeActor('${actor.id}')">Quitar</button>` : ""}</div>`;
         }
 
         function renderActors(combate) {
             if (!combate?.actores?.length) { elActores.innerHTML = `<div class="empty">Todavia no hay actores cargados en la escena. Inicia el encuentro para traer a los jugadores conectados y luego agrega NPCs.</div>`; return; }
             elActores.innerHTML = combate.actores.map((actor) => `<article class="card"><div class="row" style="justify-content:space-between;align-items:start;"><div><div>${esc(actor.nombre)}</div><div class="muted">${esc(actor.tipo)} · ${esc(actor.control)}${actor.clase ? ` · ${esc(actor.clase)}` : ""}</div></div><div class="chips">${stateChip(actor.estado)}${actor.es_actual ? '<span class="chip current">Actuando ahora</span>' : ""}</div></div><div class="chips" style="margin-top:8px;"><span class="chip">Iniciativa ${esc(actor.iniciativa)}</span><span class="chip">HP ${esc(actor.vida_actual ?? "--")} / ${esc(actor.vida_maxima ?? "--")}</span></div><div class="fields" style="margin-top:12px;"><div class="field"><label for="init-${esc(actor.id)}">Iniciativa</label><input id="init-${esc(actor.id)}" type="number" min="-10" max="40" value="${esc(actor.iniciativa)}" /></div><div class="field"><label for="hp-${esc(actor.id)}">Vida actual</label><input id="hp-${esc(actor.id)}" type="number" min="0" max="999" value="${esc(actor.vida_actual ?? 0)}" /></div><div class="field"><label for="hpmax-${esc(actor.id)}">Vida maxima</label><input id="hpmax-${esc(actor.id)}" type="number" min="1" max="999" value="${esc(actor.vida_maxima ?? 1)}" /></div><div class="field"><label for="estado-${esc(actor.id)}">Estado</label><select id="estado-${esc(actor.id)}"><option value="listo" ${actor.estado === "listo" ? "selected" : ""}>Listo</option><option value="caido" ${actor.estado === "caido" ? "selected" : ""}>Caido</option><option value="incapacitado" ${actor.estado === "incapacitado" ? "selected" : ""}>Incapacitado</option><option value="muerto" ${actor.estado === "muerto" ? "selected" : ""}>Muerto</option></select></div></div><div style="margin-top:12px;">${actorActions(actor)}</div></article>`).join("");
+        }
+
+        function renderPersistents(personajes) {
+            if (!elPersistentes) return;
+            if (!personajes?.length) { elPersistentes.innerHTML = `<div class="empty">Todavia no hay actores persistentes guardados en esta sala.</div>`; return; }
+            elPersistentes.innerHTML = personajes.map((personaje) => `<article class="card"><div class="row" style="justify-content:space-between;align-items:start;"><div><div>${esc(personaje.nombre)}</div><div class="muted">${esc(personaje.id)}${personaje.plantilla_id ? ` Â· plantilla ${esc(personaje.plantilla_id)}` : ""}</div></div><div class="chips">${personaje.persistente ? '<span class="chip ok">Persistente</span>' : ""}${personaje.reclutado ? '<span class="chip current">Reclutado</span>' : ""}</div></div><div class="chips" style="margin-top:8px;"><span class="chip">HP ${esc(personaje.vida_actual ?? "--")} / ${esc(personaje.vida_maxima ?? "--")}</span></div><div class="row" style="margin-top:10px;"><button class="btn gold" type="button" onclick="reusePersistent(${JSON.stringify(personaje.id)})">Reinyectar</button></div></article>`).join("");
         }
 
         function updateButtons(combate, jugadores) {
@@ -244,10 +260,21 @@
             document.getElementById("btn-detener").disabled = !combate?.activa;
         }
 
+        function renderActors(combate) {
+            if (!combate?.actores?.length) { elActores.innerHTML = `<div class="empty">Todavia no hay actores cargados en la escena. Inicia el encuentro para traer a los jugadores conectados y luego agrega NPCs.</div>`; return; }
+            elActores.innerHTML = combate.actores.map((actor) => `<article class="card"><div class="row" style="justify-content:space-between;align-items:start;"><div><div>${esc(actor.nombre)}</div><div class="muted">${esc(actor.tipo)} | ${esc(actor.control)}${actor.clase ? ` | ${esc(actor.clase)}` : ""}${actor.plantilla_id ? ` | plantilla ${esc(actor.plantilla_id)}` : ""}</div></div><div class="chips">${stateChip(actor.estado)}${actor.persistente ? '<span class="chip ok">Persistente</span>' : ""}${actor.reclutado ? '<span class="chip current">Reclutado</span>' : ""}${actor.es_actual ? '<span class="chip current">Actuando ahora</span>' : ""}</div></div><div class="chips" style="margin-top:8px;"><span class="chip">Iniciativa ${esc(actor.iniciativa)}</span><span class="chip">HP ${esc(actor.vida_actual ?? "--")} / ${esc(actor.vida_maxima ?? "--")}</span></div><div class="fields" style="margin-top:12px;"><div class="field"><label for="init-${esc(actor.id)}">Iniciativa</label><input id="init-${esc(actor.id)}" type="number" min="-10" max="40" value="${esc(actor.iniciativa)}" /></div><div class="field"><label for="hp-${esc(actor.id)}">Vida actual</label><input id="hp-${esc(actor.id)}" type="number" min="0" max="999" value="${esc(actor.vida_actual ?? 0)}" /></div><div class="field"><label for="hpmax-${esc(actor.id)}">Vida maxima</label><input id="hpmax-${esc(actor.id)}" type="number" min="1" max="999" value="${esc(actor.vida_maxima ?? 1)}" /></div><div class="field"><label for="estado-${esc(actor.id)}">Estado</label><select id="estado-${esc(actor.id)}"><option value="listo" ${actor.estado === "listo" ? "selected" : ""}>Listo</option><option value="caido" ${actor.estado === "caido" ? "selected" : ""}>Caido</option><option value="incapacitado" ${actor.estado === "incapacitado" ? "selected" : ""}>Incapacitado</option><option value="muerto" ${actor.estado === "muerto" ? "selected" : ""}>Muerto</option></select></div></div><div style="margin-top:12px;">${actorActions(actor)}</div></article>`).join("");
+        }
+
+        function renderPersistents(personajes) {
+            if (!elPersistentes) return;
+            if (!personajes?.length) { elPersistentes.innerHTML = `<div class="empty">Todavia no hay actores persistentes guardados en esta sala.</div>`; return; }
+            elPersistentes.innerHTML = personajes.map((personaje) => `<article class="card"><div class="row" style="justify-content:space-between;align-items:start;"><div><div>${esc(personaje.nombre)}</div><div class="muted">${esc(personaje.id)}${personaje.plantilla_id ? ` | plantilla ${esc(personaje.plantilla_id)}` : ""}</div></div><div class="chips">${personaje.persistente ? '<span class="chip ok">Persistente</span>' : ""}${personaje.reclutado ? '<span class="chip current">Reclutado</span>' : ""}</div></div><div class="chips" style="margin-top:8px;"><span class="chip">HP ${esc(personaje.vida_actual ?? "--")} / ${esc(personaje.vida_maxima ?? "--")}</span></div><div class="row" style="margin-top:10px;"><button class="btn gold" type="button" onclick="reusePersistent(${JSON.stringify(personaje.id)})">Reinyectar</button></div></article>`).join("");
+        }
+
         async function refreshHost(success = "") {
             try {
                 const data = await fetchJson(estadoUrl, { headers: {} });
-                renderTurn(data.combate); renderPlayers(data.jugadores_conectados || [], data.combate || {}); renderActors(data.combate || {}); updateButtons(data.combate || {}, data.jugadores_conectados || []); if (success) showNote(success);
+                renderTurn(data.combate); renderPlayers(data.jugadores_conectados || [], data.combate || {}); renderActors(data.combate || {}); renderPersistents(data.actores_persistentes || []); updateButtons(data.combate || {}, data.jugadores_conectados || []); if (success) showNote(success);
             } catch (error) { showNote(error.message || "No se pudo actualizar el panel del host.", true); }
         }
 
@@ -303,11 +330,18 @@
             const payload = { iniciativa: document.getElementById(`init-${actorId}`)?.value, vida_actual: document.getElementById(`hp-${actorId}`)?.value, vida_maxima: document.getElementById(`hpmax-${actorId}`)?.value, estado: document.getElementById(`estado-${actorId}`)?.value };
             try { await fetchJson(`${estadoUrl}/actor/${encodeURIComponent(actorId)}/editar`, { method: "POST", body: JSON.stringify(payload) }); await refreshHost("Actor actualizado."); } catch (error) { showNote(error.message || "No se pudieron guardar los cambios del actor.", true); }
         }
+        async function persistActor(actorId) {
+            const reclutado = confirm("Aceptar = guardar tambien como reclutado.\nCancelar = guardar solo como persistente.");
+            try { await fetchJson(`${estadoUrl}/actor/${encodeURIComponent(actorId)}/persistir`, { method: "POST", body: JSON.stringify({ reclutado }) }); await refreshHost(reclutado ? "Actor guardado como persistente reclutado." : "Actor guardado como persistente."); } catch (error) { showNote(error.message || "No se pudo persistir el actor.", true); }
+        }
         async function markFallen(actorId) { try { await fetchJson(`${estadoUrl}/actor/${encodeURIComponent(actorId)}/caida`, { method: "POST" }); await refreshHost("Actor marcado como caido."); } catch (error) { showNote(error.message || "No se pudo marcar la caida.", true); } }
         async function resolveSave(actorId) { try { const data = await fetchJson(`${estadoUrl}/actor/${encodeURIComponent(actorId)}/salvacion`, { method: "POST" }); await refreshHost(`Tirada resuelta: ${data.tirada}.`); } catch (error) { showNote(error.message || "No se pudo resolver la salvacion.", true); } }
         async function reviveActor(actorId) {
             const vidaActual = prompt("Vida actual al revivir:", "1"); if (vidaActual === null) return;
             try { await fetchJson(`${estadoUrl}/actor/${encodeURIComponent(actorId)}/revivir`, { method: "POST", body: JSON.stringify({ vida_actual: vidaActual }) }); await refreshHost("Actor revivido."); } catch (error) { showNote(error.message || "No se pudo revivir al actor.", true); }
+        }
+        async function reusePersistent(personajeId) {
+            try { await fetchJson(`${estadoUrl}/agregar-npc`, { method: "POST", body: JSON.stringify({ personaje_id: personajeId }) }); await refreshHost("Actor persistente reinyectado."); } catch (error) { showNote(error.message || "No se pudo reinyectar el actor persistente.", true); }
         }
         async function removeActor(actorId) {
             if (!confirm("Quitar este actor de la escena de turnos?")) return;
@@ -316,10 +350,10 @@
 
         document.getElementById("form-npc")?.addEventListener("submit", async (event) => {
             event.preventDefault();
-            const payload = { nombre: document.getElementById("npc-nombre").value.trim(), iniciativa: document.getElementById("npc-iniciativa").value, vida_maxima: document.getElementById("npc-vida-max").value, vida_actual: document.getElementById("npc-vida-actual").value, control: document.getElementById("npc-control").value };
+            const payload = { plantilla_id: document.getElementById("npc-plantilla-id").value.trim(), personaje_id: document.getElementById("npc-personaje-id").value.trim(), nombre: document.getElementById("npc-nombre").value.trim(), iniciativa: document.getElementById("npc-iniciativa").value, vida_maxima: document.getElementById("npc-vida-max").value, vida_actual: document.getElementById("npc-vida-actual").value, control: document.getElementById("npc-control").value };
             try {
                 await fetchJson(`${estadoUrl}/agregar-npc`, { method: "POST", body: JSON.stringify(payload) });
-                event.target.reset(); document.getElementById("npc-iniciativa").value = "10"; document.getElementById("npc-vida-max").value = "11"; document.getElementById("npc-vida-actual").value = "11"; document.getElementById("npc-control").value = "ia";
+                event.target.reset(); document.getElementById("npc-plantilla-id").value = ""; document.getElementById("npc-personaje-id").value = ""; document.getElementById("npc-iniciativa").value = "10"; document.getElementById("npc-vida-max").value = "11"; document.getElementById("npc-vida-actual").value = "11"; document.getElementById("npc-control").value = "ia";
                 await refreshHost("NPC agregado a la escena.");
             } catch (error) { showNote(error.message || "No se pudo agregar el NPC.", true); }
         });

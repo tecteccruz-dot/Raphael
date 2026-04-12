@@ -6,7 +6,9 @@ from datetime import datetime
 from pathlib import Path
 
 
-_BASE = Path(__file__).resolve().parents[2] / "datos" / "salas"
+_BASE_PROYECTO = Path(__file__).resolve().parents[2]
+_BASE = _BASE_PROYECTO / "datos" / "salas"
+_BASE_PARTIDAS = _BASE_PROYECTO / "partidas"
 _SALAS = _BASE / "salas.json"
 _ESCENARIOS = _BASE / "escenarios.json"
 _ALFABETO = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
@@ -72,6 +74,28 @@ def _buscar_sala_privada(sala_id: str) -> dict[str, object] | None:
             return dict(sala)
 
     return None
+
+
+def normalizar_sala_id(sala_id: str) -> str:
+    return (sala_id or "").strip().upper()
+
+
+def ruta_partida_sala(sala_id: str, *, crear: bool = False) -> Path:
+    sala_limpia = normalizar_sala_id(sala_id)
+    if not sala_limpia:
+        raise ValueError("La sala indicada no es valida.")
+
+    ruta = _BASE_PARTIDAS / sala_limpia
+    if crear:
+        ruta.mkdir(parents=True, exist_ok=True)
+    return ruta
+
+
+def ruta_archivo_partida(sala_id: str, nombre_archivo: str, *, crear: bool = False) -> Path:
+    nombre_limpio = (nombre_archivo or "").strip()
+    if not nombre_limpio:
+        raise ValueError("El archivo de partida necesita un nombre.")
+    return ruta_partida_sala(sala_id, crear=crear) / nombre_limpio
 
 
 def nombre_cookie_host(sala_id: str) -> str:
@@ -178,6 +202,7 @@ def crear_sala(nombre: str, escenario_id: str) -> tuple[dict[str, object], str]:
 
     salas.insert(0, sala)
     _guardar_salas(salas)
+    ruta_partida_sala(sala_id, crear=True)
     return _sanitizar_sala_publica(sala), host_token
 
 

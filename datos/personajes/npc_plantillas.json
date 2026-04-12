@@ -1,0 +1,156 @@
+{
+  "plantillas": [
+    {
+      "id": "lobo_generico",
+      "plantilla_id": null,
+      "nombre": "Lobo generico",
+      "tipo": "npc",
+      "control": "ia",
+      "raza": "Bestia",
+      "clase": "Depredador",
+      "trasfondo": "",
+      "nivel": 1,
+      "vida_actual": 11,
+      "vida_maxima": 11,
+      "mana_actual": 0,
+      "mana_maximo": 0,
+      "xp_actual": 0,
+      "xp_maximo": 25,
+      "estado": "listo",
+      "estadisticas": {
+        "fue": 12,
+        "des": 15,
+        "con": 12,
+        "int": 3,
+        "sab": 12,
+        "car": 6
+      },
+      "habilidades": [
+        "Mordida"
+      ],
+      "pasivas": [
+        "Tacticas de manada",
+        "Olfato fino"
+      ],
+      "tiradas": [
+        "Percepcion +3",
+        "Sigilo +4"
+      ],
+      "inventario": [],
+      "resumen": "Bestia veloz de caceria que presiona a un objetivo aislado.",
+      "reclutado": false,
+      "persistente": false,
+      "jugador_nombre": null,
+      "sala_id": null,
+      "avatar_url": null
+    },
+    {
+      "id": "duende_barbaro",
+      "plantilla_id": null,
+      "nombre": "Duende barbaro",
+      "tipo": "npc",
+      "control": "ia",
+      "raza": "Duende",
+      "clase": "Barbaro",
+      "trasfondo": "",
+      "nivel": 2,
+      "vida_actual": 16,
+      "vida_maxima": 16,
+      "mana_actual": 0,
+      "mana_maximo": 0,
+      "xp_actual": 0,
+      "xp_maximo": 50,
+      "estado": "listo",
+      "estadisticas": {
+        "fue": 14,
+        "des": 12,
+        "con": 13,
+        "int": 8,
+        "sab": 9,
+        "car": 8
+      },
+      "habilidades": [
+        "Hachazo brutal",
+        "Grito de guerra"
+      ],
+      "pasivas": [
+        "Impulso temerario"
+      ],
+      "tiradas": [
+        "Ataque +4",
+        "Intimidacion +1"
+      ],
+      "inventario": [
+        {
+          "icono": "[A]",
+          "nombre": "Hacha corta",
+          "detalle": "Arma tosca pero efectiva",
+          "cantidad": 1
+        }
+      ],
+      "resumen": "Combatiente agresivo que entra rapido y aguanta castigo moderado.",
+      "reclutado": false,
+      "persistente": false,
+      "jugador_nombre": null,
+      "sala_id": null,
+      "avatar_url": null
+    },
+    {
+      "id": "mercader_basico",
+      "plantilla_id": null,
+      "nombre": "Mercader basico",
+      "tipo": "npc",
+      "control": "ia",
+      "raza": "Humano",
+      "clase": "Mercader",
+      "trasfondo": "Viajero",
+      "nivel": 1,
+      "vida_actual": 8,
+      "vida_maxima": 8,
+      "mana_actual": 0,
+      "mana_maximo": 0,
+      "xp_actual": 0,
+      "xp_maximo": 20,
+      "estado": "listo",
+      "estadisticas": {
+        "fue": 8,
+        "des": 10,
+        "con": 10,
+        "int": 12,
+        "sab": 11,
+        "car": 13
+      },
+      "habilidades": [
+        "Regateo",
+        "Leer a un cliente"
+      ],
+      "pasivas": [
+        "Ojo para las rutas"
+      ],
+      "tiradas": [
+        "Persuasion +3",
+        "Percepcion +2"
+      ],
+      "inventario": [
+        {
+          "icono": "[M]",
+          "nombre": "Mercancias mixtas",
+          "detalle": "Utensilios, telas y raciones",
+          "cantidad": 1
+        },
+        {
+          "icono": "[P]",
+          "nombre": "Bolsa de monedas",
+          "detalle": "Cambio para negocios menores",
+          "cantidad": 1
+        }
+      ],
+      "resumen": "NPC civil util para trueques, rumores y encargos sencillos.",
+      "reclutado": false,
+      "persistente": false,
+      "jugador_nombre": null,
+      "sala_id": null,
+      "avatar_url": null
+    }
+  ]
+}
