@@ -1,0 +1,514 @@
+.dado-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(6, 6, 10, 0.82);
+    backdrop-filter: blur(3px);
+}
+
+.dado-panel {
+    width: min(920px, 100%);
+    border-radius: 24px;
+    border: 1px solid rgba(201, 168, 76, 0.28);
+    background:
+        radial-gradient(circle at top, rgba(124, 77, 189, 0.24), transparent 34%),
+        linear-gradient(180deg, rgba(28, 23, 34, 0.98), rgba(12, 10, 16, 0.98));
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.62),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    overflow: hidden;
+}
+
+.dado-head,
+.dado-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+}
+
+.dado-head {
+    border-bottom: 1px solid rgba(201, 168, 76, 0.16);
+}
+
+.dado-footer {
+    border-top: 1px solid rgba(201, 168, 76, 0.16);
+}
+
+.dado-footer-acciones {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.dado-titulo {
+    color: #e8d49a;
+    font-family: "Times New Roman", serif;
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.dado-subtitulo,
+.dado-estado {
+    color: #ab9d8a;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.dado-grid {
+    display: grid;
+    grid-template-columns: minmax(250px, 310px) minmax(0, 1fr);
+    gap: 20px;
+    padding: 20px;
+}
+
+.dado-info {
+    display: grid;
+    gap: 10px;
+}
+
+.dado-fila {
+    display: grid;
+    grid-template-columns: 86px minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(201, 168, 76, 0.14);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.dado-fila span {
+    color: #ab9d8a;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.dado-fila strong {
+    color: #f0e6d8;
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 600;
+}
+
+.dado-fila-motivo {
+    min-height: 84px;
+}
+
+.dado-escena {
+    display: grid;
+    gap: 16px;
+    align-content: center;
+    justify-items: center;
+}
+
+/* ── CANVAS / WRAP ── */
+
+.dado-wrap {
+    position: relative;
+    width: min(360px, 100%);
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+}
+
+.dado-wrap::before {
+    content: "";
+    position: absolute;
+    inset: 18%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(110, 35, 190, 0.18) 0%, transparent 70%);
+    pointer-events: none;
+    animation: dado-pulso 3.2s ease-in-out infinite;
+}
+
+.dado-wrap canvas {
+    position: relative;
+    z-index: 1;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ── TEXTO FLOTANTE SOBRE EL DADO ── */
+
+.dado-flotante {
+    position: absolute;
+    top: 44%;
+    left: 50%;
+    z-index: 3;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    pointer-events: none;
+    font-family: "Times New Roman", serif;
+    font-size: clamp(1.65rem, 7vw, 2.3rem);
+    font-weight: 700;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.dado-flotante.is-visible.is-critico {
+    animation: dado-ft-crit 3.0s cubic-bezier(.22, 1, .36, 1) forwards;
+    color: #ffe040;
+    text-shadow:
+        0 0 6px #fffce0,
+        0 0 18px rgba(255, 220, 30, 1),
+        0 0 36px rgba(255, 165, 0, .95),
+        0 0 60px rgba(255, 100, 0, .65);
+}
+
+.dado-flotante.is-visible.is-desastre {
+    animation: dado-ft-disaster 3.0s cubic-bezier(.22, 1, .36, 1) forwards;
+    color: #ff2828;
+    text-shadow:
+        0 0 6px rgba(255, 200, 200, .5),
+        0 0 18px rgba(230, 30, 30, 1),
+        0 0 36px rgba(180, 0, 0, .9),
+        0 0 60px rgba(100, 0, 0, .55);
+}
+
+@keyframes dado-ft-crit {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.08) rotate(-6deg); }
+    12%  { opacity: 1; transform: translate(-50%, -50%) scale(1.45) rotate(2deg); }
+    22%  { transform: translate(-50%, -50%) scale(0.92) rotate(0deg); }
+    32%  { transform: translate(-50%, -50%) scale(1.06); }
+    45%  { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
+    72%  { opacity: 1; transform: translate(-50%, -62%) scale(1.0); }
+    100% { opacity: 0; transform: translate(-50%, -82%) scale(0.88); }
+}
+
+@keyframes dado-ft-disaster {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.08); }
+    12%  { opacity: 1; transform: translate(-50%, -50%) scale(1.35); }
+    18%  { transform: translate(-53%, -50%) scale(1.0); }
+    22%  { transform: translate(-47%, -50%) scale(1.0); }
+    26%  { transform: translate(-52%, -50%) scale(1.0); }
+    30%  { transform: translate(-50%, -50%) scale(1.0); }
+    45%  { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
+    72%  { opacity: 1; transform: translate(-50%, -62%) scale(1.0); }
+    100% { opacity: 0; transform: translate(-50%, -82%) scale(0.88); }
+}
+
+/* ── FLASH DE PANTALLA ── */
+
+.dado-flash {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.dado-flash.flash-gold {
+    animation: dado-flash-anim 0.5s ease-out forwards;
+    background: radial-gradient(ellipse at center, rgba(255, 200, 30, .22) 0%, transparent 70%);
+}
+
+.dado-flash.flash-crimson {
+    animation: dado-flash-anim 0.5s ease-out forwards;
+    background: radial-gradient(ellipse at center, rgba(200, 20, 20, .22) 0%, transparent 70%);
+}
+
+@keyframes dado-flash-anim {
+    0%  { opacity: 0; }
+    15% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* ── RESULTADO ── */
+
+.dado-resultado-area {
+    position: relative;
+    min-height: 112px;
+    text-align: center;
+}
+
+.dado-resultado-linea {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 10px;
+}
+
+.dado-resultado {
+    font-family: "Times New Roman", serif;
+    font-size: clamp(2.2rem, 8vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1;
+    background: linear-gradient(175deg, #fff5a0, #e8b840 50%, #9a5e10);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 12px rgba(225, 175, 45, .4));
+}
+
+.dado-resultado.is-rolling {
+    background: linear-gradient(175deg, #bbb, #666);
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: none;
+    opacity: 0.6;
+}
+
+.dado-resultado.is-tick {
+    animation: dado-count-tick 0.14s ease-out;
+}
+
+.dado-resultado.is-exito,
+.dado-resultado.is-won {
+    background: linear-gradient(175deg, #c0ffcc, #44dd66 40%, #228844);
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 0 16px rgba(60, 220, 80, .65));
+    animation: dado-win-pop 0.7s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.dado-resultado.is-fallo,
+.dado-resultado.is-lost {
+    background: linear-gradient(175deg, #ffaaaa, #dd3333);
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 0 12px rgba(220, 50, 50, .6));
+    animation: dado-shake 0.55s ease-in-out;
+}
+
+.dado-resultado.is-critico,
+.dado-resultado.is-critical-pop {
+    background: linear-gradient(175deg, #fff 0%, #ffe060 25%, #ffaa00 60%, #ff6600 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter:
+        drop-shadow(0 0 20px rgba(255, 200, 30, 1))
+        drop-shadow(0 0 8px rgba(255, 120, 0, .8));
+    animation: dado-crit-pop 0.8s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.dado-resultado.is-desastre,
+.dado-resultado.is-disaster-pop {
+    background: linear-gradient(175deg, #ffa0a0, #ff2020 40%, #880000);
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 0 18px rgba(220, 30, 30, .9));
+    animation: dado-disaster-pop 0.7s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+@keyframes dado-win-pop      { 0% { transform: scale(.85); } 60% { transform: scale(1.14); } 100% { transform: scale(1); } }
+@keyframes dado-shake         { 0%,100% { transform: translateX(0); } 12% { transform: translateX(-10px); } 25% { transform: translateX(10px); } 37% { transform: translateX(-7px); } 50% { transform: translateX(7px); } 62% { transform: translateX(-4px); } 75% { transform: translateX(4px); } 87% { transform: translateX(-2px); } }
+@keyframes dado-count-tick    { 0% { transform: scale(1); } 40% { transform: scale(1.1); } 100% { transform: scale(1); } }
+@keyframes dado-crit-pop      { 0% { transform: scale(.6); } 50% { transform: scale(1.22); } 75% { transform: scale(.97); } 100% { transform: scale(1); } }
+@keyframes dado-disaster-pop  { 0% { transform: scale(.6); } 50% { transform: scale(1.18); } 75% { transform: scale(.98); } 100% { transform: scale(1); } }
+
+/* ── LÍNEA DE CÁLCULO ── */
+
+.dado-calc,
+.dado-veredicto {
+    min-height: 22px;
+    margin-top: 8px;
+}
+
+.dado-calc {
+    color: rgba(210, 195, 160, .55);
+    font-size: 13px;
+    letter-spacing: 1px;
+}
+
+.dado-calc .mod-pos  { color: #70c8f8; }
+.dado-calc .mod-neg  { color: #f87070; }
+.dado-calc .total    { color: #e8c870; font-weight: 700; }
+.dado-calc .dc-ref   { color: rgba(200, 180, 230, .38); }
+.dado-calc .nat20    { color: rgba(255, 210, 50, .8); letter-spacing: 2px; }
+.dado-calc .nat1     { color: rgba(255, 100, 100, .75); letter-spacing: 2px; }
+
+/* ── VEREDICTO ── */
+
+.dado-veredicto {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0;
+    transform: scale(0.8) translateY(5px);
+    transition: opacity 0.45s cubic-bezier(.34, 1.56, .64, 1), transform 0.45s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.dado-veredicto.is-show {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+
+.dado-veredicto.is-exito {
+    color: #58e870;
+    filter: drop-shadow(0 0 8px rgba(60, 230, 80, .5));
+}
+
+.dado-veredicto.is-fallo {
+    color: #ff4848;
+    filter: drop-shadow(0 0 8px rgba(220, 40, 40, .45));
+}
+
+/* ── CHISPAS ── */
+
+@keyframes dado-sparkle-fly {
+    0%   { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--tr)) scale(0.1); }
+}
+
+.dado-sparkle {
+    position: absolute;
+    pointer-events: none;
+    animation: dado-sparkle-fly 0.9s ease-out forwards;
+    font-size: 14px;
+    line-height: 1;
+    z-index: 5;
+}
+
+/* ── BOTÓN ── */
+
+.dado-boton {
+    min-width: 190px;
+    padding: 13px 16px;
+    border: 0;
+    border-radius: 13px;
+    background: linear-gradient(135deg, #c08820, #f0d060 45%, #c07020);
+    box-shadow:
+        0 6px 22px rgba(185, 140, 22, .4),
+        0 2px 0 rgba(0, 0, 0, .4),
+        inset 0 1px 0 rgba(255, 255, 255, .18);
+    color: #190808;
+    font-family: "Times New Roman", serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.16s ease, opacity 0.16s ease, box-shadow 0.16s ease;
+    position: relative;
+}
+
+.dado-boton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .14) 0%, transparent 52%);
+    pointer-events: none;
+}
+
+.dado-boton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow:
+        0 12px 30px rgba(185, 140, 22, .52),
+        0 2px 0 rgba(0, 0, 0, .4),
+        inset 0 1px 0 rgba(255, 255, 255, .18);
+}
+
+.dado-boton:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.dado-boton:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.dado-boton-secundario {
+    border: 1px solid rgba(201, 168, 76, 0.28);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 4px 18px rgba(0, 0, 0, 0.26);
+    color: #f0e6d8;
+}
+
+.dado-boton-secundario::after {
+    background: linear-gradient(180deg, rgba(255, 255, 255, .08) 0%, transparent 52%);
+}
+
+.dado-boton-secundario:hover:not(:disabled) {
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 8px 24px rgba(0, 0, 0, 0.34);
+}
+
+/* ── FALLBACK (sin Three.js) ── */
+
+.dado-wrap.is-fallback {
+    border-radius: 50%;
+    border: 1px solid rgba(201, 168, 76, 0.16);
+    background: radial-gradient(circle, rgba(124, 77, 189, 0.14), rgba(12, 10, 16, 0.12));
+}
+
+.dado-wrap.is-fallback::after {
+    content: "D20";
+    position: relative;
+    z-index: 1;
+    color: rgba(240, 211, 126, 0.7);
+    font-family: "Times New Roman", serif;
+    font-size: clamp(2rem, 9vw, 3rem);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+}
+
+/* ── ANIMACIONES BASE ── */
+
+@keyframes dado-pulso {
+    0%, 100% { opacity: 0.5; transform: scale(0.95); }
+    50%      { opacity: 1;   transform: scale(1.05); }
+}
+
+/* ── RESPONSIVE ── */
+
+@media (max-width: 860px) {
+    .dado-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dado-escena {
+        order: -1;
+    }
+
+    .dado-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dado-footer-acciones {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .dado-boton {
+        width: 100%;
+    }
+}
+
+@media (max-width: 520px) {
+    .dado-modal {
+        padding: 12px;
+    }
+
+    .dado-grid,
+    .dado-head,
+    .dado-footer {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .dado-fila {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+}

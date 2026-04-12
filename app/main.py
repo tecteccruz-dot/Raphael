@@ -13,6 +13,7 @@ from app.servicios.combate import ActorCombate, gestor_combate
 from app.servicios import personajes_npc as servicio_personajes_npc
 from app.servicios import salas as servicio_salas
 from app.servicios import sesiones_jugador
+from app.servicios import tiradas as servicio_tiradas
 from app.websocket.gestor_conexiones import gestor_conexiones
 
 
@@ -25,6 +26,9 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 _HOST_COOKIE_MAX_AGE = 60 * 60 * 24 * 180
 _LOCKS_RESOLUCION_IA: dict[str, asyncio.Lock] = {}
+_TAREAS_LIMPIEZA_TIRADA: dict[str, asyncio.Task] = {}
+_EVENTOS_CONTINUACION_TIRADA: dict[str, tuple[str, asyncio.Event]] = {}
+_ATRIBUTOS_TIRADA_VALIDOS = {"fue", "des", "con", "int", "sab", "car"}
 
 
 def _token_host_request(request: Request, sala_id: str) -> str | None:
@@ -151,6 +155,7 @@ async def eliminar_sala(request: Request, sala_id: str):
     servicio_salas.eliminar_sala(sala_id)
     sesiones_jugador.eliminar_sala(sala_id)
     _LOCKS_RESOLUCION_IA.pop(sala_id, None)
+    _cancelar_tarea_limpieza_tirada(sala_id)
 
     response = RedirectResponse(url="/", status_code=303)
     _limpiar_cookie_host(response, sala_id)
@@ -259,6 +264,253 @@ async def publicar_combate(sala_id: str) -> None:
     )
 
 
+def _cancelar_tarea_limpieza_tirada(sala_id: str) -> None:
+    tarea = _TAREAS_LIMPIEZA_TIRADA.pop(sala_id, None)
+    if tarea and not tarea.done():
+        tarea.cancel()
+    _EVENTOS_CONTINUACION_TIRADA.pop(sala_id, None)
+
+
+def _crear_evento_continuacion_tirada(sala_id: str, tirada_id: str) -> asyncio.Event:
+    evento = asyncio.Event()
+    _EVENTOS_CONTINUACION_TIRADA[sala_id] = (tirada_id, evento)
+    return evento
+
+
+def _marcar_tirada_lista_para_continuar(sala_id: str, *, tirada_id: str | None = None) -> bool:
+    registro = _EVENTOS_CONTINUACION_TIRADA.get(sala_id)
+    if not registro:
+        return False
+
+    tirada_registrada, evento = registro
+    tirada_objetivo = str(tirada_id or "").strip()
+    if tirada_objetivo and tirada_objetivo != tirada_registrada:
+        return False
+
+    evento.set()
+    return True
+
+
+def _serializar_tirada_publica(sala_id: str, tirada: object) -> dict[str, object]:
+    datos = tirada.a_dict() if hasattr(tirada, "a_dict") else dict(tirada or {})
+    actor = gestor_combate.buscar_actor(sala_id, actor_id=str(datos.get("actor_id") or ""))
+    if actor and actor.jugador_nombre:
+        datos["jugador_autorizado"] = actor.jugador_nombre
+    return datos
+
+
+def _atributo_tirada_seguro(valor: object) -> str:
+    atributo = str(valor or "").strip().lower()
+    return atributo if atributo in _ATRIBUTOS_TIRADA_VALIDOS else ""
+
+
+def _dc_tirada_segura(valor: object, *, por_defecto: int = 10) -> int:
+    try:
+        dc = int(valor)
+    except (TypeError, ValueError):
+        dc = por_defecto
+    return max(5, min(dc, 30))
+
+
+def _contexto_interpretacion_accion(
+    sala_id: str,
+    *,
+    nombre_jugador: str,
+    accion_jugador: dict[str, object],
+) -> dict[str, object]:
+    sala_actual = servicio_salas.obtener_sala(sala_id) or {}
+    return {
+        "motor": "Raphael",
+        "sala": {
+            "id": sala_id,
+            "nombre": sala_actual.get("nombre") or sala_id,
+            "escenario_nombre": sala_actual.get("escenario_nombre") or "Sin escenario",
+            "escenario_descripcion": sala_actual.get("escenario_descripcion") or "",
+            "resumen_partida": servicio_salas.obtener_resumen_partida(sala_id),
+        },
+        "combate": gestor_combate.contexto_ia(sala_id),
+        "historial_reciente": gestor_conexiones.obtener_historial_sala(sala_id, limite=8),
+        "jugador": nombre_jugador,
+        "accion_declarada": accion_jugador,
+        "instruccion": (
+            "Interpreta la accion declarada. Decide si requiere tirada y sugiere atributo, habilidad, DC y motivo. "
+            "No confirmes exito ni consecuencia final."
+        ),
+    }
+
+
+def _interpretacion_pide_tirada(interpretacion: dict[str, object] | None) -> bool:
+    if not isinstance(interpretacion, dict):
+        return False
+    if bool(interpretacion.get("requiere_aclaracion")):
+        return False
+    return bool(interpretacion.get("requiere_tirada"))
+
+
+def _crear_tirada_desde_interpretacion(
+    sala_id: str,
+    *,
+    nombre_jugador: str,
+    accion_jugador: dict[str, object],
+    interpretacion: dict[str, object],
+):
+    escena = gestor_combate.obtener_escena(sala_id)
+    if not escena or not escena.activa:
+        raise ValueError("No hay una escena activa para solicitar una tirada.")
+    if escena.tirada_pendiente:
+        raise ValueError("Ya hay una tirada pendiente en esta sala.")
+
+    actor_actual = gestor_combate.buscar_actor(sala_id, actor_id=escena.turno_actor_id or "")
+    if not actor_actual:
+        raise ValueError("No encontramos al actor actual para crear la tirada.")
+    if actor_actual.control == "jugador":
+        jugador_actor = str(actor_actual.jugador_nombre or "").strip().casefold()
+        if jugador_actor != str(nombre_jugador or "").strip().casefold():
+            raise ValueError("Solo el jugador con el turno actual puede solicitar esta tirada.")
+
+    motivo = str(interpretacion.get("motivo") or "").strip() or (
+        f"Resolver la accion declarada por {actor_actual.nombre}."
+    )
+    return servicio_tiradas.crear_tirada_pendiente(
+        sala_id,
+        actor_id=actor_actual.id,
+        atributo=_atributo_tirada_seguro(interpretacion.get("atributo")),
+        habilidad=str(interpretacion.get("habilidad") or "").strip(),
+        dc=_dc_tirada_segura(interpretacion.get("dc_sugerida"), por_defecto=10),
+        motivo=motivo,
+        accion_original=accion_jugador,
+        accion_interpretada=interpretacion,
+        auto_resolver=actor_actual.control == "ia",
+    )
+
+
+def _accion_jugador_post_tirada(
+    sala_id: str,
+    datos_tirada: dict[str, object],
+) -> dict[str, object] | None:
+    escena = gestor_combate.obtener_escena(sala_id)
+    if not escena:
+        return None
+
+    accion_pendiente = escena.accion_pendiente if isinstance(escena.accion_pendiente, dict) else {}
+    accion_original = accion_pendiente.get("accion_original")
+    accion_interpretada = accion_pendiente.get("accion_interpretada")
+
+    if not isinstance(accion_original, dict) or not accion_original:
+        return None
+
+    accion = dict(accion_original)
+    if isinstance(accion_interpretada, dict) and accion_interpretada:
+        accion["accion_interpretada"] = dict(accion_interpretada)
+    accion["tirada"] = dict(datos_tirada)
+    accion["resolucion_tirada_lista"] = True
+    return accion
+
+
+async def _publicar_tirada_solicitada(sala_id: str, tirada: object) -> None:
+    _cancelar_tarea_limpieza_tirada(sala_id)
+    await gestor_conexiones.enviar_json_a_sala(
+        sala_id,
+        {
+            "tipo": "tirada_solicitada",
+            "tirada": _serializar_tirada_publica(sala_id, tirada),
+        },
+    )
+
+
+def _mensaje_sistema_tirada(datos_tirada: dict[str, object]) -> str:
+    modificador = int(datos_tirada.get("modificador") or 0)
+    signo = f"+{modificador}" if modificador >= 0 else str(modificador)
+    detalle = "exito" if datos_tirada.get("exito") else "fallo"
+    if datos_tirada.get("critico"):
+        detalle = f"{detalle}, critico"
+    elif datos_tirada.get("desastre"):
+        detalle = f"{detalle}, desastre"
+    return (
+        f"Tirada de {datos_tirada.get('actor_nombre', 'actor')}: "
+        f"{datos_tirada.get('resultado_dado', '--')} {signo} = {datos_tirada.get('total', '--')} "
+        f"contra DC {datos_tirada.get('dc', '--')} ({detalle})."
+    )
+
+
+async def _limpiar_tirada_resuelta_despues(
+    sala_id: str,
+    datos_tirada: dict[str, object],
+    *,
+    demora_maxima: float = 8.0,
+) -> None:
+    tirada_id = str(datos_tirada.get("id") or "").strip()
+    evento_continuacion = None
+    try:
+        evento_continuacion = _crear_evento_continuacion_tirada(sala_id, tirada_id)
+        try:
+            await asyncio.wait_for(evento_continuacion.wait(), timeout=demora_maxima)
+        except asyncio.TimeoutError:
+            pass
+
+        if not servicio_tiradas.limpiar_tirada_pendiente(sala_id, tirada_id=tirada_id, limpiar_accion=False):
+            return
+        await gestor_conexiones.enviar_json_a_sala(
+            sala_id,
+            {
+                "tipo": "tirada_cancelada",
+                "tirada_id": tirada_id,
+            },
+        )
+        await publicar_combate(sala_id)
+        accion_resuelta = _accion_jugador_post_tirada(sala_id, datos_tirada)
+        if accion_resuelta:
+            await _resolver_cadena_ia(sala_id, accion_jugador=accion_resuelta)
+        else:
+            escena = gestor_combate.obtener_escena(sala_id)
+            if escena:
+                escena.accion_pendiente = None
+    except asyncio.CancelledError:
+        return
+    finally:
+        registro = _EVENTOS_CONTINUACION_TIRADA.get(sala_id)
+        if registro and registro[0] == tirada_id and registro[1] is evento_continuacion:
+            _EVENTOS_CONTINUACION_TIRADA.pop(sala_id, None)
+        tarea = _TAREAS_LIMPIEZA_TIRADA.get(sala_id)
+        if tarea is asyncio.current_task():
+            _TAREAS_LIMPIEZA_TIRADA.pop(sala_id, None)
+
+
+def _programar_limpieza_tirada(sala_id: str, datos_tirada: dict[str, object]) -> None:
+    _cancelar_tarea_limpieza_tirada(sala_id)
+    _TAREAS_LIMPIEZA_TIRADA[sala_id] = asyncio.create_task(
+        _limpiar_tirada_resuelta_despues(sala_id, dict(datos_tirada))
+    )
+
+
+async def _resolver_tirada_y_publicar(
+    sala_id: str,
+    *,
+    tirada_id: str | None = None,
+    autor: str | None = None,
+) -> dict[str, object]:
+    tirada = servicio_tiradas.resolver_tirada_pendiente(sala_id, tirada_id=tirada_id)
+    datos_tirada = _serializar_tirada_publica(sala_id, tirada)
+    await gestor_conexiones.enviar_json_a_sala(
+        sala_id,
+        {
+            "tipo": "tirada_resuelta",
+            "tirada": datos_tirada,
+            "autor": autor,
+        },
+    )
+    await gestor_conexiones.enviar_json_a_sala(
+        sala_id,
+        {
+            "tipo": "sistema",
+            "mensaje": _mensaje_sistema_tirada(datos_tirada),
+        },
+    )
+    await publicar_combate(sala_id)
+    _programar_limpieza_tirada(sala_id, datos_tirada)
+    return datos_tirada
+
+
 def _resumen_host_sala(sala_id: str) -> dict[str, object]:
     return {
         "jugadores_conectados": gestor_conexiones.obtener_resumen_jugadores_sala(sala_id),
@@ -339,6 +591,9 @@ def _contexto_turno_ia(
         escenario_descripcion = "El escenario base ya fue presentado antes. Solo vuelve a mencionarlo si cambia algo importante."
 
     incluir_ultimo_chat = bool(accion_jugador) and actor_actual.get("control") == "jugador"
+    tirada_resuelta = {}
+    if isinstance(accion_jugador, dict) and isinstance(accion_jugador.get("tirada"), dict):
+        tirada_resuelta = dict(accion_jugador.get("tirada") or {})
 
     # Instrucción específica según quién actúa
     es_turno_ia = actor_actual.get("control") == "ia"
@@ -359,6 +614,11 @@ def _contexto_turno_ia(
             f"Si la accion implica un efecto mecanico (dano, curacion, estado), aplicalo en el campo acciones. "
             f"Cierra el turno con fin_de_turno=true."
         )
+        if tirada_resuelta:
+            instruccion += (
+                " Ya existe una tirada resuelta por el servidor. "
+                "Debes usar ese resultado como verdad final del intento, sin pedir otra tirada ni ignorarla."
+            )
 
     return {
         "motor": "Raphael",
@@ -377,6 +637,7 @@ def _contexto_turno_ia(
         "ultima_narracion_ia": ultima_narracion_ia,
         "ultimo_mensaje_chat": _ultimo_evento_historial(sala_id, "chat") if incluir_ultimo_chat else "",
         "accion_disparadora": accion_jugador or {},
+        "tirada_resuelta": tirada_resuelta,
         "evento_reactivo": evento_reactivo or {},
         "instruccion": instruccion,
     }
@@ -742,6 +1003,10 @@ async def _resolver_cadena_ia(
                 ultima_respuesta["combate"] = combate_antes
                 break
 
+            if combate_antes.get("tirada_pendiente"):
+                ultima_respuesta["combate"] = combate_antes
+                break
+
             actor_actual = combate_antes.get("actor_actual")
             if not isinstance(actor_actual, dict):
                 ultima_respuesta["combate"] = combate_antes
@@ -976,6 +1241,9 @@ async def api_host_avanzar_combate(request: Request, sala_id: str):
     _asegurar_host_request(request, sala_id)
     combate_antes = gestor_combate.estado_publico(sala_id)
     actor_actual = combate_antes.get("actor_actual")
+
+    if combate_antes.get("tirada_pendiente"):
+        raise HTTPException(status_code=400, detail="Hay una tirada pendiente por resolver antes de avanzar.")
 
     if isinstance(actor_actual, dict) and (
         bool(combate_antes.get("espera_resolucion")) or actor_actual.get("control") == "ia"
@@ -1317,6 +1585,76 @@ async def websocket_sala(websocket: WebSocket, sala_id: str, nombre: str):
                 )
                 continue
 
+            if tipo == "tirar_dado":
+                combate = gestor_combate.estado_publico(sala_id)
+                tirada = combate.get("tirada_pendiente")
+                if not isinstance(tirada, dict):
+                    await gestor_conexiones.enviar_json_personal(
+                        websocket,
+                        {
+                            "tipo": "error",
+                            "mensaje": "No hay una tirada pendiente para resolver.",
+                        },
+                    )
+                    continue
+
+                actor_tirada = gestor_combate.buscar_actor(
+                    sala_id,
+                    actor_id=str(tirada.get("actor_id") or ""),
+                )
+                if not actor_tirada:
+                    await gestor_conexiones.enviar_json_personal(
+                        websocket,
+                        {
+                            "tipo": "error",
+                            "mensaje": "El actor de la tirada ya no existe en la escena.",
+                        },
+                    )
+                    continue
+
+                if str(tirada.get("control") or "").strip().lower() != "jugador":
+                    await gestor_conexiones.enviar_json_personal(
+                        websocket,
+                        {
+                            "tipo": "error",
+                            "mensaje": "Esa tirada se resuelve de forma automatica en el servidor.",
+                        },
+                    )
+                    continue
+
+                if str(actor_tirada.jugador_nombre or "").strip().casefold() != nombre.strip().casefold():
+                    await gestor_conexiones.enviar_json_personal(
+                        websocket,
+                        {
+                            "tipo": "error",
+                            "mensaje": "Solo el jugador autorizado puede lanzar ese dado.",
+                        },
+                    )
+                    continue
+
+                try:
+                    await _resolver_tirada_y_publicar(
+                        sala_id,
+                        tirada_id=str(tirada.get("id") or "").strip() or None,
+                        autor=nombre,
+                    )
+                except ValueError as exc:
+                    await gestor_conexiones.enviar_json_personal(
+                        websocket,
+                        {
+                            "tipo": "error",
+                            "mensaje": str(exc),
+                        },
+                    )
+                continue
+
+            if tipo == "continuar_tirada":
+                _marcar_tirada_lista_para_continuar(
+                    sala_id,
+                    tirada_id=str(datos.get("tirada_id") or "").strip() or None,
+                )
+                continue
+
             mensaje = str(datos.get("mensaje", "")).strip()
 
             if not mensaje:
@@ -1342,13 +1680,49 @@ async def websocket_sala(websocket: WebSocket, sala_id: str, nombre: str):
             )
             await publicar_combate(sala_id)
             if combate.get("activa"):
+                accion_jugador = {
+                    "tipo": "mensaje",
+                    "autor": nombre,
+                    "detalle": mensaje,
+                }
+                interpretacion: dict[str, object] | None = None
+                try:
+                    interpretacion = await servicio_lmstudio.interpretar_accion(
+                        _contexto_interpretacion_accion(
+                            sala_id,
+                            nombre_jugador=nombre,
+                            accion_jugador=accion_jugador,
+                        )
+                    )
+                except Exception:
+                    interpretacion = None
+
+                if _interpretacion_pide_tirada(interpretacion):
+                    try:
+                        tirada = _crear_tirada_desde_interpretacion(
+                            sala_id,
+                            nombre_jugador=nombre,
+                            accion_jugador=accion_jugador,
+                            interpretacion=interpretacion or {},
+                        )
+                    except ValueError as exc:
+                        await gestor_conexiones.enviar_json_personal(
+                            websocket,
+                            {
+                                "tipo": "error",
+                                "mensaje": str(exc),
+                            },
+                        )
+                    else:
+                        await _publicar_tirada_solicitada(sala_id, tirada)
+                        await publicar_combate(sala_id)
+                        if tirada.auto_resolver:
+                            await _resolver_tirada_y_publicar(sala_id, tirada_id=tirada.id, autor="Raphael")
+                        continue
+
                 await _resolver_cadena_ia(
                     sala_id,
-                    accion_jugador={
-                        "tipo": "mensaje",
-                        "autor": nombre,
-                        "detalle": mensaje,
-                    },
+                    accion_jugador=accion_jugador,
                 )
 
     except WebSocketDisconnect:

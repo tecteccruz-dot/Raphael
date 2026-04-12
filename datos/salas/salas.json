@@ -1,14 +1,14 @@
 {
   "salas": [
     {
-      "id": "TLQXN9",
-      "nombre": "Koma",
-      "escenario_id": "taberna_bruma",
-      "escenario_nombre": "La Taberna de la Bruma",
-      "escenario_descripcion": "La aventura comienza en una taberna fronteriza donde los rumores sobre desapariciones y criaturas extranas no dejan de crecer.",
-      "resumen_partida": "La aventura comienza en una taberna fronteriza donde los rumores sobre desapariciones y criaturas extranas no dejan de crecer.\nBenimaru hace un comentario sobre el Lobo.\nEl Lobo ataca a Benimaru con Mordida tras el comentario del jugador.\nBenimaru esquiva exitosamente la mordida del Lobo.\nEl Lobo reacciona a esquivar el ataque de Benimaru y amenaza con volver a atacar.",
-      "creada_en": "2026-04-12 04:07",
-      "host_token": "GZxWmuZ28G8mIa589Ogz0GoOUjYEVCsM"
+      "id": "FF8ERC",
+      "nombre": "asddas",
+      "escenario_id": "bosque_susurros",
+      "escenario_nombre": "Bosque de los Susurros",
+      "escenario_descripcion": "Un sendero antiguo atraviesa un bosque envuelto en niebla, con ruinas ocultas y voces que parecen guiar o confundir a los viajeros.",
+      "resumen_partida": "Un sendero antiguo atraviesa un bosque envuelto en niebla, con ruinas ocultas y voces que parecen guiar o confundir a los viajeros.\nRimu ataca al Duende bárbaro y acierta.\nDuende barbaro ataca a Rimu con Hachazo brutal tras recibir el golpe inicial.\nEl intento de Rimu por defenderse del ataque del Duende bárbaro falla, recibiendo daño.\nDuende barbaro ataca nuevamente a Rimu con Hachazo brutal.\nDuende barbaro prepara un nuevo ataque contra Rimu tras el impacto previo.\nDuende barbaro prepara un nuevo asalto contra Rimu caído.\nDuende barbaro ataca nuevamente a Rimu caído con Hachazo brutal.",
+      "creada_en": "2026-04-12 06:04",
+      "host_token": "wEUGN9HFCVd3Fj3OjkX9wm5JxFWLGrMQ"
     }
   ]
 }

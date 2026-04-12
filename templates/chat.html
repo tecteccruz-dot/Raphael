@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Raphael - {{ sala_nombre }}</title>
+    <link rel="stylesheet" href="/static/css/dado_3d.css" />
     <style>
         :root{--bg:#0e0c10;--panel:#17131d;--soft:rgba(255,255,255,.03);--border:rgba(201,168,76,.22);--gold:#c9a84c;--text:#ebe1d2;--muted:#a59884;--accent:#7c4dbd;--ok:#4a9c6a;--bad:#c4473a;--hp:#c4473a;--mp:#3a5fa8;--xp:#c9a84c;--overlay:rgba(6,6,10,.76)}
         *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%} body{background:var(--bg);color:var(--text);font-family:Georgia,serif;overflow:hidden} button,textarea{font:inherit} [hidden]{display:none!important}
@@ -146,6 +147,10 @@
         </div>
     </div>
 
+    {% include "componentes/dado_modal.html" %}
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="/static/js/dado_3d.js"></script>
     <script>
         const salaId = {{ sala_id | tojson }};
         const nombreJugador = {{ nombre | tojson }};
@@ -197,7 +202,7 @@
 
         const jugadores = new Map();
         let jugadorEnModal = null;
-        let combateActual = { activa: false, ronda: 0, espera_resolucion: false, actor_actual: null, actores: [] };
+        let combateActual = { activa: false, ronda: 0, espera_resolucion: false, tirada_pendiente: null, actor_actual: null, actores: [] };
         const SESSION_PREFIX = "raphael:session:";
 
         function claveSesion(sala) {
@@ -646,10 +651,11 @@
                     activa: Boolean(combate.activa),
                     ronda: Number(combate.ronda || 0),
                     espera_resolucion: Boolean(combate.espera_resolucion),
+                    tirada_pendiente: combate.tirada_pendiente || null,
                     actor_actual: combate.actor_actual || null,
                     actores: Array.isArray(combate.actores) ? combate.actores : []
                 }
-                : { activa: false, ronda: 0, espera_resolucion: false, actor_actual: null, actores: [] };
+                : { activa: false, ronda: 0, espera_resolucion: false, tirada_pendiente: null, actor_actual: null, actores: [] };
 
             if (combateActual.activa) {
                 elTurnoBadge.textContent = `Ronda ${combateActual.ronda || 1}`;
@@ -665,6 +671,7 @@
 
             renderPlayers([...jugadores.values()]);
             actualizarControlesCombate();
+            controladorDado.actualizarCombate(combateActual);
         }
 
         function renderPlayers(list) {
@@ -901,11 +908,19 @@
         const tokenQuery = tokenSesion ? `?token=${encodeURIComponent(tokenSesion)}` : "";
         const urlWS = `${protocolo}://${window.location.host}/ws/${encodeURIComponent(salaId)}/${encodeURIComponent(nombreJugador)}${tokenQuery}`;
         const socket = new WebSocket(urlWS);
+        const controladorDado = window.crearControladorDado3D({
+            nombreJugador,
+            getSocketAbierto: () => socket.readyState === WebSocket.OPEN,
+            enviarLanzamiento: () => socket.send(JSON.stringify({ tipo: "tirar_dado" })),
+            enviarContinuacionTirada: (tiradaId) => socket.send(JSON.stringify({ tipo: "continuar_tirada", tirada_id: tiradaId })),
+            resolverActor: (actorId) => (combateActual.actores || []).find((actor) => actor.id === actorId) || null,
+        });
 
         socket.addEventListener("open", () => {
             elEstado.textContent = "Conectado";
             elConnDot.className = "dot";
             actualizarControlesCombate();
+            controladorDado.actualizarCombate(combateActual);
         });
 
         socket.addEventListener("close", () => {
@@ -915,6 +930,7 @@
                 message("sistema", "La conexion con el servidor se cerro.");
             }
             actualizarControlesCombate();
+            controladorDado.actualizarCombate(combateActual);
         });
 
         socket.addEventListener("error", () => {
@@ -922,6 +938,7 @@
             elConnDot.className = "dot error";
             message("error", "Hubo un problema con el WebSocket.");
             actualizarControlesCombate();
+            controladorDado.actualizarCombate(combateActual);
         });
 
         socket.addEventListener("message", (event) => {
@@ -966,6 +983,15 @@
                     break;
                 case "combate_estado":
                     renderCombatState(data.combate || {});
+                    break;
+                case "tirada_solicitada":
+                    controladorDado.manejarTiradaSolicitada(data);
+                    break;
+                case "tirada_resuelta":
+                    controladorDado.manejarTiradaResuelta(data);
+                    break;
+                case "tirada_cancelada":
+                    controladorDado.manejarTiradaCancelada(data);
                     break;
                 case "pong":
                     break;

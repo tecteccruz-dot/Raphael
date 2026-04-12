@@ -1,0 +1,45 @@
+<div class="dado-modal" id="modal-dado" hidden>
+    <div class="dado-panel">
+        <div class="dado-head">
+            <div>
+                <div class="dado-titulo">Tirada pendiente</div>
+                <div class="dado-subtitulo" id="dado-subtitulo">Raphael espera una resolucion.</div>
+            </div>
+        </div>
+
+        <div class="dado-grid">
+            <div class="dado-info">
+                <div class="dado-fila"><span>Actor</span><strong id="dado-actor">--</strong></div>
+                <div class="dado-fila"><span>Control</span><strong id="dado-control">--</strong></div>
+                <div class="dado-fila"><span>Atributo</span><strong id="dado-atributo">--</strong></div>
+                <div class="dado-fila"><span>Habilidad</span><strong id="dado-habilidad">--</strong></div>
+                <div class="dado-fila"><span>DC</span><strong id="dado-dc">--</strong></div>
+                <div class="dado-fila"><span>Mod</span><strong id="dado-modificador">--</strong></div>
+                <div class="dado-fila dado-fila-motivo"><span>Motivo</span><strong id="dado-motivo">--</strong></div>
+            </div>
+
+            <div class="dado-escena">
+                <div class="dado-wrap" id="dado-wrap">
+                    <div class="dado-flotante" id="dado-flotante"></div>
+                    <div class="dado-flash" id="dado-flash"></div>
+                </div>
+
+                <div class="dado-resultado-area">
+                    <div class="dado-resultado-linea">
+                        <div class="dado-resultado" id="dado-resultado">D20</div>
+                    </div>
+                    <div class="dado-calc" id="dado-calc"></div>
+                    <div class="dado-veredicto" id="dado-veredicto"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dado-footer">
+            <div class="dado-estado" id="dado-estado">Esperando la tirada.</div>
+            <div class="dado-footer-acciones">
+                <button class="dado-boton dado-boton-secundario" id="btn-omitir-animacion" type="button" hidden>Omitir animacion</button>
+                <button class="dado-boton" id="btn-lanzar-dado" type="button">Lanzar dado</button>
+            </div>
+        </div>
+    </div>
+</div>

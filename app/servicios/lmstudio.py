@@ -46,6 +46,40 @@ _SCHEMA_RESPUESTA = {
     "additionalProperties": False,
 }
 
+_SCHEMA_INTERPRETACION = {
+    "type": "object",
+    "properties": {
+        "accion_principal": {"type": "string"},
+        "acciones_secundarias": {
+            "type": "array",
+            "items": {"type": "string"},
+        },
+        "requiere_tirada": {"type": "boolean"},
+        "atributo": {"type": "string"},
+        "habilidad": {"type": "string"},
+        "dc_sugerida": {"type": "integer"},
+        "quien_tira_actor_id": {"type": "string"},
+        "objetivo_actor_id": {"type": "string"},
+        "motivo": {"type": "string"},
+        "requiere_aclaracion": {"type": "boolean"},
+        "pregunta_aclaracion": {"type": "string"},
+    },
+    "required": [
+        "accion_principal",
+        "acciones_secundarias",
+        "requiere_tirada",
+        "atributo",
+        "habilidad",
+        "dc_sugerida",
+        "quien_tira_actor_id",
+        "objetivo_actor_id",
+        "motivo",
+        "requiere_aclaracion",
+        "pregunta_aclaracion",
+    ],
+    "additionalProperties": False,
+}
+
 
 class LMStudioError(RuntimeError):
     pass
@@ -92,6 +126,21 @@ def _prompt_sistema() -> str:
     )
 
 
+def _prompt_sistema_interpretacion() -> str:
+    return (
+        f"{_cargar_prompt_maestro()}\n\n"
+        "Tu tarea aqui no es narrar ni resolver el turno completo.\n"
+        "Solo debes interpretar la intencion mecanica de una accion declarada y devolver JSON valido.\n"
+        "Reglas tecnicas:\n"
+        "- Trata la accion del jugador como intento, no como resultado confirmado.\n"
+        "- Si hay incertidumbre, riesgo, oposicion o dificultad, marca requiere_tirada=true.\n"
+        "- No confirmes exito, dano ni consecuencia final.\n"
+        "- Sugiere atributo, habilidad, DC y quien deberia tirar segun el contexto.\n"
+        "- Si el mensaje no basta para decidir bien, usa requiere_aclaracion=true.\n"
+        "- El servidor valida la sugerencia y decide la verdad final.\n"
+    )
+
+
 def _extraer_contenido_message(message: object) -> str:
     """Devuelve el texto del mensaje, con fallback a reasoning_content para modelos de razonamiento."""
     if not isinstance(message, dict):
@@ -104,6 +153,18 @@ def _extraer_contenido_message(message: object) -> str:
 
 
 def _parsear_json_respuesta(contenido: str) -> dict[str, object]:
+    data = _parsear_json_objeto(contenido)
+
+    data.setdefault("narracion", "")
+    data.setdefault("resumen_delta", "")
+    data.setdefault("fin_de_turno", True)
+    data.setdefault("acciones", [])
+    if not isinstance(data.get("acciones"), list):
+        data["acciones"] = []
+    return data
+
+
+def _parsear_json_objeto(contenido: str) -> dict[str, object]:
     texto = str(contenido or "").strip()
     if not texto:
         raise LMStudioError("LM Studio respondio vacio.")
@@ -122,13 +183,24 @@ def _parsear_json_respuesta(contenido: str) -> dict[str, object]:
 
     if not isinstance(data, dict):
         raise LMStudioError("LM Studio no devolvio un objeto JSON.")
+    return data
 
-    data.setdefault("narracion", "")
-    data.setdefault("resumen_delta", "")
-    data.setdefault("fin_de_turno", True)
-    data.setdefault("acciones", [])
-    if not isinstance(data.get("acciones"), list):
-        data["acciones"] = []
+
+def _parsear_json_interpretacion(contenido: str) -> dict[str, object]:
+    data = _parsear_json_objeto(contenido)
+    data.setdefault("accion_principal", "")
+    data.setdefault("acciones_secundarias", [])
+    data.setdefault("requiere_tirada", False)
+    data.setdefault("atributo", "")
+    data.setdefault("habilidad", "")
+    data.setdefault("dc_sugerida", 10)
+    data.setdefault("quien_tira_actor_id", "")
+    data.setdefault("objetivo_actor_id", "")
+    data.setdefault("motivo", "")
+    data.setdefault("requiere_aclaracion", False)
+    data.setdefault("pregunta_aclaracion", "")
+    if not isinstance(data.get("acciones_secundarias"), list):
+        data["acciones_secundarias"] = []
     return data
 
 
@@ -257,3 +329,44 @@ async def resolver_turno(contexto: dict[str, object]) -> dict[str, object]:
 
     message = choices[0].get("message", {}) if isinstance(choices[0], dict) else {}
     return _parsear_json_respuesta(_extraer_contenido_message(message))
+
+
+async def interpretar_accion(contexto: dict[str, object]) -> dict[str, object]:
+    modelo = await modelo_activo()
+    if not modelo:
+        raise LMStudioError("No hay ningun modelo cargado en LM Studio.")
+
+    payload = {
+        "model": modelo,
+        "messages": [
+            {"role": "system", "content": _prompt_sistema_interpretacion()},
+            {
+                "role": "user",
+                "content": json.dumps(contexto, ensure_ascii=False),
+            },
+        ],
+        "temperature": 0.1,
+        "frequency_penalty": 0.0,
+        "presence_penalty": 0.0,
+        "max_tokens": 500,
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+                "name": "raphael_interpretacion_accion",
+                "strict": True,
+                "schema": _SCHEMA_INTERPRETACION,
+            },
+        },
+    }
+
+    async with httpx.AsyncClient(timeout=_timeout()) as client:
+        response = await client.post(f"{_base_url()}/chat/completions", json=payload)
+        response.raise_for_status()
+        data = response.json()
+
+    choices = data.get("choices", []) if isinstance(data, dict) else []
+    if not choices:
+        raise LMStudioError("LM Studio no devolvio una interpretacion usable.")
+
+    message = choices[0].get("message", {}) if isinstance(choices[0], dict) else {}
+    return _parsear_json_interpretacion(_extraer_contenido_message(message))

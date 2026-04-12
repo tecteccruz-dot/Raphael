@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 import random
 import secrets
 
+from app.modelos.tiradas import TiradaPendiente
+
 
 ESTADOS_ACTOR = {"listo", "caido", "incapacitado", "muerto"}
 ESTADOS_ACTUAN = {"listo"}
@@ -59,6 +61,8 @@ class EscenaCombate:
     ronda: int = 1
     turno_actor_id: str | None = None
     espera_resolucion: bool = False
+    tirada_pendiente: TiradaPendiente | None = None
+    accion_pendiente: dict[str, object] | None = None
     actores: list[ActorCombate] = field(default_factory=list)
     secuencia: int = 0
 
@@ -91,6 +95,25 @@ class GestorCombate:
 
     def _actor_actual(self, escena: EscenaCombate) -> ActorCombate | None:
         return self._actor_por_id(escena, escena.turno_actor_id)
+
+    def _limpiar_pendientes_escena(self, escena: EscenaCombate, *, limpiar_accion: bool = True) -> None:
+        escena.tirada_pendiente = None
+        if limpiar_accion:
+            escena.accion_pendiente = None
+
+    def _sincronizar_pendientes_con_turno(self, escena: EscenaCombate) -> None:
+        tirada = escena.tirada_pendiente
+        if not tirada:
+            return
+
+        actor_tirada = self._actor_por_id(escena, tirada.actor_id)
+        actor_actual = self._actor_actual(escena)
+        if not actor_tirada or not actor_actual or actor_tirada.id != actor_actual.id:
+            self._limpiar_pendientes_escena(escena)
+            return
+
+        if actor_tirada.estado not in ESTADOS_ACTUAN:
+            self._limpiar_pendientes_escena(escena)
 
     def _actor_jugador(self, escena: EscenaCombate, nombre: str) -> ActorCombate | None:
         buscado = (nombre or "").strip().casefold()
@@ -151,6 +174,9 @@ class GestorCombate:
                 datos[campo] = getattr(actor_o_datos, campo)
 
         return datos
+
+    def obtener_escena(self, sala_id: str) -> EscenaCombate | None:
+        return self.escenas_por_sala.get(sala_id)
 
     def _crear_actor_desde_payload(
         self,
@@ -350,6 +376,7 @@ class GestorCombate:
         if not escena.activa:
             escena.turno_actor_id = None
             escena.espera_resolucion = False
+            self._limpiar_pendientes_escena(escena)
             return []
 
         actual = self._actor_actual(escena)
@@ -364,6 +391,7 @@ class GestorCombate:
         if not siguiente:
             escena.turno_actor_id = None
             escena.espera_resolucion = False
+            self._limpiar_pendientes_escena(escena)
             return saltados
 
         if hubo_vuelta and actual:
@@ -371,6 +399,7 @@ class GestorCombate:
 
         escena.turno_actor_id = siguiente.id
         escena.espera_resolucion = False
+        self._sincronizar_pendientes_con_turno(escena)
         return saltados
 
     def estado_publico(self, sala_id: str) -> dict[str, object]:
@@ -380,6 +409,7 @@ class GestorCombate:
                 "activa": False,
                 "ronda": 0,
                 "espera_resolucion": False,
+                "tirada_pendiente": None,
                 "actor_actual": None,
                 "actores": [],
                 "total_actores": 0,
@@ -390,6 +420,7 @@ class GestorCombate:
             "activa": escena.activa,
             "ronda": escena.ronda if escena.activa else 0,
             "espera_resolucion": escena.espera_resolucion,
+            "tirada_pendiente": escena.tirada_pendiente.a_dict() if escena.tirada_pendiente else None,
             "actor_actual": self._serializar_actor(actual, es_actual=True) if actual else None,
             "actores": [
                 self._serializar_actor(actor, es_actual=bool(actual and actor.id == actual.id))
@@ -405,6 +436,7 @@ class GestorCombate:
                 "activa": False,
                 "ronda": 0,
                 "espera_resolucion": False,
+                "tirada_pendiente": None,
                 "actor_actual": None,
                 "actores": [],
                 "total_actores": 0,
@@ -417,6 +449,7 @@ class GestorCombate:
             "activa": escena.activa,
             "ronda": escena.ronda if escena.activa else 0,
             "espera_resolucion": escena.espera_resolucion,
+            "tirada_pendiente": escena.tirada_pendiente.a_dict() if escena.tirada_pendiente else None,
             "actor_actual": self._serializar_actor_para_ia(actual, es_actual=True) if actual else None,
             "actores": [
                 self._serializar_actor_para_ia(actor, es_actual=bool(actual and actor.id == actual.id))
@@ -471,6 +504,7 @@ class GestorCombate:
         escena.ronda = 1
         escena.turno_actor_id = None
         escena.espera_resolucion = False
+        self._limpiar_pendientes_escena(escena)
         escena.actores = []
         escena.secuencia = 0
 
@@ -521,6 +555,7 @@ class GestorCombate:
         escena.activa = False
         escena.turno_actor_id = None
         escena.espera_resolucion = False
+        self._limpiar_pendientes_escena(escena)
         return self.estado_publico(sala_id)
 
     def eliminar_sala(self, sala_id: str) -> None:
@@ -718,6 +753,7 @@ class GestorCombate:
         escena.actores = [actor for actor in escena.actores if actor.id != actor_id]
         if actual_id == actor_id:
             escena.turno_actor_id = None
+            self._limpiar_pendientes_escena(escena)
         self._ordenar_actores(escena)
         self._asegurar_turno_valido(escena)
         return self.estado_publico(sala_id)
@@ -769,6 +805,7 @@ class GestorCombate:
         actual = self._actor_actual(escena)
         actual_id = actual.id if actual else None
         actual_ronda = escena.ronda
+        self._limpiar_pendientes_escena(escena)
 
         siguiente, hubo_vuelta, saltados = self._buscar_siguiente_listo(
             escena,
