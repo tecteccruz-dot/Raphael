@@ -9,7 +9,7 @@
         *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%} body{background:var(--bg);color:var(--text);font-family:Georgia,serif;overflow:hidden} button,textarea{font:inherit} [hidden]{display:none!important}
         .layout{display:grid;grid-template-columns:280px minmax(0,1fr) 260px;grid-template-rows:52px minmax(0,1fr);height:100vh}
         .topbar,.panel-left,.panel-right,.chat-footer{background:var(--panel)} .topbar{grid-column:1/-1;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:0 16px} .brand,.section-title,.turn-badge,.name-main,.modal-title{font-family:"Times New Roman",serif;letter-spacing:.06em}
-        .brand{color:var(--gold);font-size:15px}.scene{color:var(--muted);font-size:13px;display:flex;align-items:center;gap:8px}.spacer{flex:1}.turn-badge{color:#d4bf86;border:1px solid rgba(124,77,189,.5);background:rgba(124,77,189,.18);border-radius:999px;padding:4px 10px;font-size:11px}
+        .brand{color:var(--gold);font-size:15px}.brand-button{background:transparent;border:0;padding:0;cursor:pointer;transition:color .18s ease,text-shadow .18s ease}.brand-button:hover{color:#e0c57d;text-shadow:0 0 10px rgba(201,168,76,.22)}.brand-button:focus-visible{outline:1px solid rgba(201,168,76,.45);outline-offset:4px;border-radius:4px}.scene{color:var(--muted);font-size:13px;display:flex;align-items:center;gap:8px}.spacer{flex:1}.turn-badge{color:#d4bf86;border:1px solid rgba(124,77,189,.5);background:rgba(124,77,189,.18);border-radius:999px;padding:4px 10px;font-size:11px}
         .conn{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}.dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}.dot.warning{background:var(--gold)}.dot.error{background:var(--bad)}.host-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid rgba(74,156,106,.35);background:rgba(74,156,106,.12);color:#a6debb;font-size:11px;text-decoration:none}
         .panel-left,.panel-right{display:flex;flex-direction:column;min-height:0}.panel-left{border-right:1px solid var(--border)}.panel-right{border-left:1px solid var(--border)}
         .section-head{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px}.section-title{color:var(--gold);font-size:11px;text-transform:uppercase}
@@ -50,7 +50,7 @@
 <body>
     <div class="layout">
         <header class="topbar">
-            <div class="brand">&#9876; Raphael</div>
+            <button class="brand brand-button" id="btn-dashboard" type="button" title="Volver al dashboard">&#9876; Raphael</button>
             <div class="scene"><span class="dot"></span><span>{{ sala_nombre }} · ID {{ sala_id }}</span></div>
             <div class="spacer"></div>
             <div class="turn-badge" id="turno-badge">Turno 1</div>
@@ -154,6 +154,7 @@
 
         const elEstado = document.getElementById("estado-conexion");
         const elConnDot = document.getElementById("conn-dot");
+        const elBtnDashboard = document.getElementById("btn-dashboard");
         const elTurnoBadge = document.getElementById("turno-badge");
         const elMensajes = document.getElementById("mensajes");
         const elEntrada = document.getElementById("entrada-mensaje");
@@ -850,6 +851,15 @@
             socket.send(JSON.stringify({ tipo: "privacidad", bloqueado: !me.privacidad_bloqueada }));
         }
 
+        function volverAlDashboard() {
+            const confirmado = window.confirm("Seguro que quieres salir del chat y volver al Dashboard?");
+            if (!confirmado) {
+                return;
+            }
+
+            window.location.assign("/");
+        }
+
         function sendMessage() {
             const texto = elEntrada.value.trim();
 
@@ -964,6 +974,7 @@
 
         elBtnEnviar.addEventListener("click", sendMessage);
         elBtnSaltar.addEventListener("click", skipTurn);
+        elBtnDashboard.addEventListener("click", volverAlDashboard);
         document.getElementById("btn-ver-mi-ficha").addEventListener("click", () => openSummary(nombreJugador));
         document.getElementById("btn-privacidad").addEventListener("click", togglePrivacy);
         document.getElementById("btn-cerrar-modal").addEventListener("click", closeModal);

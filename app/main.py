@@ -1,4 +1,4 @@
-import asyncio
+﻿import asyncio
 import re
 
 from fastapi import FastAPI, Form, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
@@ -11,6 +11,7 @@ from app.api import personaje as api_personaje
 from app.servicios import lmstudio as servicio_lmstudio
 from app.servicios.combate import ActorCombate, gestor_combate
 from app.servicios import salas as servicio_salas
+from app.servicios import sesiones_jugador
 from app.websocket.gestor_conexiones import gestor_conexiones
 
 
@@ -40,6 +41,13 @@ def _aplicar_cookie_host(response: RedirectResponse, sala_id: str, host_token: s
         max_age=_HOST_COOKIE_MAX_AGE,
         httponly=True,
         samesite="lax",
+        path="/",
+    )
+
+
+def _limpiar_cookie_host(response: RedirectResponse, sala_id: str) -> None:
+    response.delete_cookie(
+        key=servicio_salas.nombre_cookie_host(sala_id),
         path="/",
     )
 
@@ -122,6 +130,29 @@ async def reclamar_host(
 
     response = RedirectResponse(url=f"/host/{sala['id']}", status_code=303)
     _aplicar_cookie_host(response, str(sala["id"]), host_token)
+    return response
+
+
+@app.post("/salas/{sala_id}/eliminar", response_class=HTMLResponse, summary="Eliminar sala")
+async def eliminar_sala(request: Request, sala_id: str):
+    sala_actual = servicio_salas.obtener_sala(sala_id)
+    if not sala_actual:
+        return _render_dashboard(request, error="No encontramos la sala que intentas eliminar.", status_code=404)
+
+    if not _es_host_request(request, sala_id):
+        return _render_dashboard(request, error="Solo el host de esta sala puede eliminarla.", status_code=403)
+
+    await gestor_conexiones.cerrar_sala(
+        sala_id,
+        mensaje=f"La sala '{sala_actual.get('nombre') or sala_id}' fue eliminada por el host.",
+    )
+    gestor_combate.eliminar_sala(sala_id)
+    servicio_salas.eliminar_sala(sala_id)
+    sesiones_jugador.eliminar_sala(sala_id)
+    _LOCKS_RESOLUCION_IA.pop(sala_id, None)
+
+    response = RedirectResponse(url="/", status_code=303)
+    _limpiar_cookie_host(response, sala_id)
     return response
 
 
@@ -286,12 +317,43 @@ def _ultimo_evento_historial(sala_id: str, tipo: str) -> str:
     return ""
 
 
-def _contexto_turno_ia(sala_id: str, *, accion_jugador: dict[str, object] | None = None) -> dict[str, object]:
+def _contexto_turno_ia(
+    sala_id: str,
+    *,
+    accion_jugador: dict[str, object] | None = None,
+    evento_reactivo: dict[str, object] | None = None,
+) -> dict[str, object]:
     sala_actual = servicio_salas.obtener_sala(sala_id) or {}
+    combate = gestor_combate.contexto_ia(sala_id)
+    actor_actual = combate.get("actor_actual") or {}
+
     ultima_narracion_ia = _ultimo_evento_historial(sala_id, "ia")
+
     escenario_descripcion = str(sala_actual.get("escenario_descripcion") or "")
     if ultima_narracion_ia:
         escenario_descripcion = "El escenario base ya fue presentado antes. Solo vuelve a mencionarlo si cambia algo importante."
+
+    incluir_ultimo_chat = bool(accion_jugador) and actor_actual.get("control") == "jugador"
+
+    # Instrucción específica según quién actúa
+    es_turno_ia = actor_actual.get("control") == "ia"
+    nombre_actor = actor_actual.get("nombre", "el actor")
+
+    if es_turno_ia:
+        instruccion = (
+            f"Es el turno de {nombre_actor}, controlado por ti como DM. "
+            f"DEBES hacer que {nombre_actor} realice una accion concreta y activa: atacar, hablar, moverse, usar un objeto, huir, o cualquier cosa apropiada para su personaje. "
+            f"No lo narres solo observando o manteniendose quieto. "
+            f"Si hay un evento_reactivo reciente, {nombre_actor} DEBE responder a el de forma creible. "
+            f"Narra su accion en tercera persona y aplica las acciones de juego correspondientes."
+        )
+    else:
+        instruccion = (
+            f"Narra SOLO lo que {nombre_actor} hace o dice, usando la accion_disparadora como fuente exacta. "
+            f"NO narres reacciones, respuestas ni decisiones de otros actores: eso ocurre en sus propios turnos. "
+            f"Si la accion implica un efecto mecanico (dano, curacion, estado), aplicalo en el campo acciones. "
+            f"Cierra el turno con fin_de_turno=true."
+        )
 
     return {
         "motor": "Raphael",
@@ -302,17 +364,17 @@ def _contexto_turno_ia(sala_id: str, *, accion_jugador: dict[str, object] | None
             "escenario_descripcion": escenario_descripcion,
             "resumen_partida": servicio_salas.obtener_resumen_partida(sala_id),
         },
-        "combate": gestor_combate.contexto_ia(sala_id),
+        "combate": combate,
         "narraciones_recientes": [
             e for e in gestor_conexiones.obtener_historial_sala(sala_id, limite=12)
             if str(e.get("tipo") or "") == "ia"
         ][-4:],
         "ultima_narracion_ia": ultima_narracion_ia,
-        "ultimo_mensaje_chat": _ultimo_evento_historial(sala_id, "chat"),
+        "ultimo_mensaje_chat": _ultimo_evento_historial(sala_id, "chat") if incluir_ultimo_chat else "",
         "accion_disparadora": accion_jugador or {},
-        "instruccion": "Resuelve exactamente el turno actual y devuelve JSON estructurado.",
+        "evento_reactivo": evento_reactivo or {},
+        "instruccion": instruccion,
     }
-
 
 def _sincronizar_actor_jugador(sala_id: str, actor: ActorCombate) -> bool:
     if not actor.jugador_nombre:
@@ -515,11 +577,67 @@ async def _publicar_resultado_avance(sala_id: str, resultado: dict[str, object])
             },
         )
 
+def _respuesta_ia_es_valida(respuesta: dict[str, object]) -> tuple[bool, str]:
+    narracion = str(respuesta.get("narracion") or "").strip()
+    resumen_delta = str(respuesta.get("resumen_delta") or "").strip()
+    fin_de_turno = respuesta.get("fin_de_turno")
+    acciones = respuesta.get("acciones")
+
+    if not narracion:
+        return False, "La narracion viene vacia."
+
+    if not isinstance(resumen_delta, str):
+        return False, "resumen_delta no es texto."
+
+    if not isinstance(fin_de_turno, bool):
+        return False, "fin_de_turno no es booleano."
+
+    if not isinstance(acciones, list):
+        return False, "Las acciones no son una lista."
+
+    tipos_validos = {"danio", "curacion", "estado", "xp", "agregar_actor"}
+
+    for accion in acciones:
+        if not isinstance(accion, dict):
+            return False, "Hay una accion sin formato valido."
+
+        tipo = str(accion.get("tipo") or "").strip().lower()
+        if tipo not in tipos_validos:
+            return False, f"Tipo de accion invalido: {tipo}"
+
+        if tipo in {"danio", "curacion", "estado", "xp"}:
+            if not accion.get("actor_id") and not accion.get("objetivo"):
+                return False, f"La accion {tipo} no tiene objetivo."
+
+        if tipo == "estado":
+            estado = str(accion.get("estado") or "").strip().lower()
+            if not estado:
+                return False, "La accion de estado no indica el estado."
+
+        if tipo in {"danio", "curacion", "xp"}:
+            cantidad = accion.get("cantidad")
+            if not isinstance(cantidad, int) or cantidad < 0:
+                return False, f"La accion {tipo} tiene cantidad invalida."
+
+        if tipo == "agregar_actor":
+            nombre = str(accion.get("nombre") or "").strip()
+            iniciativa = accion.get("iniciativa")
+            vida_maxima = accion.get("vida_maxima")
+
+            if not nombre:
+                return False, "agregar_actor no tiene nombre."
+            if not isinstance(iniciativa, int):
+                return False, "agregar_actor no tiene iniciativa valida."
+            if not isinstance(vida_maxima, int) or vida_maxima < 1:
+                return False, "agregar_actor no tiene vida_maxima valida."
+
+    return True, ""
 
 async def _resolver_cadena_ia(
     sala_id: str,
     *,
     accion_jugador: dict[str, object] | None = None,
+    evento_reactivo: dict[str, object] | None = None,
 ) -> dict[str, object]:
     ultima_respuesta: dict[str, object] = {
         "ok": True,
@@ -528,6 +646,7 @@ async def _resolver_cadena_ia(
 
     async with _lock_resolucion_ia(sala_id):
         accion_actual = accion_jugador
+        reaccion_pendiente = evento_reactivo
 
         for _ in range(6):
             combate_antes = gestor_combate.estado_publico(sala_id)
@@ -547,10 +666,26 @@ async def _resolver_cadena_ia(
             turno_jugador = actor_actual.get("control") == "jugador"
             aviso = None
             await _publicar_ia_escribiendo(sala_id)
+
             try:
                 respuesta_ia = await servicio_lmstudio.resolver_turno(
-                    _contexto_turno_ia(sala_id, accion_jugador=accion_actual)
+                    _contexto_turno_ia(
+                        sala_id,
+                        accion_jugador=accion_actual,
+                        evento_reactivo=reaccion_pendiente,
+                    )
                 )
+
+                ok_respuesta, motivo_error = _respuesta_ia_es_valida(respuesta_ia)
+                if not ok_respuesta:
+                    respuesta_ia = {
+                        "narracion": _mensaje_resolucion_ia(actor_actual, turno_jugador=turno_jugador),
+                        "resumen_delta": "",
+                        "acciones": [],
+                        "fin_de_turno": True,
+                    }
+                    aviso = f"Respuesta invalida del modelo: {motivo_error}. Raphael uso resolucion segura."
+
             except Exception:
                 aviso = "LM Studio no respondio a tiempo, asi que Raphael uso una resolucion local basica."
                 respuesta_ia = {
@@ -587,13 +722,21 @@ async def _resolver_cadena_ia(
                 "acciones_ignoradas": aplicacion.get("ignoradas") or [],
             }
 
+            # La accion del jugador solo vive en su turno.
             accion_actual = None
+
+            # Pero su resultado inmediato puede alimentar la reaccion del siguiente actor una sola vez.
+            if narracion and isinstance(actor_actual, dict):
+                reaccion_pendiente = {
+                    "actor_origen": actor_actual.get("nombre"),
+                    "detalle": narracion,
+                }
+
             siguiente = resultado.get("actor_actual")
             if not isinstance(siguiente, dict) or siguiente.get("control") != "ia":
                 break
 
     return ultima_respuesta
-
 
 @app.get("/api/host/sala/{sala_id}/combate", response_class=JSONResponse, summary="Estado de combate para host")
 async def api_host_estado_combate(request: Request, sala_id: str):
@@ -1028,6 +1171,8 @@ async def websocket_sala(websocket: WebSocket, sala_id: str, nombre: str):
 
     except WebSocketDisconnect:
         gestor_conexiones.desconectar(sala_id, nombre)
+        if not gestor_conexiones.obtener_jugadores_sala(sala_id):
+            return
 
         await gestor_conexiones.enviar_json_a_sala(
             sala_id,
@@ -1041,6 +1186,8 @@ async def websocket_sala(websocket: WebSocket, sala_id: str, nombre: str):
 
     except Exception:
         gestor_conexiones.desconectar(sala_id, nombre)
+        if not gestor_conexiones.obtener_jugadores_sala(sala_id):
+            return
 
         await gestor_conexiones.enviar_json_a_sala(
             sala_id,

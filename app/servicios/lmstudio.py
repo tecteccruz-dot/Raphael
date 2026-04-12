@@ -86,7 +86,8 @@ def _prompt_sistema() -> str:
         "Instrucciones tecnicas:\n"
         "- Devuelve siempre JSON valido que respete el schema exacto.\n"
         "- La narracion debe estar en espanol.\n"
-        "- Cierra siempre el turno con fin_de_turno=true.\n"
+        "- Pon fin_de_turno=true cuando el actor haya completado su accion. "
+        "Para NPCs controlados por IA, asegurate de que la narracion describa una accion real antes de cerrar el turno.\n"
         "- El servidor aplica y valida la verdad final; tu solo propones cambios.\n"
     )
 
@@ -231,10 +232,10 @@ async def resolver_turno(contexto: dict[str, object]) -> dict[str, object]:
                 "content": json.dumps(contexto, ensure_ascii=False),
             },
         ],
-        "temperature": 0.65,
-        "frequency_penalty": 0.5,
-        "presence_penalty": 0.25,
-        "max_tokens": 900,
+        "temperature": 0.2,
+        "frequency_penalty": 0.0,
+        "presence_penalty": 0.0,
+        "max_tokens": 800,
         "response_format": {
             "type": "json_schema",
             "json_schema": {

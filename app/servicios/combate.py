@@ -370,6 +370,9 @@ class GestorCombate:
         escena.espera_resolucion = False
         return self.estado_publico(sala_id)
 
+    def eliminar_sala(self, sala_id: str) -> None:
+        self.escenas_por_sala.pop(sala_id, None)
+
     def agregar_npc(
         self,
         sala_id: str,

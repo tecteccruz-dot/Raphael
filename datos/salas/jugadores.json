@@ -1,419 +1,267 @@
 {
   "sesiones": [
     {
-      "token": "rp-1775964539192-435ab286a9ea8",
-      "sala_id": "KGRTN9",
-      "nombre": "Jna",
+      "token": "rp-1775984999603-61d86b995ec878",
+      "sala_id": "XMJ43Q",
+      "nombre": "Juan",
       "datos_creacion": {
-        "nombre": "Jna",
-        "sala_id": "KGRTN9",
-        "session_token": "rp-1775964539192-435ab286a9ea8",
-        "raza": "humano",
-        "subraza": null,
-        "clase": "picaro",
-        "trasfondo": "criminal",
+        "nombre": "Juan",
+        "sala_id": "XMJ43Q",
+        "session_token": "rp-1775984999603-61d86b995ec878",
+        "raza": "elfo",
+        "subraza": "alto_elfo",
+        "clase": "mago",
+        "trasfondo": "pilluelo",
         "ascendencia_draconica": null,
         "modificadores_libres": null,
         "atributos": {
           "fue": 10,
-          "des": 15,
-          "con": 8,
-          "int": 14,
-          "sab": 13,
-          "car": 12
+          "des": 14,
+          "con": 15,
+          "int": 12,
+          "sab": 8,
+          "car": 13
         },
         "habilidades_elegidas": [
-          "Persuasión",
-          "Atletismo",
-          "Acrobacias",
-          "Juego de manos"
+          "Medicina",
+          "Perspicacia"
         ]
       },
       "perfil": {
-        "nombre": "Jna",
-        "clase": "Pícaro",
+        "nombre": "Juan",
+        "clase": "Mago",
         "nivel": 1,
-        "vida_actual": 7,
-        "vida_maxima": 7,
-        "mana_actual": 0,
-        "mana_maximo": 0,
+        "vida_actual": 8,
+        "vida_maxima": 8,
+        "mana_actual": 2,
+        "mana_maximo": 2,
         "xp_actual": 0,
         "xp_maximo": 300,
         "estadisticas": {
-          "fue": 11,
+          "fue": 10,
           "des": 16,
-          "con": 9,
+          "con": 15,
+          "int": 13,
+          "sab": 8,
+          "car": 13
+        },
+        "habilidades": [
+          "Lanzamiento de conjuros: usa INT. Libreta de conjuros con 6 conjuros de nivel 1.",
+          "Recuperación arcana: recuperas espacios de conjuro durante un descanso corto (total de niveles = mitad del nivel de mago).",
+          "Conocedor de la ciudad: conoces los callejones, alcantarillas y rutas secretas de cualquier ciudad; la gente de la calle te ayuda."
+        ],
+        "pasivas": [
+          "Sentidos agudos: competencia en Percepción.",
+          "Ascendencia feérica: ventaja contra ser encantado; inmune a efecto de sueño mágico.",
+          "Trance: no necesitas dormir; meditas 4 horas en lugar de 8.",
+          "Visión en la oscuridad: 60 pies.",
+          "Idiomas: Común y Élfico.",
+          "Entrenamiento con armas élficas: competencia en espada larga, espada corta, arco corto y arco largo.",
+          "Truco: conoces un truco del mago.",
+          "Idioma extra: un idioma adicional."
+        ],
+        "tiradas": [
+          "Juego de manos +5",
+          "Sigilo +5",
+          "Percepción +1",
+          "Medicina +1",
+          "Perspicacia +1"
+        ],
+        "inventario": [
+          {
+            "icono": "[C]",
+            "nombre": "bastón",
+            "detalle": "Mago",
+            "cantidad": 1
+          },
+          {
+            "icono": "[C]",
+            "nombre": "bolsa de componentes",
+            "detalle": "Mago",
+            "cantidad": 1
+          },
+          {
+            "icono": "[C]",
+            "nombre": "paquete de erudito",
+            "detalle": "Mago",
+            "cantidad": 1
+          },
+          {
+            "icono": "[C]",
+            "nombre": "libreta de conjuros",
+            "detalle": "Mago",
+            "cantidad": 1
+          },
+          {
+            "icono": "[T]",
+            "nombre": "pequeño cuchillo",
+            "detalle": "Pilluelo Urbano",
+            "cantidad": 1
+          },
+          {
+            "icono": "[T]",
+            "nombre": "mapa de la ciudad donde creciste",
+            "detalle": "Pilluelo Urbano",
+            "cantidad": 1
+          },
+          {
+            "icono": "[T]",
+            "nombre": "ratón mascota",
+            "detalle": "Pilluelo Urbano",
+            "cantidad": 1
+          },
+          {
+            "icono": "[T]",
+            "nombre": "recuerdo de tus padres",
+            "detalle": "Pilluelo Urbano",
+            "cantidad": 1
+          },
+          {
+            "icono": "[T]",
+            "nombre": "conjunto de ropa común",
+            "detalle": "Pilluelo Urbano",
+            "cantidad": 1
+          },
+          {
+            "icono": "[T]",
+            "nombre": "bolsa con 10 po",
+            "detalle": "Pilluelo Urbano",
+            "cantidad": 1
+          }
+        ],
+        "resumen": "Alto Elfo Mago · Trasfondo: Pilluelo Urbano · PG 8 · FUE 10 DES 16 CON 15 INT 13 SAB 8 CAR 13.",
+        "privacidad_bloqueada": false,
+        "raza": "Alto Elfo",
+        "trasfondo": "Pilluelo Urbano",
+        "avatar_url": "/static/avatars/Juan.png"
+      },
+      "creada_en": "2026-04-12 03:09:58",
+      "actualizada_en": "2026-04-12 03:09:59"
+    },
+    {
+      "token": "4b9b1bab-892a-4541-a197-edaef6b85b7a",
+      "sala_id": "XMJ43Q",
+      "nombre": "Raja",
+      "datos_creacion": {
+        "nombre": "Raja",
+        "sala_id": "XMJ43Q",
+        "session_token": "4b9b1bab-892a-4541-a197-edaef6b85b7a",
+        "raza": "humano",
+        "subraza": null,
+        "clase": "mago",
+        "trasfondo": "ermitano",
+        "ascendencia_draconica": null,
+        "modificadores_libres": null,
+        "atributos": {
+          "fue": 12,
+          "des": 10,
+          "con": 8,
           "int": 15,
           "sab": 14,
           "car": 13
         },
+        "habilidades_elegidas": [
+          "Investigación",
+          "Arcanos"
+        ]
+      },
+      "perfil": {
+        "nombre": "Raja",
+        "clase": "Mago",
+        "nivel": 1,
+        "vida_actual": 5,
+        "vida_maxima": 5,
+        "mana_actual": 2,
+        "mana_maximo": 2,
+        "xp_actual": 0,
+        "xp_maximo": 300,
+        "estadisticas": {
+          "fue": 13,
+          "des": 11,
+          "con": 9,
+          "int": 16,
+          "sab": 15,
+          "car": 14
+        },
         "habilidades": [
-          "Expertise: doble bonificador de competencia en 2 habilidades o herramientas elegidas.",
-          "Ataque furtivo: 1d6 daño extra cuando tienes ventaja o un aliado adyacente al objetivo.",
-          "Jerga de ladrones: conoces el lenguaje secreto del hampa.",
-          "Contacto criminal: tienes un contacto de confianza en el mundo del crimen organizado."
+          "Lanzamiento de conjuros: usa INT. Libreta de conjuros con 6 conjuros de nivel 1.",
+          "Recuperación arcana: recuperas espacios de conjuro durante un descanso corto (total de niveles = mitad del nivel de mago).",
+          "Descubrimiento: has descubierto una verdad secreta sobre el universo, los dioses o las fuerzas que dan forma al mundo."
         ],
         "pasivas": [
           "Versatilidad: ganas una competencia adicional en una habilidad de tu elección.",
           "Idiomas: Común + un idioma adicional."
         ],
         "tiradas": [
-          "Engaño +3",
-          "Sigilo +5",
-          "Persuasión +3",
-          "Atletismo +2",
-          "Acrobacias +5",
-          "Juego de manos +5"
+          "Medicina +4",
+          "Religión +5",
+          "Investigación +5",
+          "Arcanos +5"
         ],
         "inventario": [
           {
             "icono": "[C]",
-            "nombre": "rapier",
-            "detalle": "Pícaro",
+            "nombre": "bastón",
+            "detalle": "Mago",
             "cantidad": 1
           },
           {
             "icono": "[C]",
-            "nombre": "arco corto y carcaj con 20 flechas",
-            "detalle": "Pícaro",
+            "nombre": "bolsa de componentes",
+            "detalle": "Mago",
             "cantidad": 1
           },
           {
             "icono": "[C]",
-            "nombre": "paquete de burlador",
-            "detalle": "Pícaro",
+            "nombre": "paquete de erudito",
+            "detalle": "Mago",
             "cantidad": 1
           },
           {
             "icono": "[C]",
-            "nombre": "armadura de cuero",
-            "detalle": "Pícaro",
-            "cantidad": 1
-          },
-          {
-            "icono": "[C]",
-            "nombre": "2 dagas",
-            "detalle": "Pícaro",
-            "cantidad": 1
-          },
-          {
-            "icono": "[C]",
-            "nombre": "herramientas de ladrón",
-            "detalle": "Pícaro",
+            "nombre": "libreta de conjuros",
+            "detalle": "Mago",
             "cantidad": 1
           },
           {
             "icono": "[T]",
-            "nombre": "palanca",
-            "detalle": "Criminal",
+            "nombre": "caja con notas de tus estudios y oraciones",
+            "detalle": "Ermitaño",
             "cantidad": 1
           },
           {
             "icono": "[T]",
-            "nombre": "conjunto de ropa oscura con capucha",
-            "detalle": "Criminal",
-            "cantidad": 1
-          },
-          {
-            "icono": "[T]",
-            "nombre": "herramientas de ladrón",
-            "detalle": "Criminal",
-            "cantidad": 1
-          },
-          {
-            "icono": "[T]",
-            "nombre": "bolsa con 15 po",
-            "detalle": "Criminal",
-            "cantidad": 1
-          }
-        ],
-        "resumen": "Humano Pícaro · Trasfondo: Criminal · PG 7 · FUE 11 DES 16 CON 9 INT 15 SAB 14 CAR 13.",
-        "privacidad_bloqueada": false,
-        "raza": "Humano",
-        "trasfondo": "Criminal",
-        "avatar_url": "/static/avatars/Jna.png"
-      },
-      "creada_en": "2026-04-11 21:28:55",
-      "actualizada_en": "2026-04-11 21:42:16"
-    },
-    {
-      "token": "rp-1775964490407-9ee008873737e",
-      "sala_id": "KGRTN9",
-      "nombre": "El arqui",
-      "datos_creacion": {
-        "nombre": "El arqui",
-        "sala_id": "KGRTN9",
-        "session_token": "rp-1775964490407-9ee008873737e",
-        "raza": "gnomo",
-        "subraza": "gnomo_del_bosque",
-        "clase": "clerigo",
-        "trasfondo": "charlatan",
-        "ascendencia_draconica": null,
-        "modificadores_libres": null,
-        "atributos": {
-          "fue": 14,
-          "des": 15,
-          "con": 13,
-          "int": 8,
-          "sab": 12,
-          "car": 10
-        },
-        "habilidades_elegidas": [
-          "Religión",
-          "Historia"
-        ]
-      },
-      "perfil": {
-        "nombre": "El arqui",
-        "clase": "Clérigo",
-        "nivel": 1,
-        "vida_actual": 9,
-        "vida_maxima": 9,
-        "mana_actual": 2,
-        "mana_maximo": 2,
-        "xp_actual": 0,
-        "xp_maximo": 300,
-        "estadisticas": {
-          "fue": 14,
-          "des": 16,
-          "con": 13,
-          "int": 10,
-          "sab": 12,
-          "car": 10
-        },
-        "habilidades": [
-          "Lanzamiento de conjuros: usa SAB. Prepara conjuros diariamente (mod SAB + nivel de clérigo).",
-          "Dominio divino: elige un dominio (vida, guerra, luz, etc.) que otorga conjuros y rasgos adicionales.",
-          "Canal de divinidad: poder especial según dominio (1 uso por descanso corto).",
-          "Identidad falsa: tienes una segunda identidad con documentación, disfraz establecido y contactos."
-        ],
-        "pasivas": [
-          "Visión en la oscuridad: 60 pies.",
-          "Astucia gnoma: ventaja en todas las salvaciones de INT, SAB y CAR contra magia.",
-          "Idiomas: Común y Gnomo.",
-          "Ilusión natural: conoces el truco ilusión menor.",
-          "Hablar con bestias pequeñas: puedes comunicarte con animales pequeños."
-        ],
-        "tiradas": [
-          "Engaño +2",
-          "Juego de manos +5",
-          "Religión +2",
-          "Historia +2"
-        ],
-        "inventario": [
-          {
-            "icono": "[C]",
-            "nombre": "maza",
-            "detalle": "Clérigo",
-            "cantidad": 1
-          },
-          {
-            "icono": "[C]",
-            "nombre": "armadura de escamas",
-            "detalle": "Clérigo",
-            "cantidad": 1
-          },
-          {
-            "icono": "[C]",
-            "nombre": "ballesta ligera y 20 virotes",
-            "detalle": "Clérigo",
-            "cantidad": 1
-          },
-          {
-            "icono": "[C]",
-            "nombre": "paquete de sacerdote",
-            "detalle": "Clérigo",
-            "cantidad": 1
-          },
-          {
-            "icono": "[C]",
-            "nombre": "escudo y símbolo sagrado",
-            "detalle": "Clérigo",
-            "cantidad": 1
-          },
-          {
-            "icono": "[T]",
-            "nombre": "conjunto de ropa fina",
-            "detalle": "Charlatán",
-            "cantidad": 1
-          },
-          {
-            "icono": "[T]",
-            "nombre": "kit de disfraz",
-            "detalle": "Charlatán",
-            "cantidad": 1
-          },
-          {
-            "icono": "[T]",
-            "nombre": "herramientas de estafador (10 botellas falsas, dados cargados, mazo de naipes trucado)",
-            "detalle": "Charlatán",
-            "cantidad": 1
-          },
-          {
-            "icono": "[T]",
-            "nombre": "bolsa con 15 po",
-            "detalle": "Charlatán",
-            "cantidad": 1
-          }
-        ],
-        "resumen": "Gnomo del Bosque Clérigo · Trasfondo: Charlatán · PG 9 · FUE 14 DES 16 CON 13 INT 10 SAB 12 CAR 10.",
-        "privacidad_bloqueada": false,
-        "raza": "Gnomo del Bosque",
-        "trasfondo": "Charlatán",
-        "avatar_url": "/static/avatars/Elarqui.png"
-      },
-      "creada_en": "2026-04-11 21:28:09",
-      "actualizada_en": "2026-04-11 21:28:09"
-    },
-    {
-      "token": "rp-1775964481096-4f86faddc13e18",
-      "sala_id": "KGRTN9",
-      "nombre": "Veldora",
-      "datos_creacion": {
-        "nombre": "Veldora",
-        "sala_id": "KGRTN9",
-        "session_token": "rp-1775964481096-4f86faddc13e18",
-        "raza": "draconido",
-        "subraza": null,
-        "clase": "picaro",
-        "trasfondo": "sabio",
-        "ascendencia_draconica": "verde",
-        "modificadores_libres": null,
-        "atributos": {
-          "fue": 10,
-          "des": 13,
-          "con": 14,
-          "int": 12,
-          "sab": 8,
-          "car": 15
-        },
-        "habilidades_elegidas": [
-          "Perspicacia",
-          "Acrobacias",
-          "Sigilo",
-          "Persuasión"
-        ]
-      },
-      "perfil": {
-        "nombre": "Veldora",
-        "clase": "Pícaro",
-        "nivel": 1,
-        "vida_actual": 10,
-        "vida_maxima": 10,
-        "mana_actual": 0,
-        "mana_maximo": 0,
-        "xp_actual": 0,
-        "xp_maximo": 300,
-        "estadisticas": {
-          "fue": 12,
-          "des": 13,
-          "con": 14,
-          "int": 12,
-          "sab": 8,
-          "car": 16
-        },
-        "habilidades": [
-          "Expertise: doble bonificador de competencia en 2 habilidades o herramientas elegidas.",
-          "Ataque furtivo: 1d6 daño extra cuando tienes ventaja o un aliado adyacente al objetivo.",
-          "Jerga de ladrones: conoces el lenguaje secreto del hampa.",
-          "Investigador: cuando no sabes algo, sueles saber dónde encontrar la información (biblioteca, sabio, archivo)."
-        ],
-        "pasivas": [
-          "Ascendencia dracónica: elige un tipo de dragón que determina tu tipo de daño y forma del aliento.",
-          "Arma de aliento: usa acción para exhalar energía destructiva (CD 8 + mod CON + bon competencia).",
-          "Resistencia al daño: resistencia al tipo de daño de tu ascendencia.",
-          "Idiomas: Común y Dracónico."
-        ],
-        "tiradas": [
-          "Arcanos +3",
-          "Historia +3",
-          "Perspicacia +1",
-          "Acrobacias +3",
-          "Sigilo +3",
-          "Persuasión +5"
-        ],
-        "inventario": [
-          {
-            "icono": "[C]",
-            "nombre": "rapier",
-            "detalle": "Pícaro",
-            "cantidad": 1
-          },
-          {
-            "icono": "[C]",
-            "nombre": "arco corto y carcaj con 20 flechas",
-            "detalle": "Pícaro",
-            "cantidad": 1
-          },
-          {
-            "icono": "[C]",
-            "nombre": "paquete de burlador",
-            "detalle": "Pícaro",
-            "cantidad": 1
-          },
-          {
-            "icono": "[C]",
-            "nombre": "armadura de cuero",
-            "detalle": "Pícaro",
-            "cantidad": 1
-          },
-          {
-            "icono": "[C]",
-            "nombre": "2 dagas",
-            "detalle": "Pícaro",
-            "cantidad": 1
-          },
-          {
-            "icono": "[C]",
-            "nombre": "herramientas de ladrón",
-            "detalle": "Pícaro",
-            "cantidad": 1
-          },
-          {
-            "icono": "[T]",
-            "nombre": "botella de tinta negra",
-            "detalle": "Sabio",
-            "cantidad": 1
-          },
-          {
-            "icono": "[T]",
-            "nombre": "pluma",
-            "detalle": "Sabio",
-            "cantidad": 1
-          },
-          {
-            "icono": "[T]",
-            "nombre": "cuchillo pequeño",
-            "detalle": "Sabio",
-            "cantidad": 1
-          },
-          {
-            "icono": "[T]",
-            "nombre": "carta de un colega fallecido con una pregunta sin respuesta",
-            "detalle": "Sabio",
+            "nombre": "manta de invierno",
+            "detalle": "Ermitaño",
             "cantidad": 1
           },
           {
             "icono": "[T]",
             "nombre": "conjunto de ropa común",
-            "detalle": "Sabio",
+            "detalle": "Ermitaño",
             "cantidad": 1
           },
           {
             "icono": "[T]",
-            "nombre": "bolsa con 10 po",
-            "detalle": "Sabio",
+            "nombre": "herramientas de herborista",
+            "detalle": "Ermitaño",
+            "cantidad": 1
+          },
+          {
+            "icono": "[T]",
+            "nombre": "5 po",
+            "detalle": "Ermitaño",
             "cantidad": 1
           }
         ],
-        "resumen": "Dracónido Pícaro · Trasfondo: Sabio · PG 10 · FUE 12 DES 13 CON 14 INT 12 SAB 8 CAR 16.",
+        "resumen": "Humano Mago · Trasfondo: Ermitaño · PG 5 · FUE 13 DES 11 CON 9 INT 16 SAB 15 CAR 14.",
         "privacidad_bloqueada": false,
-        "raza": "Dracónido",
-        "trasfondo": "Sabio",
-        "avatar_url": null
+        "raza": "Humano",
+        "trasfondo": "Ermitaño",
+        "avatar_url": "/static/avatars/Raja.png"
       },
-      "creada_en": "2026-04-11 21:28:01",
-      "actualizada_en": "2026-04-11 21:35:57"
+      "creada_en": "2026-04-12 03:09:30",
+      "actualizada_en": "2026-04-12 03:10:26"
     }
   ]
 }

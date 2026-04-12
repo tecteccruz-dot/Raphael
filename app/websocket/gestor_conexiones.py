@@ -658,6 +658,40 @@ class GestorConexiones:
     def limpiar_historial(self, sala_id: str) -> None:
         self.historial_por_sala.pop(sala_id, None)
 
+    async def cerrar_sala(self, sala_id: str, mensaje: str | None = None) -> int:
+        sala_limpia = str(sala_id or "").strip()
+        sala = self.conexiones_por_sala.pop(sala_limpia, {})
+        self.historial_por_sala.pop(sala_limpia, None)
+
+        claves_pendientes = [
+            clave
+            for clave in self.personajes_pendientes
+            if str(clave[0] or "").strip().upper() == sala_limpia.upper()
+        ]
+        for clave in claves_pendientes:
+            self.personajes_pendientes.pop(clave, None)
+
+        if not sala:
+            return 0
+
+        if mensaje:
+            payload = {"tipo": "sistema", "mensaje": mensaje}
+            for sesion in list(sala.values()):
+                try:
+                    await sesion.websocket.send_json(payload)
+                except Exception:
+                    pass
+
+        total = 0
+        for sesion in list(sala.values()):
+            try:
+                await sesion.websocket.close(code=4002)
+            except Exception:
+                pass
+            total += 1
+
+        return total
+
     async def expulsar_jugador(self, sala_id: str, nombre: str) -> bool:
         sala = self.conexiones_por_sala.get(sala_id, {})
         sesion = sala.get(nombre)

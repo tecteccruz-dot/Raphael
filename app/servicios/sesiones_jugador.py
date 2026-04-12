@@ -180,3 +180,16 @@ def olvidar_sesion(sala_id: str, token: str | None) -> None:
         )
     ]
     _guardar(sesiones)
+
+
+def eliminar_sala(sala_id: str) -> None:
+    sala_limpia = (sala_id or "").strip().upper()
+    if not sala_limpia:
+        return
+
+    sesiones = [
+        sesion
+        for sesion in _cargar()
+        if str(sesion.get("sala_id", "")).upper() != sala_limpia
+    ]
+    _guardar(sesiones)

@@ -205,6 +205,29 @@ def reclamar_host(sala_id: str) -> tuple[dict[str, object], str]:
     raise ValueError("No encontramos la sala solicitada.")
 
 
+def eliminar_sala(sala_id: str) -> dict[str, object] | None:
+    buscada = (sala_id or "").strip().upper()
+    if not buscada:
+        return None
+
+    salas = _listar_salas_privadas()
+    restantes: list[dict[str, object]] = []
+    eliminada: dict[str, object] | None = None
+
+    for sala in salas:
+        if eliminada is None and str(sala.get("id", "")).upper() == buscada:
+            eliminada = dict(sala)
+            continue
+
+        restantes.append(dict(sala))
+
+    if not eliminada:
+        return None
+
+    _guardar_salas(restantes)
+    return _sanitizar_sala_publica(eliminada)
+
+
 def obtener_resumen_partida(sala_id: str) -> str:
     sala = _buscar_sala_privada(sala_id)
     if not sala:
