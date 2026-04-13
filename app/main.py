@@ -921,67 +921,6 @@ async def _publicar_resultado_avance(sala_id: str, resultado: dict[str, object])
             },
         )
 
-def _respuesta_ia_es_valida(respuesta: dict[str, object]) -> tuple[bool, str]:
-    narracion = str(respuesta.get("narracion") or "").strip()
-    resumen_delta = str(respuesta.get("resumen_delta") or "").strip()
-    fin_de_turno = respuesta.get("fin_de_turno")
-    acciones = respuesta.get("acciones")
-
-    if not narracion:
-        return False, "La narracion viene vacia."
-
-    if not isinstance(resumen_delta, str):
-        return False, "resumen_delta no es texto."
-
-    if not isinstance(fin_de_turno, bool):
-        return False, "fin_de_turno no es booleano."
-
-    if not isinstance(acciones, list):
-        return False, "Las acciones no son una lista."
-
-    tipos_validos = {"danio", "curacion", "estado", "xp", "agregar_actor"}
-
-    for accion in acciones:
-        if not isinstance(accion, dict):
-            return False, "Hay una accion sin formato valido."
-
-        tipo = str(accion.get("tipo") or "").strip().lower()
-        if tipo not in tipos_validos:
-            return False, f"Tipo de accion invalido: {tipo}"
-
-        if tipo in {"danio", "curacion", "estado", "xp"}:
-            if not accion.get("actor_id") and not accion.get("objetivo"):
-                return False, f"La accion {tipo} no tiene objetivo."
-
-        if tipo == "estado":
-            estado = str(accion.get("estado") or "").strip().lower()
-            if not estado:
-                return False, "La accion de estado no indica el estado."
-
-        if tipo in {"danio", "curacion", "xp"}:
-            cantidad = accion.get("cantidad")
-            if not isinstance(cantidad, int) or cantidad < 0:
-                return False, f"La accion {tipo} tiene cantidad invalida."
-
-        if tipo == "agregar_actor":
-            plantilla_id = str(accion.get("plantilla_id") or "").strip()
-            npc_unico_id = str(accion.get("npc_unico_id") or "").strip()
-            personaje_id = str(accion.get("personaje_id") or "").strip()
-            nombre = str(accion.get("nombre") or "").strip()
-            iniciativa = accion.get("iniciativa")
-            vida_maxima = accion.get("vida_maxima")
-
-            if plantilla_id or npc_unico_id or personaje_id:
-                continue
-            if not nombre:
-                return False, "agregar_actor no tiene nombre."
-            if not isinstance(iniciativa, int):
-                return False, "agregar_actor no tiene iniciativa valida."
-            if not isinstance(vida_maxima, int) or vida_maxima < 1:
-                return False, "agregar_actor no tiene vida_maxima valida."
-
-    return True, ""
-
 async def _resolver_cadena_ia(
     sala_id: str,
     *,
@@ -1029,7 +968,7 @@ async def _resolver_cadena_ia(
                     )
                 )
 
-                ok_respuesta, motivo_error = _respuesta_ia_es_valida(respuesta_ia)
+                ok_respuesta, motivo_error = servicio_lmstudio.respuesta_turno_es_valida(respuesta_ia)
                 if not ok_respuesta:
                     respuesta_ia = {
                         "narracion": _mensaje_resolucion_ia(actor_actual, turno_jugador=turno_jugador),

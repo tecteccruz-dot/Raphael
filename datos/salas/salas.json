@@ -1,14 +1,14 @@
 {
   "salas": [
     {
-      "id": "FF8ERC",
-      "nombre": "asddas",
-      "escenario_id": "bosque_susurros",
-      "escenario_nombre": "Bosque de los Susurros",
-      "escenario_descripcion": "Un sendero antiguo atraviesa un bosque envuelto en niebla, con ruinas ocultas y voces que parecen guiar o confundir a los viajeros.",
-      "resumen_partida": "Un sendero antiguo atraviesa un bosque envuelto en niebla, con ruinas ocultas y voces que parecen guiar o confundir a los viajeros.\nRimu ataca al Duende bárbaro y acierta.\nDuende barbaro ataca a Rimu con Hachazo brutal tras recibir el golpe inicial.\nEl intento de Rimu por defenderse del ataque del Duende bárbaro falla, recibiendo daño.\nDuende barbaro ataca nuevamente a Rimu con Hachazo brutal.\nDuende barbaro prepara un nuevo ataque contra Rimu tras el impacto previo.\nDuende barbaro prepara un nuevo asalto contra Rimu caído.\nDuende barbaro ataca nuevamente a Rimu caído con Hachazo brutal.",
-      "creada_en": "2026-04-12 06:04",
-      "host_token": "wEUGN9HFCVd3Fj3OjkX9wm5JxFWLGrMQ"
+      "id": "3XTUEU",
+      "nombre": "615",
+      "escenario_id": "taberna_bruma",
+      "escenario_nombre": "La Taberna de la Bruma",
+      "escenario_descripcion": "La aventura comienza en una taberna fronteriza donde los rumores sobre desapariciones y criaturas extranas no dejan de crecer.",
+      "resumen_partida": "la dificultad requerida.\nGwen usa Niebla Sagrada para proteger a Jan de la molotov lanzada por Jan hacia Simon.\nSimon avanza activamente hacia Jan a pesar de la protección mágica de Gwen.\nJan acierta un disparo crítico contra Simon, infligiéndole daño.\nGwen invoca una barrera defensiva tras el disparo crítico de Jan a Simon.\nSimon avanza activamente contra Jan a pesar de las protecciones mágicas.\nJan acierta un disparo contra Simon.\nGwen ataca a Simon utilizando Agujas Benditas mientras mantiene su defensa mágica.\nGwen ataca a Simon con Agujas Benditas mientras mantiene su defensa mágica activa.\nJan le pide a Gwen que detenga su acción, afirmando la muerte de Simon.\nGwen cesa sus ataques y defensas tras la declaración de Jan sobre la caída de Simon.\nJan pregunta a Gwen qué desea hacer ahora que Simon ha caído.\nGwen acepta la información de Jan sobre la caída de Simon y espera instrucciones.\nJan inicia una conversación tras la caída de Simon.\nGwen acepta la situación tras la caída de Simon y espera instrucciones de Jan.\nEl intento romántico de Jan hacia Gwen fracasa al superar la tirada de Persuasión/Engaño.\nGwen evalúa el campo de batalla tras la caída de Simon y la interacción con Jan.\nEl intento de Jan por forzar una respuesta emocional de Gwen fracasa al superar la tirada de Engaño/Persuasión.\nGwen responde a la presión de Jan confirmando la caída de Simon y evaluando el campo de batalla.\nJan acepta la información de Gwen y espera sus siguientes indicaciones.\nGwen evalúa el campo de batalla y toma una postura activa tras la caída de Simon.\nGwen evalúa activamente el campo de batalla tras el rechazo del intento romántico de Jan.\nEl intento de Jan por forzar una respuesta romántica o física a Gwen fracasa.\nGwen evalúa activamente el campo de batalla tras la interacción fallida con Jan.\nEl intento de Jan por hacerle cosquillas a Gwen falla debido a su estado de alerta.\nGwen toma una postura activa y ofensiva tras la conclusión de los combates recientes.\nEl intento de Jan por un acercamiento físico y emocional a Gwen fracasa al superar la tirada de Engaño/Persuasión.\nGwen toma una postura ofensiva al desenvainar sus tijeras encantadas tras el intento de contacto de Jan.\nEl intento de Jan por provocar una respuesta emocional romántica en Gwen tiene éxito.\nGwen mantiene su alerta y responde al intento de intimidad de Jan apuntándole con sus tijeras encantadas.",
+      "creada_en": "2026-04-12 20:27",
+      "host_token": "cOSDdcvG54WP_M4gueFpMWvE9yS0bxRS"
     }
   ]
 }

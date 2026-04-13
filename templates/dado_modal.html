@@ -203,6 +203,31 @@
     @keyframes flash-g { 0%{opacity:0} 15%{opacity:1} 100%{opacity:0} }
     @keyframes flash-r { 0%{opacity:0} 15%{opacity:1} 100%{opacity:0} }
 
+    /* ── DC BADGE sobre el dado ── */
+    #dc-badge {
+      position:absolute; top:7px; left:50%; transform:translateX(-50%);
+      z-index:10; pointer-events:none;
+      font-family:'Cinzel',serif; font-size:.62rem; letter-spacing:3px; text-transform:uppercase;
+      color:rgba(232,184,64,.55);
+      background:rgba(8,3,17,.68); border:1px solid rgba(175,135,65,.22); border-radius:20px;
+      padding:3px 11px; white-space:nowrap;
+    }
+    #dc-badge .badge-val {
+      font-family:'Cinzel Decorative',serif; font-size:.78rem; font-weight:700; color:#e8b840;
+    }
+    #dc-badge.dc-hi  .badge-val { color:#ff7060; }
+    #dc-badge.dc-low .badge-val { color:#70e880; }
+
+    /* ── Pop final antes de éxito/fallo ── */
+    @keyframes pop-final {
+      0%  { transform:scale(1); }
+      55% { transform:scale(1.26); }
+      100%{ transform:scale(1.12); }
+    }
+    #result.pop-final {
+      animation:pop-final .38s cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+
     /* SEP / BOTÓN */
     .sep { height:1px; margin:10px 0; background:linear-gradient(90deg,transparent,rgba(155,115,240,.14),transparent); }
     #btn {
@@ -254,6 +279,8 @@
   <div id="wrap">
     <!-- Texto flotante para Crítico / Desastre -->
     <div id="floating-text"></div>
+    <!-- Badge dificultad sobre el dado -->
+    <div id="dc-badge">DC <span class="badge-val" id="dc-badge-val">18</span></div>
   </div>
 
   <div class="result-area" id="result-area">
@@ -275,12 +302,20 @@
 ══════════════════════════════════════════════ */
 let dcVal=18, modVal=0;
 const dcEl=document.getElementById('dc-val'), modEl=document.getElementById('mod-val');
+const dcBadge=document.getElementById('dc-badge'), dcBadgeVal=document.getElementById('dc-badge-val');
+
+function syncDcBadge(){
+  dcBadgeVal.textContent=dcVal;
+  dcBadge.className=dcVal>=20?'dc-hi':dcVal<=5?'dc-low':'';
+}
+syncDcBadge();
 
 function adj(type,delta){
   if(type==='dc'){
-    dcVal=Math.max(1,Math.min(30,dcVal+delta));          // mínimo 1
+    dcVal=Math.max(1,Math.min(30,dcVal+delta));
     dcEl.textContent=dcVal;
     dcEl.className='ctrl-num'+(dcVal>=20?' dc-hi':dcVal<=5?' dc-low':'');
+    syncDcBadge();
   }else{
     modVal=Math.max(-10,Math.min(10,modVal+delta));
     modEl.textContent=modVal>=0?`+${modVal}`:`${modVal}`;
@@ -523,26 +558,50 @@ function setResultTick(num){
 }
 
 /* ── Animación del modificador ── */
+function popFinalThenDone(finalNum,onDone){
+  resultEl.classList.remove('pop-final'); void resultEl.offsetWidth;
+  resultEl.classList.add('pop-final');
+  setTimeout(()=>{ resultEl.classList.remove('pop-final'); onDone(finalNum); },400);
+}
+
 function animateModifier(dieRoll,mod,onDone){
   const absSteps=Math.abs(mod),sign=mod>=0?1:-1;
   const stepMs=Math.max(110,180-absSteps*5);
-  if(absSteps===0){onDone(dieRoll);return;}
-  resultEl.textContent=dieRoll;resultEl.className='';
-  modCountEl.textContent=mod>=0?`+${mod}`:`${mod}`;
-  modCountEl.className=`show ${mod>0?'pos':'neg'}`;
-  let cur=dieRoll,rem=mod,step=0;
-  const iv=setInterval(()=>{
-    cur+=sign;rem-=sign;step++;
-    setResultTick(cur);
-    modCountEl.textContent=rem>=0?`+${rem}`:`${rem}`;
-    if(step>=absSteps){
-      clearInterval(iv);
-      setTimeout(()=>{
-        modCountEl.className=mod>0?'pos':'neg';
-        setTimeout(()=>{modCountEl.textContent='';onDone(cur);},260);
-      },300);
-    }
-  },stepMs);
+
+  // Mostrar resultado crudo
+  resultEl.textContent=dieRoll; resultEl.className='';
+  modCountEl.className=''; modCountEl.textContent='';
+
+  if(absSteps===0){
+    // Sin modificador: pausa breve, crece un poco, pasa a éxito/fallo
+    setTimeout(()=>popFinalThenDone(dieRoll,onDone), 220);
+    return;
+  }
+
+  // Pausa para ver el número crudo antes de que aparezca el modificador
+  setTimeout(()=>{
+    modCountEl.textContent=mod>=0?`+${mod}`:`${mod}`;
+    modCountEl.className=`show ${mod>0?'pos':'neg'}`;
+
+    let cur=dieRoll, rem=mod, step=0;
+    const iv=setInterval(()=>{
+      cur+=sign; rem-=sign; step++;
+      setResultTick(cur);
+      modCountEl.textContent=rem>=0?`+${rem}`:`${rem}`;
+      if(step>=absSteps){
+        clearInterval(iv);
+        setTimeout(()=>{
+          // Ocultar el contador de modificador
+          modCountEl.className=mod>0?'pos':'neg';
+          setTimeout(()=>{
+            modCountEl.textContent='';
+            // Número final crece antes de pasar a éxito/fallo
+            popFinalThenDone(cur,onDone);
+          },240);
+        },300);
+      }
+    },stepMs);
+  },350);
 }
 
 /* ── Resultado normal (con modificador) ── */

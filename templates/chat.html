@@ -9,7 +9,8 @@
         :root{--bg:#0e0c10;--panel:#17131d;--soft:rgba(255,255,255,.03);--border:rgba(201,168,76,.22);--gold:#c9a84c;--text:#ebe1d2;--muted:#a59884;--accent:#7c4dbd;--ok:#4a9c6a;--bad:#c4473a;--hp:#c4473a;--mp:#3a5fa8;--xp:#c9a84c;--overlay:rgba(6,6,10,.76)}
         *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%} body{background:var(--bg);color:var(--text);font-family:Georgia,serif;overflow:hidden} button,textarea{font:inherit} [hidden]{display:none!important}
         .layout{display:grid;grid-template-columns:280px minmax(0,1fr) 260px;grid-template-rows:52px minmax(0,1fr);height:100vh}
-        .topbar,.panel-left,.panel-right,.chat-footer{background:var(--panel)} .topbar{grid-column:1/-1;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:0 16px} .brand,.section-title,.turn-badge,.name-main,.modal-title{font-family:"Times New Roman",serif;letter-spacing:.06em}
+        .topbar,.panel-left,.panel-right,.chat-footer{background:var(--panel)} .topbar{grid-column:1/-1;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:0 16px;position:relative}
+        .topbar-turn{position:absolute;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;line-height:1.2;pointer-events:none}.topbar-turn[hidden]{display:none!important}.topbar-turn-label{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.1em}.topbar-turn-name{color:var(--gold);font-family:"Times New Roman",serif;font-size:14px;letter-spacing:.04em;white-space:nowrap} .brand,.section-title,.turn-badge,.name-main,.modal-title{font-family:"Times New Roman",serif;letter-spacing:.06em}
         .brand{color:var(--gold);font-size:15px}.brand-button{background:transparent;border:0;padding:0;cursor:pointer;transition:color .18s ease,text-shadow .18s ease}.brand-button:hover{color:#e0c57d;text-shadow:0 0 10px rgba(201,168,76,.22)}.brand-button:focus-visible{outline:1px solid rgba(201,168,76,.45);outline-offset:4px;border-radius:4px}.scene{color:var(--muted);font-size:13px;display:flex;align-items:center;gap:8px}.spacer{flex:1}.turn-badge{color:#d4bf86;border:1px solid rgba(124,77,189,.5);background:rgba(124,77,189,.18);border-radius:999px;padding:4px 10px;font-size:11px}
         .conn{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}.dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}.dot.warning{background:var(--gold)}.dot.error{background:var(--bad)}.host-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid rgba(74,156,106,.35);background:rgba(74,156,106,.12);color:#a6debb;font-size:11px;text-decoration:none}
         .panel-left,.panel-right{display:flex;flex-direction:column;min-height:0}.panel-left{border-right:1px solid var(--border)}.panel-right{border-left:1px solid var(--border)}
@@ -21,6 +22,7 @@
         .bar-row{display:flex;gap:8px;align-items:center;margin-bottom:6px}.bar-row span:first-child{width:24px;color:var(--muted);font-size:11px}.bar-track{flex:1;height:6px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}.bar-fill{height:100%;width:0%}.bar-fill.hp{background:var(--hp)}.bar-fill.mp{background:var(--mp)}.bar-fill.xp{background:var(--xp)}.bar-value{width:58px;text-align:right;color:var(--muted);font-size:11px}
         .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 14px;border-bottom:1px solid var(--border)}.stat{background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:6px 4px;text-align:center}.stat strong{display:block;font-size:14px}.stat small{color:var(--muted);font-size:9px}
         .players,.inventory{flex:1;overflow-y:auto;padding:10px 14px}.player-row{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;margin-bottom:6px}.player-row.active{background:rgba(201,168,76,.08)}.player-row.turn-current{outline:1px solid rgba(201,168,76,.28);background:rgba(201,168,76,.06)}.player-open{flex:1;min-width:0;display:flex;align-items:center;gap:8px}.player-name{color:var(--text);font-size:13px}
+        .player-hp-row{display:flex;align-items:center;gap:5px;margin-top:4px}.player-hp-track{flex:1;height:4px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}.player-hp-fill{height:100%;border-radius:999px;background:var(--hp);transition:width .3s}.player-hp-text{color:var(--muted);font-size:10px;white-space:nowrap}
         .chat{display:flex;flex-direction:column;min-width:0;min-height:0}.messages{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:5px}.msg{max-width:92%;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.04)}.msg.normal{border-radius:4px 12px 12px 12px}.msg.propio{align-self:flex-end;background:rgba(124,77,189,.16);border-color:rgba(124,77,189,.38);border-radius:12px 4px 12px 12px}.msg.ia{max-width:96%;border-radius:4px 16px 16px 16px;border-left:3px solid var(--gold);background:rgba(130,90,30,.14);border-color:rgba(201,168,76,.3)}.msg.sistema,.msg.error{align-self:center;max-width:none;border-radius:999px;font-size:12px}.msg.sistema{background:rgba(201,168,76,.12);color:#e0c57d}.msg.error{background:rgba(196,71,58,.14);color:#f1b2ac}.msg-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;min-width:0}.msg.propio .msg-head{justify-content:flex-end}.msg-author{color:var(--gold);font-size:11px;margin-bottom:0;line-height:1.2}.msg-author.ia-autor{color:#d4bf86;font-style:italic;letter-spacing:.04em}
         .pensamiento{color:#9b8ed4;font-style:italic}
         .accion{color:#e8d8a0;font-style:italic}
@@ -40,8 +42,9 @@
         .tag-default{background:rgba(255,255,255,.04);border-color:var(--border);color:var(--muted)}
         .chat-footer{border-top:1px solid var(--border);padding:10px 14px}.chat-controls{display:flex;gap:8px;align-items:flex-end} textarea{flex:1;resize:none;min-height:42px;max-height:96px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);padding:10px 12px;outline:none}.chat-note{margin-top:8px;min-height:18px;color:var(--muted);font-size:12px}.chat-note.error{color:#f1b2ac}
         .action{border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);padding:10px 14px;cursor:pointer}.action.send{background:rgba(124,77,189,.18);border-color:rgba(124,77,189,.45)}.action-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
-        .scene-box,.turn-box{padding:10px 14px;border-bottom:1px solid var(--border)}.scene-name{color:var(--gold);font-size:13px;margin-bottom:4px}.turn-box{display:flex;gap:10px;align-items:center}.turn-num{color:var(--gold);font-size:24px}.turn-label{color:var(--muted);font-size:10px;text-transform:uppercase}
+        .scene-box{padding:10px 14px;border-bottom:1px solid var(--border)}.scene-name{color:var(--gold);font-size:13px;margin-bottom:4px}
         .item{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}.item:last-child{border-bottom:0}.item-emoji{width:22px;text-align:center}.item-name{font-size:13px}.item-desc,.item-count{color:var(--muted);font-size:11px}.summary{padding:12px 14px 14px;border-top:1px solid rgba(255,255,255,.04);line-height:1.5}
+        .collapse-btn{background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:13px;padding:2px 4px;border-radius:4px;line-height:1;transition:color .15s,transform .2s}.collapse-btn:hover{color:var(--gold)}.collapse-btn.collapsed{transform:rotate(-90deg)}.inventory.collapsed,.summary.collapsed{display:none}
         .modal{position:fixed;inset:0;background:var(--overlay);display:flex;align-items:center;justify-content:center;padding:18px;z-index:20}.modal-card{width:min(720px,100%);max-height:88vh;overflow-y:auto;background:linear-gradient(180deg,#1c1722,#120f17);border:1px solid rgba(201,168,76,.3);border-radius:18px}.modal-head{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;align-items:center}.modal-title{color:var(--gold);font-size:17px}.modal-sub{color:var(--muted);font-size:12px;margin-top:4px}.modal-body{padding:18px;display:grid;gap:12px}.modal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
         .modal-box,.modal-section,.blocked{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:12px}.modal-k{color:var(--muted);font-size:10px;text-transform:uppercase}.modal-v{margin-top:4px;font-size:14px}.modal-section h3{color:var(--gold);font-size:11px;text-transform:uppercase;margin-bottom:8px}.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{border:1px solid var(--border);border-radius:999px;padding:6px 10px;background:rgba(255,255,255,.04);font-size:12px}.modal-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.modal-stat{text-align:center;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);padding:10px}.modal-stat strong{display:block;font-size:16px}.modal-stat small{color:var(--muted);font-size:10px}
         @media (max-width:960px){body{overflow:auto}.layout{grid-template-columns:1fr;grid-template-rows:52px auto minmax(320px,1fr) auto;height:auto;min-height:100vh}.panel-left,.panel-right{border:0;border-top:1px solid var(--border)}}
@@ -54,6 +57,10 @@
             <button class="brand brand-button" id="btn-dashboard" type="button" title="Volver al dashboard">&#9876; Raphael</button>
             <div class="scene"><span class="dot"></span><span>{{ sala_nombre }} · ID {{ sala_id }}</span></div>
             <div class="spacer"></div>
+            <div class="topbar-turn" id="turn-bar" hidden>
+                <span class="topbar-turn-label">Turno</span>
+                <span class="topbar-turn-name" id="turno-jugador">—</span>
+            </div>
             <div class="turn-badge" id="turno-badge">Turno 1</div>
             {% if es_host and host_url %}
             <a class="host-pill" href="{{ host_url }}">Panel host</a>
@@ -88,8 +95,16 @@
                 <div class="stat"><strong id="stat-con">--</strong><small>CON</small></div>
                 <div class="stat"><strong id="stat-car">--</strong><small>CAR</small></div>
             </div>
-            <div class="section-head"><div class="section-title" id="label-jugadores">Jugadores - 0</div></div>
+            <div class="section-head">
+                <div class="section-title" id="label-jugadores">Jugadores - 0</div>
+                <button class="collapse-btn" id="btn-toggle-jugadores" type="button" title="Colapsar jugadores">&#9660;</button>
+            </div>
             <div class="players" id="lista-jugadores"></div>
+            <div class="section-head">
+                <div class="section-title" id="label-npcs">PNJs / NPCs - 0</div>
+                <button class="collapse-btn" id="btn-toggle-npcs" type="button" title="Colapsar PNJs/NPCs">&#9660;</button>
+            </div>
+            <div class="players" id="lista-npcs"><div class="item-desc" style="padding:8px 2px">No hay PNJs/NPCs en escena.</div></div>
         </aside>
 
         <main class="chat">
@@ -120,15 +135,11 @@
                 </div>
             </div>
             {% endif %}
-            <div class="section-head"><div class="section-title">Turno</div></div>
-            <div class="turn-box">
-                <div class="turn-num" id="turno-num">1</div>
-                <div>
-                    <div class="turn-label">En juego</div>
-                    <div class="scene-desc" id="turno-jugador">Esperando...</div>
-                </div>
+
+            <div class="section-head">
+                <div class="section-title">Inventario</div>
+                <button class="collapse-btn" id="btn-toggle-inventario" type="button" title="Colapsar inventario">&#9660;</button>
             </div>
-            <div class="section-head"><div class="section-title">Inventario</div></div>
             <div class="inventory" id="inventario-lista"><div class="item-desc">Tu inventario aparecera aqui cuando llegue la ficha.</div></div>
             <div class="summary" id="resumen-personaje">El resumen corto de tu personaje aparecera aqui.</div>
         </aside>
@@ -168,6 +179,8 @@
         const elChatNote = document.getElementById("chat-note");
         const elListaJug = document.getElementById("lista-jugadores");
         const elLabelJug = document.getElementById("label-jugadores");
+        const elListaNpcs = document.getElementById("lista-npcs");
+        const elLabelNpcs = document.getElementById("label-npcs");
         const elAvatar = document.getElementById("avatar-iniciales");
         const elFichaNombre = document.getElementById("ficha-nombre");
         const elFichaClase = document.getElementById("ficha-clase");
@@ -177,7 +190,7 @@
         const elInventario = document.getElementById("inventario-lista");
         const elResumen = document.getElementById("resumen-personaje");
         const elTurnoJugador = document.getElementById("turno-jugador");
-        const elTurnoNum = document.getElementById("turno-num");
+        const elTurnBar = document.getElementById("turn-bar");
         const elModal = document.getElementById("modal-resumen");
         const elModalTitulo = document.getElementById("modal-titulo");
         const elModalSubtitulo = document.getElementById("modal-subtitulo");
@@ -202,6 +215,7 @@
 
         const jugadores = new Map();
         let jugadorEnModal = null;
+        let npcEnModal = null;
         let combateActual = { activa: false, ronda: 0, espera_resolucion: false, tirada_pendiente: null, actor_actual: null, actores: [] };
         const SESSION_PREFIX = "raphael:session:";
 
@@ -659,17 +673,17 @@
 
             if (combateActual.activa) {
                 elTurnoBadge.textContent = `Ronda ${combateActual.ronda || 1}`;
-                elTurnoNum.textContent = String(combateActual.ronda || 1);
                 elTurnoJugador.textContent = combateActual.actor_actual
                     ? `${combateActual.actor_actual.nombre}${combateActual.espera_resolucion ? " · Resolucion" : ""}`
                     : "Sin actor listo";
+                elTurnBar.hidden = false;
             } else {
                 elTurnoBadge.textContent = "Modo libre";
-                elTurnoNum.textContent = "--";
-                elTurnoJugador.textContent = "Sin escena activa";
+                elTurnBar.hidden = true;
             }
 
             renderPlayers([...jugadores.values()]);
+            renderNpcs(combateActual.actores);
             actualizarControlesCombate();
             controladorDado.actualizarCombate(combateActual);
         }
@@ -686,11 +700,21 @@
                 const open = document.createElement("button");
                 open.type = "button";
                 open.className = "player-open";
+                const hpActual = player.vida_actual ?? null;
+                const hpMax = player.vida_maxima ?? null;
+                const hpVisible = player.puede_ver && hpActual !== null && hpMax !== null && hpMax > 0;
+                const hpPct = hpVisible ? Math.min(100, Math.max(0, Math.round(hpActual / hpMax * 100))) : 0;
+                const hpBar = hpVisible ? `
+                    <div class="player-hp-row">
+                        <div class="player-hp-track"><div class="player-hp-fill" style="width:${hpPct}%"></div></div>
+                        <div class="player-hp-text">${hpActual}/${hpMax}</div>
+                    </div>` : "";
                 open.innerHTML = `
                     ${avatarMarkup(player, "small")}
-                    <div style="min-width:0;">
+                    <div style="min-width:0;flex:1;">
                         <div class="player-name">${esc(player.nombre)}</div>
                         <div class="player-sub">${esc(player.puede_ver ? `${player.clase || "Sin clase"}${player.nivel ? ` | Nivel ${player.nivel}` : ""}` : "Ficha bloqueada")}${actor ? ` · ${esc(textoEstadoActor(actor.estado))}` : ""}</div>
+                        ${hpBar}
                     </div>
                 `;
                 open.addEventListener("click", () => openSummary(player.nombre));
@@ -710,6 +734,54 @@
                 row.appendChild(open);
                 row.appendChild(lock);
                 elListaJug.appendChild(row);
+            }
+        }
+
+        function renderNpcs(actores) {
+            const npcs = (actores || []).filter((a) => !a.jugador_nombre);
+            elLabelNpcs.textContent = `PNJs / NPCs - ${npcs.length}`;
+
+            if (!npcs.length) {
+                elListaNpcs.innerHTML = '<div class="item-desc" style="padding:8px 2px">No hay PNJs/NPCs en escena.</div>';
+                return;
+            }
+
+            elListaNpcs.innerHTML = "";
+            for (const npc of npcs) {
+                const esActual = combateActual.actor_actual && combateActual.actor_actual.nombre === npc.nombre;
+                const row = document.createElement("div");
+                row.className = `player-row${esActual ? " turn-current" : ""}`;
+
+                const hpActual = npc.vida_actual ?? null;
+                const hpMax = npc.vida_maxima ?? null;
+                const hpVisible = hpActual !== null && hpMax !== null && hpMax > 0;
+                const hpPct = hpVisible ? Math.min(100, Math.max(0, Math.round(hpActual / hpMax * 100))) : 0;
+                const hpBar = hpVisible ? `
+                    <div class="player-hp-row">
+                        <div class="player-hp-track"><div class="player-hp-fill" style="width:${hpPct}%"></div></div>
+                        <div class="player-hp-text">${hpActual}/${hpMax}</div>
+                    </div>` : "";
+                const estadoTexto = textoEstadoActor(npc.estado);
+
+                const open = document.createElement("button");
+                open.type = "button";
+                open.className = "player-open";
+                open.style.background = "transparent";
+                open.style.border = "0";
+                open.style.cursor = "pointer";
+                open.style.textAlign = "left";
+                open.style.width = "100%";
+                open.innerHTML = `
+                    <div class="avatar small" style="flex-shrink:0;">&#128123;</div>
+                    <div style="min-width:0;flex:1;">
+                        <div class="player-name">${esc(npc.nombre || "NPC")}</div>
+                        <div class="player-sub">${esc(npc.tipo || "PNJ")} · ${esc(estadoTexto)}</div>
+                        ${hpBar}
+                    </div>
+                `;
+                open.addEventListener("click", () => openNpcModal(npc.nombre));
+                row.appendChild(open);
+                elListaNpcs.appendChild(row);
             }
         }
 
@@ -793,18 +865,15 @@
         }
 
         function refreshModal() {
-            if (!jugadorEnModal) {
-                return;
+            if (jugadorEnModal) {
+                const profile = jugadores.get(jugadorEnModal);
+                if (!profile) { closeModal(); return; }
+                renderModal(profile);
+            } else if (npcEnModal) {
+                const actor = (combateActual.actores || []).find((a) => a.nombre === npcEnModal && !a.jugador_nombre);
+                if (!actor) { closeModal(); return; }
+                renderNpcModal(actor);
             }
-
-            const profile = jugadores.get(jugadorEnModal);
-
-            if (!profile) {
-                closeModal();
-                return;
-            }
-
-            renderModal(profile);
         }
 
         function openSummary(nombre) {
@@ -815,13 +884,48 @@
                 return;
             }
 
+            npcEnModal = null;
             jugadorEnModal = nombre;
             renderModal(profile);
             elModal.hidden = false;
         }
 
+        function openNpcModal(npcNombre) {
+            const actor = (combateActual.actores || []).find((a) => a.nombre === npcNombre && !a.jugador_nombre);
+            if (!actor) {
+                message("error", "No se encontro la ficha de ese PNJ.");
+                return;
+            }
+            jugadorEnModal = null;
+            npcEnModal = npcNombre;
+            renderNpcModal(actor);
+            elModal.hidden = false;
+        }
+
+        function renderNpcModal(actor) {
+            elModalTitulo.textContent = actor.nombre || "PNJ";
+            elModalSubtitulo.textContent = `${actor.raza ? actor.raza + " · " : ""}${actor.clase || "Sin clase"} · Nivel ${actor.nivel ?? "--"} · ${textoEstadoActor(actor.estado)}`;
+
+            elModalCuerpo.innerHTML = `
+                <div class="modal-grid">
+                    <div class="modal-box"><div class="modal-k">Tipo</div><div class="modal-v">${esc(actor.tipo || "PNJ")}</div></div>
+                    <div class="modal-box"><div class="modal-k">Control</div><div class="modal-v">${esc(actor.control || "IA")}</div></div>
+                    <div class="modal-box"><div class="modal-k">Vida</div><div class="modal-v">${esc(actor.vida_actual ?? "--")} / ${esc(actor.vida_maxima ?? "--")}</div></div>
+                    <div class="modal-box"><div class="modal-k">Mana</div><div class="modal-v">${esc(actor.mana_actual ?? "--")} / ${esc(actor.mana_maximo ?? "--")}</div></div>
+                    <div class="modal-box"><div class="modal-k">Estado</div><div class="modal-v">${esc(textoEstadoActor(actor.estado))}</div></div>
+                    <div class="modal-box"><div class="modal-k">Tirada base</div><div class="modal-v">${esc((actor.tiradas || [])[0] || "Sin datos")}</div></div>
+                </div>
+                <div class="modal-section"><h3>Resumen</h3><div>${esc(actor.resumen || "Sin resumen cargado.")}</div></div>
+                <div class="modal-section"><h3>Estadisticas</h3>${statsBlock(actor.estadisticas)}</div>
+                <div class="modal-section"><h3>Habilidades</h3>${chips(actor.habilidades || [])}</div>
+                <div class="modal-section"><h3>Pasivas</h3>${chips(actor.pasivas || [])}</div>
+                <div class="modal-section"><h3>Tiradas</h3>${chips(actor.tiradas || [])}</div>
+            `;
+        }
+
         function closeModal() {
             jugadorEnModal = null;
+            npcEnModal = null;
             elModal.hidden = true;
         }
 
@@ -1036,6 +1140,31 @@
         }, 15000);
 
         renderCombatState(combateActual);
+
+        // Secciones colapsables
+        function makeCollapsible(btnId, targets, labelExpand, labelCollapse) {
+            const btn = document.getElementById(btnId);
+            if (!btn) return;
+            let colapsado = false;
+            btn.addEventListener("click", function() {
+                colapsado = !colapsado;
+                for (const el of targets) { if (el) el.classList.toggle("collapsed", colapsado); }
+                btn.classList.toggle("collapsed", colapsado);
+                btn.title = colapsado ? labelExpand : labelCollapse;
+            });
+        }
+
+        makeCollapsible("btn-toggle-inventario",
+            [document.getElementById("inventario-lista"), document.getElementById("resumen-personaje")],
+            "Expandir inventario", "Colapsar inventario");
+
+        makeCollapsible("btn-toggle-jugadores",
+            [document.getElementById("lista-jugadores")],
+            "Expandir jugadores", "Colapsar jugadores");
+
+        makeCollapsible("btn-toggle-npcs",
+            [document.getElementById("lista-npcs")],
+            "Expandir PNJs/NPCs", "Colapsar PNJs/NPCs");
     </script>
 </body>
 </html>

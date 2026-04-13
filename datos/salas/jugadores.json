@@ -1,200 +1,69 @@
 {
   "sesiones": [
     {
-      "token": "rp-1775995476254-49a75ea70e7c2",
-      "sala_id": "FF8ERC",
-      "nombre": "Rimu",
+      "token": "rp-1776047356219-35452b411171d8",
+      "sala_id": "3XTUEU",
+      "nombre": "Jan",
       "datos_creacion": {
-        "nombre": "Rimu",
-        "sala_id": "FF8ERC",
-        "session_token": "rp-1775995476254-49a75ea70e7c2",
-        "raza": "draconido",
-        "subraza": null,
-        "clase": "paladin",
-        "trasfondo": "entertainador",
-        "ascendencia_draconica": "cobre",
-        "modificadores_libres": null,
-        "atributos": {
-          "fue": 14,
-          "des": 15,
-          "con": 8,
-          "int": 10,
-          "sab": 13,
-          "car": 12
-        },
-        "habilidades_elegidas": [
-          "Religión",
-          "Intimidación"
-        ]
-      },
-      "perfil": {
-        "nombre": "Rimu",
-        "clase": "Paladín",
-        "nivel": 1,
-        "vida_actual": 0,
-        "vida_maxima": 9,
-        "mana_actual": 0,
-        "mana_maximo": 0,
-        "xp_actual": 0,
-        "xp_maximo": 300,
-        "estadisticas": {
-          "fue": 16,
-          "des": 15,
-          "con": 8,
-          "int": 10,
-          "sab": 13,
-          "car": 13
-        },
-        "habilidades": [
-          "Sentido divino: detectas criaturas celestiales, infernales y no-muertos cercanas.",
-          "Imposición de manos: curas un total de 5 × nivel PG por descanso largo.",
-          "Fama del artista: puedes encontrar hospedaje y comida a cambio de actuar; los admiradores a veces se acercan."
-        ],
-        "pasivas": [
-          "Ascendencia dracónica: elige un tipo de dragón que determina tu tipo de daño y forma del aliento.",
-          "Arma de aliento: usa acción para exhalar energía destructiva (CD 8 + mod CON + bon competencia).",
-          "Resistencia al daño: resistencia al tipo de daño de tu ascendencia.",
-          "Idiomas: Común y Dracónico."
-        ],
-        "tiradas": [
-          "Acrobacias +4",
-          "Actuación +3",
-          "Religión +2",
-          "Intimidación +3"
-        ],
-        "inventario": [
-          {
-            "icono": "[C]",
-            "nombre": "arma marcial y escudo",
-            "detalle": "Paladín",
-            "cantidad": 1
-          },
-          {
-            "icono": "[C]",
-            "nombre": "5 venablos",
-            "detalle": "Paladín",
-            "cantidad": 1
-          },
-          {
-            "icono": "[C]",
-            "nombre": "paquete de sacerdote",
-            "detalle": "Paladín",
-            "cantidad": 1
-          },
-          {
-            "icono": "[C]",
-            "nombre": "cota de mallas",
-            "detalle": "Paladín",
-            "cantidad": 1
-          },
-          {
-            "icono": "[C]",
-            "nombre": "símbolo sagrado",
-            "detalle": "Paladín",
-            "cantidad": 1
-          },
-          {
-            "icono": "[T]",
-            "nombre": "instrumento musical (de tu elección)",
-            "detalle": "Entretenedor",
-            "cantidad": 1
-          },
-          {
-            "icono": "[T]",
-            "nombre": "el favor de un admirador (carta de amor, mechón de cabello, joya)",
-            "detalle": "Entretenedor",
-            "cantidad": 1
-          },
-          {
-            "icono": "[T]",
-            "nombre": "traje de actuación",
-            "detalle": "Entretenedor",
-            "cantidad": 1
-          },
-          {
-            "icono": "[T]",
-            "nombre": "bolsa con 15 po",
-            "detalle": "Entretenedor",
-            "cantidad": 1
-          }
-        ],
-        "resumen": "Dracónido Paladín · Trasfondo: Entretenedor · PG 9 · FUE 16 DES 15 CON 8 INT 10 SAB 13 CAR 13.",
-        "privacidad_bloqueada": false,
-        "raza": "Dracónido",
-        "trasfondo": "Entretenedor",
-        "avatar_url": "/static/avatars/Rimu.png"
-      },
-      "creada_en": "2026-04-12 06:04:35",
-      "actualizada_en": "2026-04-12 06:10:00"
-    },
-    {
-      "token": "a01cbcd4-f904-4fda-9f3d-a6b9d21207c9",
-      "sala_id": "FF8ERC",
-      "nombre": "Brain",
-      "datos_creacion": {
-        "nombre": "Brain",
-        "sala_id": "FF8ERC",
-        "session_token": "a01cbcd4-f904-4fda-9f3d-a6b9d21207c9",
-        "raza": "semiorco",
+        "nombre": "Jan",
+        "sala_id": "3XTUEU",
+        "session_token": "rp-1776047356219-35452b411171d8",
+        "raza": "humano",
         "subraza": null,
         "clase": "picaro",
-        "trasfondo": "marinero",
+        "trasfondo": "criminal",
         "ascendencia_draconica": null,
         "modificadores_libres": null,
         "atributos": {
-          "fue": 14,
-          "des": 13,
-          "con": 15,
-          "int": 12,
-          "sab": 8,
-          "car": 10
+          "fue": 10,
+          "des": 15,
+          "con": 8,
+          "int": 14,
+          "sab": 12,
+          "car": 13
         },
         "habilidades_elegidas": [
-          "Investigación",
           "Acrobacias",
-          "Sigilo",
-          "Persuasión"
+          "Juego de manos",
+          "Atletismo",
+          "Investigación"
         ]
       },
       "perfil": {
-        "nombre": "Brain",
+        "nombre": "Jan",
         "clase": "Pícaro",
         "nivel": 1,
-        "vida_actual": 11,
-        "vida_maxima": 11,
+        "vida_actual": 7,
+        "vida_maxima": 7,
         "mana_actual": 0,
         "mana_maximo": 0,
         "xp_actual": 0,
         "xp_maximo": 300,
         "estadisticas": {
-          "fue": 16,
-          "des": 13,
-          "con": 16,
-          "int": 12,
-          "sab": 8,
-          "car": 10
+          "fue": 11,
+          "des": 16,
+          "con": 9,
+          "int": 15,
+          "sab": 13,
+          "car": 14
         },
         "habilidades": [
           "Expertise: doble bonificador de competencia en 2 habilidades o herramientas elegidas.",
           "Ataque furtivo: 1d6 daño extra cuando tienes ventaja o un aliado adyacente al objetivo.",
           "Jerga de ladrones: conoces el lenguaje secreto del hampa.",
-          "Pasaje seguro: cuando necesitas pasaje marítimo, puedes garantizarte a ti y a tus compañeros lugar en un barco."
+          "Contacto criminal: tienes un contacto de confianza en el mundo del crimen organizado."
         ],
         "pasivas": [
-          "Visión en la oscuridad: 60 pies.",
-          "Amenazante: competencia en Intimidación.",
-          "Resistencia implacable: cuando caes a 0 PG, puedes caer a 1 PG en su lugar (1 vez por descanso largo).",
-          "Ataques salvajes: en crítico con arma cuerpo a cuerpo, añade un dado de daño adicional.",
-          "Idiomas: Común y Orco."
+          "Versatilidad: ganas una competencia adicional en una habilidad de tu elección.",
+          "Idiomas: Común + un idioma adicional."
         ],
         "tiradas": [
-          "Atletismo +5",
-          "Percepción +1",
-          "Intimidación +2",
-          "Investigación +3",
-          "Acrobacias +3",
-          "Sigilo +3",
-          "Persuasión +2"
+          "Engaño +4",
+          "Sigilo +5",
+          "Acrobacias +5",
+          "Juego de manos +5",
+          "Atletismo +2",
+          "Investigación +4"
         ],
         "inventario": [
           {
@@ -236,42 +105,308 @@
           {
             "icono": "[T]",
             "nombre": "palanca",
-            "detalle": "Marinero",
+            "detalle": "Criminal",
             "cantidad": 1
           },
           {
             "icono": "[T]",
-            "nombre": "rollo de cuerda de seda de 15 metros",
-            "detalle": "Marinero",
+            "nombre": "conjunto de ropa oscura con capucha",
+            "detalle": "Criminal",
             "cantidad": 1
           },
           {
             "icono": "[T]",
-            "nombre": "un amuleto de la suerte (ojo blanco de vidrio, una escama de pez o cualquier objeto similar)",
-            "detalle": "Marinero",
+            "nombre": "herramientas de ladrón",
+            "detalle": "Criminal",
             "cantidad": 1
           },
           {
             "icono": "[T]",
-            "nombre": "conjunto de ropa común",
-            "detalle": "Marinero",
-            "cantidad": 1
-          },
-          {
-            "icono": "[T]",
-            "nombre": "bolsa con 10 po",
-            "detalle": "Marinero",
+            "nombre": "bolsa con 15 po",
+            "detalle": "Criminal",
             "cantidad": 1
           }
         ],
-        "resumen": "Semiorco Pícaro · Trasfondo: Marinero · PG 11 · FUE 16 DES 13 CON 16 INT 12 SAB 8 CAR 10.",
+        "resumen": "Humano Pícaro · Trasfondo: Criminal · PG 7 · FUE 11 DES 16 CON 9 INT 15 SAB 13 CAR 14.",
         "privacidad_bloqueada": false,
-        "raza": "Semiorco",
-        "trasfondo": "Marinero",
+        "raza": "Humano",
+        "trasfondo": "Criminal",
+        "avatar_url": "/static/avatars/Jan.png"
+      },
+      "creada_en": "2026-04-12 20:29:11",
+      "actualizada_en": "2026-04-12 21:01:17"
+    },
+    {
+      "token": "rp-1776046760183-b7e8376750ce2",
+      "sala_id": "63NVDM",
+      "nombre": "Jan",
+      "datos_creacion": {
+        "nombre": "Jan",
+        "sala_id": "63NVDM",
+        "session_token": "rp-1776046760183-b7e8376750ce2",
+        "raza": "humano",
+        "subraza": null,
+        "clase": "picaro",
+        "trasfondo": "criminal",
+        "ascendencia_draconica": null,
+        "modificadores_libres": null,
+        "atributos": {
+          "fue": 10,
+          "des": 15,
+          "con": 8,
+          "int": 14,
+          "sab": 12,
+          "car": 13
+        },
+        "habilidades_elegidas": [
+          "Atletismo",
+          "Juego de manos",
+          "Acrobacias",
+          "Investigación"
+        ]
+      },
+      "perfil": {
+        "nombre": "Jan",
+        "clase": "Pícaro",
+        "nivel": 1,
+        "vida_actual": 7,
+        "vida_maxima": 7,
+        "mana_actual": 0,
+        "mana_maximo": 0,
+        "xp_actual": 0,
+        "xp_maximo": 300,
+        "estadisticas": {
+          "fue": 11,
+          "des": 16,
+          "con": 9,
+          "int": 15,
+          "sab": 13,
+          "car": 14
+        },
+        "habilidades": [
+          "Expertise: doble bonificador de competencia en 2 habilidades o herramientas elegidas.",
+          "Ataque furtivo: 1d6 daño extra cuando tienes ventaja o un aliado adyacente al objetivo.",
+          "Jerga de ladrones: conoces el lenguaje secreto del hampa.",
+          "Contacto criminal: tienes un contacto de confianza en el mundo del crimen organizado."
+        ],
+        "pasivas": [
+          "Versatilidad: ganas una competencia adicional en una habilidad de tu elección.",
+          "Idiomas: Común + un idioma adicional."
+        ],
+        "tiradas": [
+          "Engaño +4",
+          "Sigilo +5",
+          "Atletismo +2",
+          "Juego de manos +5",
+          "Acrobacias +5",
+          "Investigación +4"
+        ],
+        "inventario": [
+          {
+            "icono": "[C]",
+            "nombre": "rapier",
+            "detalle": "Pícaro",
+            "cantidad": 1
+          },
+          {
+            "icono": "[C]",
+            "nombre": "arco corto y carcaj con 20 flechas",
+            "detalle": "Pícaro",
+            "cantidad": 1
+          },
+          {
+            "icono": "[C]",
+            "nombre": "paquete de burlador",
+            "detalle": "Pícaro",
+            "cantidad": 1
+          },
+          {
+            "icono": "[C]",
+            "nombre": "armadura de cuero",
+            "detalle": "Pícaro",
+            "cantidad": 1
+          },
+          {
+            "icono": "[C]",
+            "nombre": "2 dagas",
+            "detalle": "Pícaro",
+            "cantidad": 1
+          },
+          {
+            "icono": "[C]",
+            "nombre": "herramientas de ladrón",
+            "detalle": "Pícaro",
+            "cantidad": 1
+          },
+          {
+            "icono": "[T]",
+            "nombre": "palanca",
+            "detalle": "Criminal",
+            "cantidad": 1
+          },
+          {
+            "icono": "[T]",
+            "nombre": "conjunto de ropa oscura con capucha",
+            "detalle": "Criminal",
+            "cantidad": 1
+          },
+          {
+            "icono": "[T]",
+            "nombre": "herramientas de ladrón",
+            "detalle": "Criminal",
+            "cantidad": 1
+          },
+          {
+            "icono": "[T]",
+            "nombre": "bolsa con 15 po",
+            "detalle": "Criminal",
+            "cantidad": 1
+          }
+        ],
+        "resumen": "Humano Pícaro · Trasfondo: Criminal · PG 7 · FUE 11 DES 16 CON 9 INT 15 SAB 13 CAR 14.",
+        "privacidad_bloqueada": false,
+        "raza": "Humano",
+        "trasfondo": "Criminal",
+        "avatar_url": "/static/avatars/Jan.png"
+      },
+      "creada_en": "2026-04-12 20:28:11",
+      "actualizada_en": "2026-04-12 20:28:36"
+    },
+    {
+      "token": "48fe361b-fe91-48cd-9050-5d92b39aee50",
+      "sala_id": "3XTUEU",
+      "nombre": "Ainz",
+      "datos_creacion": {
+        "nombre": "Ainz",
+        "sala_id": "3XTUEU",
+        "session_token": "48fe361b-fe91-48cd-9050-5d92b39aee50",
+        "raza": "enano",
+        "subraza": "enano_de_la_montaña",
+        "clase": "brujo",
+        "trasfondo": "criminal",
+        "ascendencia_draconica": null,
+        "modificadores_libres": null,
+        "atributos": {
+          "fue": 14,
+          "des": 15,
+          "con": 10,
+          "int": 13,
+          "sab": 8,
+          "car": 12
+        },
+        "habilidades_elegidas": [
+          "Intimidación",
+          "Investigación"
+        ]
+      },
+      "perfil": {
+        "nombre": "Ainz",
+        "clase": "Brujo",
+        "nivel": 1,
+        "vida_actual": 9,
+        "vida_maxima": 9,
+        "mana_actual": 1,
+        "mana_maximo": 1,
+        "xp_actual": 0,
+        "xp_maximo": 300,
+        "estadisticas": {
+          "fue": 16,
+          "des": 15,
+          "con": 12,
+          "int": 13,
+          "sab": 8,
+          "car": 12
+        },
+        "habilidades": [
+          "Patrón de más allá: elige un patrón (el gran anciano, el archidiablo, el soberano feérico, etc.).",
+          "Magia del pacto: usa CAR. Recuperas todos los espacios de conjuro con un descanso corto.",
+          "Invocaciones sobrenaturales (nivel 2): poderes especiales del pacto.",
+          "Contacto criminal: tienes un contacto de confianza en el mundo del crimen organizado."
+        ],
+        "pasivas": [
+          "Visión en la oscuridad: 60 pies.",
+          "Resistencia enana: ventaja en salvaciones contra veneno; resistencia al daño por veneno.",
+          "Competencia en herramientas: herramientas de albañilería o herramientas de cervecero o instrumentos de músico.",
+          "Entrenamiento con armas enanas: competencia en hacha de guerra, hacha de mano, martillo ligero y martillo de guerra.",
+          "Conocimiento de la piedra: doble competencia en Historia sobre trabajo en piedra.",
+          "Entrenamiento con armaduras enanas: competencia en armaduras ligeras y medias."
+        ],
+        "tiradas": [
+          "Engaño +3",
+          "Sigilo +4",
+          "Intimidación +3",
+          "Investigación +3"
+        ],
+        "inventario": [
+          {
+            "icono": "[C]",
+            "nombre": "ballesta ligera y 20 virotes",
+            "detalle": "Brujo",
+            "cantidad": 1
+          },
+          {
+            "icono": "[C]",
+            "nombre": "bolsa de componentes",
+            "detalle": "Brujo",
+            "cantidad": 1
+          },
+          {
+            "icono": "[C]",
+            "nombre": "paquete de erudito",
+            "detalle": "Brujo",
+            "cantidad": 1
+          },
+          {
+            "icono": "[C]",
+            "nombre": "armadura de cuero",
+            "detalle": "Brujo",
+            "cantidad": 1
+          },
+          {
+            "icono": "[C]",
+            "nombre": "cualquier arma sencilla",
+            "detalle": "Brujo",
+            "cantidad": 1
+          },
+          {
+            "icono": "[C]",
+            "nombre": "2 dagas",
+            "detalle": "Brujo",
+            "cantidad": 1
+          },
+          {
+            "icono": "[T]",
+            "nombre": "palanca",
+            "detalle": "Criminal",
+            "cantidad": 1
+          },
+          {
+            "icono": "[T]",
+            "nombre": "conjunto de ropa oscura con capucha",
+            "detalle": "Criminal",
+            "cantidad": 1
+          },
+          {
+            "icono": "[T]",
+            "nombre": "herramientas de ladrón",
+            "detalle": "Criminal",
+            "cantidad": 1
+          },
+          {
+            "icono": "[T]",
+            "nombre": "bolsa con 15 po",
+            "detalle": "Criminal",
+            "cantidad": 1
+          }
+        ],
+        "resumen": "Enano de la Montaña Brujo · Trasfondo: Criminal · PG 9 · FUE 16 DES 15 CON 12 INT 13 SAB 8 CAR 12.",
+        "privacidad_bloqueada": false,
+        "raza": "Enano de la Montaña",
+        "trasfondo": "Criminal",
         "avatar_url": null
       },
-      "creada_en": "2026-04-12 06:04:17",
-      "actualizada_en": "2026-04-12 06:07:10"
+      "creada_en": "2026-04-12 20:27:41",
+      "actualizada_en": "2026-04-12 21:05:22"
     }
   ]
 }

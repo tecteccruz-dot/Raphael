@@ -34,6 +34,9 @@ _SCHEMA_RESPUESTA = {
                     "nombre": {"type": "string"},
                     "control": {"type": "string", "enum": ["jugador", "ia"]},
                     "iniciativa": {"type": "integer"},
+                    "plantilla_id": {"type": "string"},
+                    "npc_unico_id": {"type": "string"},
+                    "personaje_id": {"type": "string"},
                     "vida_maxima": {"type": "integer"},
                     "vida_actual": {"type": "integer"},
                 },
@@ -83,6 +86,30 @@ _SCHEMA_INTERPRETACION = {
 
 class LMStudioError(RuntimeError):
     pass
+
+
+def respuesta_turno_es_valida(respuesta: object) -> tuple[bool, str]:
+    if not isinstance(respuesta, dict):
+        return False, "La respuesta no es un objeto JSON."
+
+    narracion = respuesta.get("narracion")
+    resumen_delta = respuesta.get("resumen_delta")
+    fin_de_turno = respuesta.get("fin_de_turno")
+    acciones = respuesta.get("acciones")
+
+    if not isinstance(narracion, str) or not narracion.strip():
+        return False, "La narracion viene vacia."
+
+    if resumen_delta is not None and not isinstance(resumen_delta, str):
+        return False, "resumen_delta no es texto."
+
+    if not isinstance(fin_de_turno, bool):
+        return False, "fin_de_turno no es booleano."
+
+    if not isinstance(acciones, list):
+        return False, "Las acciones no son una lista."
+
+    return True, ""
 
 
 def _base_url() -> str:
@@ -258,7 +285,7 @@ async def probar_conexion() -> dict[str, object]:
             {"role": "user", "content": '{"ping":"raphael"}'},
         ],
         "temperature": 0.1,
-        "max_tokens": 120,
+        "max_tokens": 800,
         "response_format": {
             "type": "json_schema",
             "json_schema": {
@@ -348,7 +375,7 @@ async def interpretar_accion(contexto: dict[str, object]) -> dict[str, object]:
         "temperature": 0.1,
         "frequency_penalty": 0.0,
         "presence_penalty": 0.0,
-        "max_tokens": 500,
+        "max_tokens": 850,
         "response_format": {
             "type": "json_schema",
             "json_schema": {

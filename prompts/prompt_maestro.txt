@@ -265,6 +265,14 @@ Tipos permitidos:
 - `xp`
 - `agregar_actor`
 
+Formato minimo por accion:
+- `danio`, `curacion` y `xp`: usa `actor_id` o `objetivo`, y `cantidad`
+- `estado`: usa `actor_id` o `objetivo`, y `estado` con uno de estos valores exactos: `listo`, `caido`, `incapacitado`, `muerto`
+- `agregar_actor`: usa `plantilla_id`, `npc_unico_id` o `personaje_id`; si no existen, entonces incluye `nombre`, `iniciativa` y `vida_maxima`
+
+No uses `nombre` para describir estados narrativos.
+Si quieres expresar algo como "sorprendido", "asustado" o "agredido", dejalo en `narracion` o `resumen_delta`, no en `acciones`.
+
 No inventes:
 - dano no indicado
 - curacion no indicada

@@ -151,6 +151,80 @@
       "jugador_nombre": null,
       "sala_id": null,
       "avatar_url": null
+    },
+    {
+      "id": "gwen_costurera",
+      "plantilla_id": null,
+      "nombre": "Gwen",
+      "tipo": "npc",
+      "control": "ia",
+      "raza": "Muneca Encantada",
+      "clase": "Costurera Arcana",
+      "trasfondo": "Dama de las Islas",
+      "nivel": 3,
+      "vida_actual": 18,
+      "vida_maxima": 18,
+      "mana_actual": 6,
+      "mana_maximo": 6,
+      "xp_actual": 0,
+      "xp_maximo": 100,
+      "estado": "listo",
+      "estadisticas": {
+        "fue": 9,
+        "des": 16,
+        "con": 12,
+        "int": 14,
+        "sab": 13,
+        "car": 12
+      },
+      "habilidades": [
+        "Snip Snip!",
+        "Agujas benditas",
+        "Niebla sagrada",
+        "Costura reparadora"
+      ],
+      "pasivas": [
+        "Alma despierta",
+        "Gracia de costurera"
+      ],
+      "tiradas": [
+        "Ataque +5",
+        "Arcanos +4",
+        "Perspicacia +3",
+        "Acrobacias +5"
+      ],
+      "inventario": [
+        {
+          "icono": "[A]",
+          "nombre": "Tijeras gigantes encantadas",
+          "detalle": "Arma principal de Gwen, precisa y elegante",
+          "cantidad": 1
+        },
+        {
+          "icono": "[M]",
+          "nombre": "Hilo azul bendito",
+          "detalle": "Canaliza magia protectora y puntadas imposibles",
+          "cantidad": 1
+        },
+        {
+          "icono": "[T]",
+          "nombre": "Kit de costura fino",
+          "detalle": "Util para remendar ropa, equipo o detalles de escena",
+          "cantidad": 1
+        },
+        {
+          "icono": "[R]",
+          "nombre": "Reliquia de Isolde",
+          "detalle": "Recuerdo importante que refuerza su voluntad",
+          "cantidad": 1
+        }
+      ],
+      "resumen": "Combatiente agil de corto alcance con magia de costura, niebla protectora y aire noble.",
+      "reclutado": false,
+      "persistente": false,
+      "jugador_nombre": null,
+      "sala_id": null,
+      "avatar_url": null
     }
   ]
 }
