@@ -33,8 +33,8 @@
         "nombre": "Jan",
         "clase": "Pícaro",
         "nivel": 1,
-        "vida_actual": 7,
-        "vida_maxima": 7,
+        "vida_actual": 64,
+        "vida_maxima": 100,
         "mana_actual": 0,
         "mana_maximo": 0,
         "xp_actual": 0,
@@ -134,7 +134,7 @@
         "avatar_url": "/static/avatars/Jan.png"
       },
       "creada_en": "2026-04-12 20:29:11",
-      "actualizada_en": "2026-04-12 21:01:17"
+      "actualizada_en": "2026-04-12 21:37:22"
     },
     {
       "token": "rp-1776046760183-b7e8376750ce2",
