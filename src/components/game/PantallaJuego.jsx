@@ -30,6 +30,7 @@ export default function PantallaJuego({ onOpenSave, onOpenNavigation }) {
   
   const [input, setInput] = useState('');
   const [seccionInventario, setSeccionInventario] = useState(true);
+  const [seccionHabilidades, setSeccionHabilidades] = useState(true);
   const [mapaAbierto, setMapaAbierto] = useState(false);
   const narrativaRef = useRef(null);
 
@@ -118,7 +119,7 @@ export default function PantallaJuego({ onOpenSave, onOpenNavigation }) {
           <div className="p-4 pb-3" style={{ borderBottom: `1px solid ${colors.border}` }}>
             <div className="flex gap-3 items-start mb-3">
               <div className="relative flex-shrink-0">
-                <img src={avatarGenerico} alt="Avatar" className="w-14 h-14 rounded-full object-cover" style={{ border: `2px solid ${colors.goldDim}` }} />
+                <img src={personaje.avatar || avatarGenerico} alt="Avatar" className="w-14 h-14 rounded-full object-cover" style={{ border: `2px solid ${colors.goldDim}` }} />
                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-2 py-px rounded-full font-['Cinzel'] text-[10px] whitespace-nowrap text-[#b89fe8]" style={{ backgroundColor: colors.purpleDim, border: `1px solid ${colors.purple}` }}>
                   Nv {personaje.nivel}
                 </div>
@@ -182,6 +183,34 @@ export default function PantallaJuego({ onOpenSave, onOpenNavigation }) {
 
           {/* Scrollable Sections */}
           <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: `${colors.border} transparent` }}>
+            {/* Habilidades */}
+            {personaje.habilidades && (
+              <div style={{ borderBottom: `1px solid ${colors.border}` }}>
+                <div 
+                  className="flex items-center justify-between px-3 py-2 cursor-pointer select-none transition-colors hover:bg-[#221f35]" 
+                  onClick={() => setSeccionHabilidades(!seccionHabilidades)}
+                >
+                  <span className="font-['Cinzel'] text-[10px] tracking-widest uppercase" style={{ color: colors.textMuted }}>Habilidades</span>
+                  <span className={`text-[10px] transition-transform ${seccionHabilidades ? 'rotate-180' : ''}`} style={{ color: colors.textDim }}>▼</span>
+                </div>
+                {seccionHabilidades && (
+                  <div className="px-3 pb-3 pt-1 flex flex-col gap-2">
+                    {Object.entries(personaje.habilidades).map(([key, hab], i) => hab.nombre.trim() !== '' && (
+                      <div key={i} className="flex gap-2 items-start group" title={hab.descripcion}>
+                        <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 text-sm transition-colors group-hover:border-[#7a5f28]" style={{ backgroundColor: colors.bgCard, border: `1px solid ${colors.border}` }}>
+                          {hab.emoji}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[11px] font-['Cinzel'] truncate leading-tight" style={{ color: colors.textMain }}>{hab.nombre}</div>
+                          <div className="text-[9px] italic truncate leading-tight mt-0.5" style={{ color: colors.gold }}>{hab.limitacion}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Mochila */}
             <div style={{ borderBottom: `1px solid ${colors.border}` }}>
               <div 

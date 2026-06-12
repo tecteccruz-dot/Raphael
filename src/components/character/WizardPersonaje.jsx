@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { useGameStore } from '../../engine/state'
 import { razas } from '../../data/razas'
 import { clases } from '../../data/clases'
@@ -15,6 +15,7 @@ const PASOS = [
   'Trasfondo',
   'Estadísticas',
   'Inventario',
+  'Habilidades',
   'Confirmar',
 ]
 
@@ -24,6 +25,9 @@ const STATS_FULL = {
   INT: 'Inteligencia', SAB: 'Sabiduría', CAR: 'Carisma'
 }
 
+const localAvatarsContext = import.meta.glob('../../assets/Imagenes/Avatars/*.{png,jpg,jpeg}', { eager: true, import: 'default' });
+const localAvatars = Object.values(localAvatarsContext);
+
 export default function WizardPersonaje({ onNavigate }) {
   const addToGaleria = useGameStore(s => s.addToGaleria)
   const setPersonajeActivo = useGameStore(s => s.setPersonajeActivo)
@@ -32,6 +36,7 @@ export default function WizardPersonaje({ onNavigate }) {
   const [pj, setPj] = useState({
     nombre: '',
     sexo: 'Masculino',
+    avatar: null,
     raza: null,
     subraza: null,
     clase: null,
@@ -39,6 +44,13 @@ export default function WizardPersonaje({ onNavigate }) {
     trasfondo: null,
     estadisticas: { FUE: 10, DES: 10, CON: 10, INT: 10, SAB: 10, CAR: 10 },
     metodoStats: null,
+    habilidades: {
+      pasiva: { nombre: '', emoji: '✨', descripcion: '', limitacion: 'Siempre activa' },
+      activa1: { nombre: '', emoji: '⚔️', descripcion: '', limitacion: '' },
+      activa2: { nombre: '', emoji: '🛡️', descripcion: '', limitacion: '' },
+      activa3: { nombre: '', emoji: '🔮', descripcion: '', limitacion: '' },
+      unica: { nombre: '', emoji: '🔥', descripcion: '', limitacion: '' }
+    }
   })
 
   // Stats methods
@@ -73,6 +85,69 @@ export default function WizardPersonaje({ onNavigate }) {
   const pointBuyTotal = useMemo(() => {
     return Object.values(pointBuy).reduce((sum, v) => sum + (costosCompraPuntos[v] || 0), 0)
   }, [pointBuy])
+
+  const fileInputRef = useRef(null);
+  const importInputRef = useRef(null);
+
+  const handleDownloadTemplate = () => {
+    const template = {
+      nombre: "[Nombre]",
+      sexo: "Masculino/Femenino/Otro",
+      avatar: null,
+      raza: "humano",
+      subraza: null,
+      clase: "guerrero",
+      subclase: null,
+      trasfondo: "heroe_del_pueblo",
+      estadisticas: { FUE: 15, DES: 14, CON: 13, INT: 12, SAB: 10, CAR: 8 },
+      metodoStats: "estandar",
+      habilidades: {
+        pasiva: { nombre: "[Nombre]", emoji: "✨", descripcion: "[Efecto constante]", limitacion: "Siempre activa" },
+        activa1: { nombre: "[Ataque 1]", emoji: "⚔️", descripcion: "[Daño y efecto]", limitacion: "1 vez por turno" },
+        activa2: { nombre: "[Defensa 1]", emoji: "🛡️", descripcion: "[Efecto defensivo]", limitacion: "Cuesta 1 KI" },
+        activa3: { nombre: "[Hechizo]", emoji: "🔮", descripcion: "[Magia]", limitacion: "Cuesta 10 de Maná" },
+        unica: { nombre: "[Definitiva]", emoji: "🔥", descripcion: "[Efecto poderoso]", limitacion: "1 vez por descanso" }
+      }
+    };
+    const blob = new Blob([JSON.stringify(template, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'plantilla_maestra.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportJSON = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = JSON.parse(event.target.result);
+        if (data.nombre && data.estadisticas) {
+          setPj({ ...pj, ...data });
+          setPaso(7); // Saltar al final
+        } else {
+          alert('Formato de personaje inválido.');
+        }
+      } catch (err) {
+        alert('Error al leer el JSON.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = null;
+  };
+
+  const handleExportJSON = () => {
+    const blob = new Blob([JSON.stringify(pj, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${pj.nombre.replace(/\s+/g, '_')}_ficha.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const handleRollDice = () => {
     const rolls = Array.from({ length: 6 }, () => tirar4d6())
@@ -138,6 +213,7 @@ export default function WizardPersonaje({ onNavigate }) {
       id,
       nombre: pj.nombre,
       sexo: pj.sexo,
+      avatar: pj.avatar,
       raza: razaData?.nombre || pj.raza,
       subraza: subrazaData?.nombre || pj.subraza || null,
       clase: claseData?.nombre || pj.clase,
@@ -165,6 +241,7 @@ export default function WizardPersonaje({ onNavigate }) {
         ...(razaData?.rasgos || []),
         ...(subrazaData?.rasgos || []),
       ],
+      habilidades: pj.habilidades,
     }
 
     addToGaleria(personajeCompleto)
@@ -180,7 +257,9 @@ export default function WizardPersonaje({ onNavigate }) {
       case 3: return pj.trasfondo !== null
       case 4: return pj.metodoStats !== null
       case 5: return true
-      case 6: return true
+      case 6: 
+        return Object.values(pj.habilidades).every(h => h.nombre.trim() !== '' && h.descripcion.trim() !== '')
+      case 7: return true
       default: return false
     }
   }
@@ -192,10 +271,20 @@ export default function WizardPersonaje({ onNavigate }) {
       }}>
 
       {/* Header */}
-      <div className="text-center mb-3 flex-shrink-0">
-        <h1 className="font-[var(--font-display)] text-xl text-[var(--color-gold)] tracking-wider">
+      <div className="text-center mb-3 flex-shrink-0 relative">
+        <h1 className="font-[var(--font-display)] text-xl text-[var(--color-gold)] tracking-wider mb-2">
           ✦ Crear Personaje
         </h1>
+        
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <button onClick={handleDownloadTemplate} className="btn-medieval px-2 py-1 text-[10px]">
+            📄 Plantilla
+          </button>
+          <input type="file" accept=".json" ref={importInputRef} className="hidden" onChange={handleImportJSON} />
+          <button onClick={() => importInputRef.current.click()} className="btn-medieval px-2 py-1 text-[10px]">
+            📥 Importar
+          </button>
+        </div>
       </div>
 
       {/* Step Indicator */}
@@ -242,7 +331,7 @@ export default function WizardPersonaje({ onNavigate }) {
                 <label className="block font-[var(--font-ui)] text-xs text-[var(--color-parchment-dark)] mb-2 uppercase tracking-wider">
                   Sexo
                 </label>
-                <div className="flex gap-3">
+                <div className="flex gap-3 mb-6">
                   {['Masculino', 'Femenino', 'Otro'].map(s => (
                     <button
                       key={s}
@@ -255,6 +344,65 @@ export default function WizardPersonaje({ onNavigate }) {
                       <div className="font-[var(--font-ui)] text-sm">{s}</div>
                     </button>
                   ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-[var(--font-ui)] text-xs text-[var(--color-parchment-dark)] mb-2 uppercase tracking-wider">
+                  Avatar del Personaje
+                </label>
+                <div className="flex flex-col gap-4">
+                  {/* Current Avatar / Upload */}
+                  <div className="flex items-center gap-4">
+                    <div className="w-20 h-20 rounded-full border-2 border-[var(--color-gold)] overflow-hidden bg-[#1a1729] flex-shrink-0 flex items-center justify-center">
+                      {pj.avatar ? (
+                        <img src={pj.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-[var(--color-parchment-dark)] text-2xl">👤</span>
+                      )}
+                    </div>
+                    <div>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        ref={fileInputRef} 
+                        className="hidden" 
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => setPj({ ...pj, avatar: event.target.result });
+                            reader.readAsDataURL(file);
+                          }
+                        }} 
+                      />
+                      <button 
+                        onClick={() => fileInputRef.current.click()} 
+                        className="btn-medieval px-3 py-1.5 text-xs"
+                      >
+                        Subir Imagen (1:1)
+                      </button>
+                      <p className="text-[10px] text-[var(--color-parchment-dark)] mt-1 italic max-w-[200px]">
+                        La imagen se guardará dentro de la ficha (Base64) para portabilidad.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Local Avatars Grid */}
+                  <div>
+                    <div className="text-[10px] uppercase text-[var(--color-parchment-dark)] mb-2 mt-2">O elige uno de la galería:</div>
+                    <div className="flex flex-wrap gap-2">
+                      {localAvatars.map((url, i) => (
+                        <button 
+                          key={i} 
+                          onClick={() => setPj({ ...pj, avatar: url })}
+                          className={`w-12 h-12 rounded-full overflow-hidden border-2 transition-all cursor-pointer ${pj.avatar === url ? 'border-[var(--color-gold)] scale-110' : 'border-transparent hover:border-[var(--color-panel-border)]'}`}
+                        >
+                          <img src={url} alt={`Avatar ${i}`} className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -674,11 +822,74 @@ export default function WizardPersonaje({ onNavigate }) {
             </div>
           )}
 
-          {/* PASO 6: Confirmar */}
+          {/* PASO 6: Habilidades */}
           {paso === 6 && (
+            <div className="space-y-6 overflow-y-auto pr-2" style={{ maxHeight: '60vh' }}>
+              <p className="font-[var(--font-narrative)] text-sm text-[var(--color-parchment-dark)] mb-4 italic">
+                Crea tu propio set de habilidades. El Dungeon Master interpretará sus efectos y respetará las limitaciones que impongas.
+              </p>
+
+              {['pasiva', 'activa1', 'activa2', 'activa3', 'unica'].map((key) => {
+                const hab = pj.habilidades[key];
+                const typeLabel = key === 'pasiva' ? 'Habilidad Pasiva' : key === 'unica' ? 'Habilidad Única (Definitiva)' : `Habilidad Activa ${key.slice(-1)}`;
+                const emojiOptions = ['✨', '⚔️', '🛡️', '🔮', '🔥', '💨', '💧', '⚡', '🌙', '☀️', '🩸', '🏹'];
+
+                return (
+                  <div key={key} className="bg-[rgba(0,0,0,0.3)] border border-[var(--color-panel-border)] rounded-md p-4">
+                    <h4 className="font-[var(--font-display)] text-[var(--color-gold)] mb-3">{typeLabel}</h4>
+                    
+                    <div className="flex gap-3 mb-3">
+                      <select 
+                        value={hab.emoji}
+                        onChange={e => setPj({ ...pj, habilidades: { ...pj.habilidades, [key]: { ...hab, emoji: e.target.value } } })}
+                        className="input-medieval text-xl w-14 text-center cursor-pointer"
+                      >
+                        {emojiOptions.map(em => <option key={em} value={em}>{em}</option>)}
+                      </select>
+                      
+                      <input 
+                        type="text" 
+                        placeholder="Nombre de la Habilidad" 
+                        value={hab.nombre}
+                        onChange={e => setPj({ ...pj, habilidades: { ...pj.habilidades, [key]: { ...hab, nombre: e.target.value } } })}
+                        className="input-medieval flex-1 font-[var(--font-display)] text-lg"
+                      />
+                    </div>
+
+                    <textarea 
+                      placeholder="Descripción y Efecto (¿Qué hace? ¿Cómo se ve?)"
+                      value={hab.descripcion}
+                      onChange={e => setPj({ ...pj, habilidades: { ...pj.habilidades, [key]: { ...hab, descripcion: e.target.value } } })}
+                      className="input-medieval w-full mb-3 h-20 resize-none text-sm"
+                    />
+
+                    <input 
+                      type="text" 
+                      placeholder={key === 'pasiva' ? "Limitación (Ej: Siempre activa)" : "Limitación (Ej: Cuesta 1 KI, 1 vez por combate)"}
+                      value={hab.limitacion}
+                      onChange={e => setPj({ ...pj, habilidades: { ...pj.habilidades, [key]: { ...hab, limitacion: e.target.value } } })}
+                      className="input-medieval w-full text-xs text-[var(--color-parchment-dark)] italic"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* PASO 7: Confirmar */}
+          {paso === 7 && (
             <div className="space-y-4">
-              <div className="text-center mb-4">
-                <div className="text-4xl mb-2">{pj.sexo === 'Femenino' ? '👩' : pj.sexo === 'Masculino' ? '🧑' : '🧝'}</div>
+              <div className="text-center mb-4 relative">
+                <button onClick={handleExportJSON} className="absolute right-0 top-0 btn-medieval px-2 py-1 text-[10px]" title="Exportar ficha JSON">
+                  💾 Exportar JSON
+                </button>
+                <div className="w-20 h-20 mx-auto rounded-full border-2 border-[var(--color-gold)] overflow-hidden bg-[#1a1729] mb-3 flex items-center justify-center">
+                  {pj.avatar ? (
+                    <img src={pj.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-4xl">{pj.sexo === 'Femenino' ? '👩' : pj.sexo === 'Masculino' ? '🧑' : '🧝'}</div>
+                  )}
+                </div>
                 <h3 className="font-[var(--font-display)] text-xl text-[var(--color-gold)]">{pj.nombre}</h3>
                 <p className="font-[var(--font-ui)] text-sm text-[var(--color-parchment-dark)]">
                   {razaData?.nombre} {subrazaData ? `(${subrazaData.nombre})` : ''} · {claseData?.nombre} · {trasfondoData?.nombre}
@@ -688,30 +899,26 @@ export default function WizardPersonaje({ onNavigate }) {
               {/* Final Stats */}
               <div className="grid grid-cols-6 gap-2">
                 {STATS_NOMBRES.map(stat => (
-                  <div key={stat} className="stat-block bg-[rgba(0,0,0,0.2)] rounded p-2">
-                    <span className="stat-label">{stat}</span>
-                    <span className="stat-value">{finalStats[stat]}</span>
-                    <span className="stat-mod">{finalMods[stat] >= 0 ? '+' : ''}{finalMods[stat]}</span>
+                  <div key={stat} className="stat-block bg-[rgba(0,0,0,0.2)] rounded p-2 text-center">
+                    <span className="stat-label block text-[10px] text-[var(--color-parchment-dark)]">{stat}</span>
+                    <span className="stat-value block font-bold text-lg">{finalStats[stat]}</span>
+                    <span className="stat-mod block text-[10px] text-[var(--color-gold)]">{finalMods[stat] >= 0 ? '+' : ''}{finalMods[stat]}</span>
                   </div>
                 ))}
               </div>
 
-              {/* HP */}
-              <div className="text-center p-3 bg-[rgba(0,0,0,0.2)] rounded">
-                <span className="font-[var(--font-display)] text-sm text-[var(--color-health)]">HP Máximo: </span>
-                <span className="font-[var(--font-display)] text-xl text-[var(--color-parchment)]">
-                  {calcularHPMaximo(pj.clase, 1, finalMods.CON)}
-                </span>
-              </div>
-
-              {/* Inventory preview */}
-              <div>
-                <h4 className="font-[var(--font-display)] text-sm text-[var(--color-gold)] mb-2">Inventario</h4>
-                <div className="flex flex-wrap gap-2">
-                  {inventarioGenerado.map((item, i) => (
-                    <span key={i} className="text-xs bg-[rgba(0,0,0,0.2)] border border-[var(--color-panel-border)] px-2 py-1 rounded text-[var(--color-parchment-dark)]">
-                      {item.nombre}
-                    </span>
+              {/* Habilidades Resumen */}
+              <div className="mt-4">
+                <h4 className="font-[var(--font-display)] text-sm text-[var(--color-gold)] mb-2">Habilidades Personalizadas</h4>
+                <div className="grid grid-cols-1 gap-2">
+                  {Object.values(pj.habilidades).map((h, i) => (
+                    <div key={i} className="flex items-center gap-2 text-xs bg-[rgba(0,0,0,0.2)] border border-[var(--color-panel-border)] px-3 py-2 rounded">
+                      <span className="text-base">{h.emoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[var(--color-parchment)] font-bold truncate">{h.nombre}</div>
+                        <div className="text-[var(--color-parchment-dark)] truncate italic">{h.limitacion}</div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -729,7 +936,7 @@ export default function WizardPersonaje({ onNavigate }) {
           ← {paso === 0 ? 'Galería' : 'Anterior'}
         </button>
 
-        {paso < 6 ? (
+        {paso < 7 ? (
           <button
             onClick={() => setPaso(paso + 1)}
             disabled={!canAdvance()}
