@@ -270,6 +270,39 @@ export default function WizardPersonaje({ onNavigate }) {
         background: 'radial-gradient(ellipse at center, rgba(45,45,68,0.4) 0%, rgba(15,15,30,1) 70%)'
       }}>
 
+      <input 
+        type="file" 
+        accept="image/*" 
+        ref={fileInputRef} 
+        className="hidden" 
+        onChange={(e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              const img = new Image();
+              img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const size = 256;
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                
+                const sizeMin = Math.min(img.width, img.height);
+                const startX = (img.width - sizeMin) / 2;
+                const startY = (img.height - sizeMin) / 2;
+                
+                ctx.drawImage(img, startX, startY, sizeMin, sizeMin, 0, 0, size, size);
+                const resizedDataUrl = canvas.toDataURL('image/webp', 0.8);
+                setPj({ ...pj, avatar: resizedDataUrl });
+              };
+              img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+          }
+        }} 
+      />
+
       {/* Header */}
       <div className="text-center mb-3 flex-shrink-0 relative">
         <h1 className="font-[var(--font-display)] text-xl text-[var(--color-gold)] tracking-wider mb-2">
@@ -362,40 +395,8 @@ export default function WizardPersonaje({ onNavigate }) {
                       )}
                     </div>
                     <div>
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        ref={fileInputRef} 
-                        className="hidden" 
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onload = (event) => {
-                              const img = new Image();
-                              img.onload = () => {
-                                const canvas = document.createElement('canvas');
-                                const size = 256;
-                                canvas.width = size;
-                                canvas.height = size;
-                                const ctx = canvas.getContext('2d');
-                                
-                                const sizeMin = Math.min(img.width, img.height);
-                                const startX = (img.width - sizeMin) / 2;
-                                const startY = (img.height - sizeMin) / 2;
-                                
-                                ctx.drawImage(img, startX, startY, sizeMin, sizeMin, 0, 0, size, size);
-                                const resizedDataUrl = canvas.toDataURL('image/webp', 0.8);
-                                setPj({ ...pj, avatar: resizedDataUrl });
-                              };
-                              img.src = event.target.result;
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }} 
-                      />
                       <button 
-                        onClick={() => fileInputRef.current.click()} 
+                        onClick={() => fileInputRef.current?.click()} 
                         className="btn-medieval px-3 py-1.5 text-xs"
                       >
                         Subir Imagen (1:1)
