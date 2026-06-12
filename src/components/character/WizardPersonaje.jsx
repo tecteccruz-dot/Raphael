@@ -371,7 +371,25 @@ export default function WizardPersonaje({ onNavigate }) {
                           const file = e.target.files[0];
                           if (file) {
                             const reader = new FileReader();
-                            reader.onload = (event) => setPj({ ...pj, avatar: event.target.result });
+                            reader.onload = (event) => {
+                              const img = new Image();
+                              img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                const size = 256;
+                                canvas.width = size;
+                                canvas.height = size;
+                                const ctx = canvas.getContext('2d');
+                                
+                                const sizeMin = Math.min(img.width, img.height);
+                                const startX = (img.width - sizeMin) / 2;
+                                const startY = (img.height - sizeMin) / 2;
+                                
+                                ctx.drawImage(img, startX, startY, sizeMin, sizeMin, 0, 0, size, size);
+                                const resizedDataUrl = canvas.toDataURL('image/webp', 0.8);
+                                setPj({ ...pj, avatar: resizedDataUrl });
+                              };
+                              img.src = event.target.result;
+                            };
                             reader.readAsDataURL(file);
                           }
                         }} 
@@ -883,12 +901,19 @@ export default function WizardPersonaje({ onNavigate }) {
                 <button onClick={handleExportJSON} className="absolute right-0 top-0 btn-medieval px-2 py-1 text-[10px]" title="Exportar ficha JSON">
                   💾 Exportar JSON
                 </button>
-                <div className="w-20 h-20 mx-auto rounded-full border-2 border-[var(--color-gold)] overflow-hidden bg-[#1a1729] mb-3 flex items-center justify-center">
+                <div 
+                  className="w-20 h-20 mx-auto rounded-full border-2 border-[var(--color-gold)] overflow-hidden bg-[#1a1729] mb-3 flex items-center justify-center cursor-pointer relative group"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Cambiar Avatar"
+                >
                   {pj.avatar ? (
-                    <img src={pj.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                    <img src={pj.avatar} alt="Avatar" className="w-full h-full object-cover transition-opacity group-hover:opacity-40" />
                   ) : (
-                    <div className="text-4xl">{pj.sexo === 'Femenino' ? '👩' : pj.sexo === 'Masculino' ? '🧑' : '🧝'}</div>
+                    <div className="text-4xl transition-opacity group-hover:opacity-40">{pj.sexo === 'Femenino' ? '👩' : pj.sexo === 'Masculino' ? '🧑' : '🧝'}</div>
                   )}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
+                    <span className="text-[10px] text-white font-bold text-center leading-tight">CAMBIAR<br/>AVATAR</span>
+                  </div>
                 </div>
                 <h3 className="font-[var(--font-display)] text-xl text-[var(--color-gold)]">{pj.nombre}</h3>
                 <p className="font-[var(--font-ui)] text-sm text-[var(--color-parchment-dark)]">
