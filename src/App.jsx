@@ -80,9 +80,9 @@ export default function App() {
           <nav className="fixed top-0 left-0 h-full w-64 z-50 panel-medieval-solid"
             style={{ borderRadius: '0 8px 8px 0' }}>
             <div className="p-4">
-              <h2 className="font-[var(--font-display)] text-[var(--color-gold)] text-lg mb-6 tracking-wider">
-                ⚔ Motor de Rol IA
-              </h2>
+              <h1 className="text-xl font-[var(--font-display)] font-bold text-[var(--color-gold)] tracking-widest drop-shadow-md">
+                ⚔ Raphael
+              </h1>
               <div className="flex flex-col gap-1">
                 {pantallasNav.map(p => (
                   <button

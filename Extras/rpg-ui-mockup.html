@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPG Narrator — Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep:    #0c0b12;
+    --bg-panel:   #12101e;
+    --bg-card:    #1a1729;
+    --bg-hover:   #221f35;
+    --border:     #2e2a48;
+    --border-hi:  #4a4278;
+    --gold:       #c9a84c;
+    --gold-dim:   #7a5f28;
+    --purple:     #7c5cbf;
+    --purple-dim: #3d2e6b;
+    --text-main:  #e8e0f0;
+    --text-muted: #8a809a;
+    --text-dim:   #5a5268;
+    --hp-green:   #3dba6e;
+    --hp-track:   #1a3328;
+    --danger:     #c0444a;
+    --info:       #4a90d9;
+    --scrollbar:  #2a2540;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-deep);
+    color: var(--text-main);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── SCROLLBARS ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 4px; }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 18px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .menu-btn {
+    width: 32px; height: 32px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    transition: border-color .2s, color .2s;
+  }
+  .menu-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: .08em;
+    color: var(--text-muted);
+    flex: 1;
+  }
+  .breadcrumb .sep { color: var(--text-dim); }
+  .breadcrumb .current { color: var(--gold); }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .save-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 14px;
+    background: none;
+    border: 1px solid var(--gold-dim);
+    border-radius: 6px;
+    color: var(--gold);
+    font-size: 12px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: .06em;
+    cursor: pointer;
+    transition: background .2s, border-color .2s;
+  }
+  .save-btn:hover { background: rgba(201,168,76,.08); border-color: var(--gold); }
+  .save-btn::before { content: '◆'; font-size: 8px; }
+
+  /* ── MAIN LAYOUT ── */
+  .main {
+    display: grid;
+    grid-template-columns: 240px 1fr 260px;
+    flex: 1;
+    overflow: hidden;
+    gap: 0;
+  }
+
+  /* ── LEFT PANEL ── */
+  .left-panel {
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .char-card {
+    padding: 16px 14px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .char-header {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+  .avatar-wrap img {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    border: 2px solid var(--gold-dim);
+    object-fit: cover;
+  }
+  .level-badge {
+    position: absolute;
+    bottom: -4px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--purple-dim);
+    border: 1px solid var(--purple);
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 10px;
+    font-family: 'Cinzel', serif;
+    color: #b89fe8;
+    white-space: nowrap;
+  }
+
+  .char-info { flex: 1; min-width: 0; }
+  .char-name {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: .04em;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .char-class {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .gold-display {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--gold);
+  }
+  .gold-icon { font-size: 11px; }
+
+  /* HP Bar */
+  .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .stat-label {
+    font-size: 10px;
+    font-family: 'Cinzel', serif;
+    color: var(--text-dim);
+    letter-spacing: .05em;
+    width: 22px;
+    flex-shrink: 0;
+  }
+  .bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--hp-track);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: var(--hp-green);
+    transition: width .4s ease;
+  }
+  .bar-fill.mp { background: var(--purple); }
+  .bar-fill.xp { background: var(--gold); }
+  .stat-value {
+    font-size: 10px;
+    color: var(--text-muted);
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* Core Stats */
+  .core-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    margin-top: 4px;
+  }
+  .core-stat {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 4px;
+    text-align: center;
+  }
+  .cs-val {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+    display: block;
+  }
+  .cs-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: .05em;
+    display: block;
+    margin-top: 1px;
+  }
+
+  /* Quick actions */
+  .quick-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .qa-btn {
+    padding: 7px 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: .04em;
+    cursor: pointer;
+    text-align: center;
+    transition: all .2s;
+  }
+  .qa-btn:hover { border-color: var(--gold-dim); color: var(--gold); background: var(--bg-hover); }
+
+  /* Collapsible Sections */
+  .section-group {
+    flex: 1;
+    overflow-y: auto;
+  }
+  .section {
+    border-bottom: 1px solid var(--border);
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 14px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .15s;
+  }
+  .section-header:hover { background: var(--bg-hover); }
+  .section-title {
+    font-size: 10px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: .08em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .section-chevron {
+    font-size: 10px;
+    color: var(--text-dim);
+    transition: transform .2s;
+  }
+  .section.open .section-chevron { transform: rotate(180deg); }
+
+  .section-body {
+    display: none;
+    padding: 8px 14px 12px;
+  }
+  .section.open .section-body { display: block; }
+
+  .ability-list { display: flex; flex-direction: column; gap: 4px; }
+  .ability-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    background: var(--bg-card);
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: border-color .2s;
+  }
+  .ability-item:hover { border-color: var(--purple-dim); }
+  .ability-icon {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    background: var(--purple-dim);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .ability-name { font-size: 11px; color: var(--text-main); }
+  .ability-cd {
+    margin-left: auto;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  .inv-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+  }
+  .inv-slot {
+    aspect-ratio: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    transition: border-color .2s;
+    position: relative;
+  }
+  .inv-slot:hover { border-color: var(--gold-dim); }
+  .inv-slot.empty { opacity: .25; }
+  .inv-qty {
+    position: absolute;
+    bottom: 2px; right: 4px;
+    font-size: 9px;
+    color: var(--gold);
+  }
+
+  /* ── CENTER PANEL ── */
+  .center-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .scene-bg {
+    position: absolute;
+    inset: 0;
+    background: url('/mnt/user-data/uploads/Plaza_Mayor-mu-i5tQT.png') center/cover no-repeat;
+    opacity: .18;
+    pointer-events: none;
+  }
+
+  .narrative-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px 16px;
+    position: relative;
+  }
+
+  .narr-block {
+    margin-bottom: 16px;
+  }
+  .narr-label {
+    font-size: 9px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: .1em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .narr-text {
+    font-family: 'Crimson Pro', serif;
+    font-size: 17px;
+    line-height: 1.75;
+    color: #d8d0e8;
+    font-weight: 300;
+  }
+  .narr-text strong {
+    color: var(--gold);
+    font-weight: 600;
+  }
+  .narr-text em {
+    color: #b0a0cc;
+    font-style: italic;
+  }
+
+  .player-action-log {
+    font-family: 'Crimson Pro', serif;
+    font-size: 15px;
+    font-style: italic;
+    color: var(--purple);
+    border-left: 2px solid var(--purple-dim);
+    padding: 6px 12px;
+    margin-bottom: 16px;
+    background: rgba(124,92,191,.06);
+    border-radius: 0 6px 6px 0;
+  }
+
+  /* Options Cards */
+  .options-strip {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    background: linear-gradient(to top, rgba(12,11,18,.95) 0%, rgba(12,11,18,.7) 100%);
+    position: relative;
+  }
+  .options-label {
+    font-size: 9px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: .1em;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+  .option-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .option-card:hover {
+    border-color: var(--gold-dim);
+    background: var(--bg-hover);
+    transform: translateX(3px);
+  }
+  .option-num {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--purple-dim);
+    border: 1px solid var(--purple);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    font-family: 'Cinzel', serif;
+    color: #b89fe8;
+    flex-shrink: 0;
+  }
+  .option-text {
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    color: var(--text-main);
+    font-style: italic;
+  }
+  .option-tag {
+    margin-left: auto;
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    border: 1px solid;
+    flex-shrink: 0;
+    font-family: 'Cinzel', serif;
+    letter-spacing: .04em;
+  }
+  .tag-social { color: #4ab8d4; border-color: #1a4a5a; background: #0d2530; }
+  .tag-explore { color: #6ad474; border-color: #1a4a1e; background: #0d2512; }
+  .tag-combat { color: var(--danger); border-color: #4a1a1e; background: #250d0e; }
+  .tag-magic { color: #b89fe8; border-color: var(--purple-dim); background: rgba(61,46,107,.3); }
+
+  /* Input */
+  .action-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .action-label {
+    font-size: 10px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: .08em;
+    color: var(--gold);
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .action-input {
+    flex: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 14px;
+    color: var(--text-main);
+    font-family: 'Crimson Pro', serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .action-input:focus { border-color: var(--gold-dim); }
+  .action-input::placeholder { color: var(--text-dim); font-style: italic; }
+
+  .send-btn {
+    padding: 9px 16px;
+    background: var(--gold-dim);
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: .06em;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .send-btn:hover { background: rgba(201,168,76,.25); }
+  .send-arrow { font-size: 12px; }
+
+  /* ── RIGHT PANEL ── */
+  .right-panel {
+    background: var(--bg-panel);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .scene-title {
+    padding: 12px 14px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .scene-title-label {
+    font-size: 9px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: .1em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .scene-name {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .right-scroll {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  /* Scene Characters */
+  .chars-section {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .chars-label {
+    font-size: 9px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: .1em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .char-list { display: flex; flex-direction: column; gap: 5px; }
+  .char-entry {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 8px;
+    background: var(--bg-card);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color .2s;
+  }
+  .char-entry:hover { border-color: var(--border-hi); }
+  .char-entry-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--purple-dim);
+    border: 1px solid var(--purple);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .char-entry-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .char-entry-info { flex: 1; min-width: 0; }
+  .char-entry-name {
+    font-size: 11px;
+    color: var(--text-main);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .char-entry-role { font-size: 10px; color: var(--text-muted); }
+  .char-relation {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+  .rel-neutral { background: rgba(90,82,104,.3); color: var(--text-muted); }
+  .rel-friendly { background: rgba(61,186,110,.12); color: #3dba6e; }
+  .rel-hostile { background: rgba(192,68,74,.12); color: var(--danger); }
+
+  /* Party Section */
+  .party-section {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Mini Map */
+  .map-section {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .mini-map {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: var(--bg-deep);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+  }
+  .mini-map-inner {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 1px;
+    padding: 1px;
+  }
+  .map-cell {
+    border-radius: 2px;
+    background: var(--bg-panel);
+  }
+  .map-cell.road { background: #1e1c2e; }
+  .map-cell.building { background: #2a2445; }
+  .map-cell.plaza { background: #32305a; border: 1px solid var(--purple-dim); }
+  .map-cell.inn { background: #3a2a18; }
+  .map-cell.market { background: #2a3520; }
+  .map-cell.current {
+    background: var(--purple-dim);
+    border: 1px solid var(--gold);
+    position: relative;
+  }
+  .map-cell.current::after {
+    content: '●';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    font-size: 6px;
+    color: var(--gold);
+  }
+  .map-expand {
+    position: absolute;
+    bottom: 5px; right: 5px;
+    font-size: 9px;
+    color: var(--text-dim);
+    font-family: 'Cinzel', serif;
+    letter-spacing: .04em;
+  }
+
+  /* Log Section */
+  .log-section {
+    padding: 10px 14px 16px;
+  }
+  .log-list { display: flex; flex-direction: column; gap: 4px; }
+  .log-item {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(46,42,72,.4);
+  }
+  .log-time {
+    font-size: 9px;
+    color: var(--text-dim);
+    font-family: 'Cinzel', serif;
+    flex-shrink: 0;
+  }
+  .log-text { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+  .log-text .log-hi { color: var(--gold); }
+
+  /* Divider */
+  .divider {
+    width: calc(100% - 28px);
+    margin: 0 14px;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Tooltip hint */
+  .ac-display {
+    font-size: 10px;
+    color: var(--text-muted);
+    display: flex; gap: 8px; flex-wrap: wrap;
+    padding: 4px 0 0;
+  }
+  .ac-item { display: flex; align-items: center; gap: 4px; }
+  .ac-val { color: var(--text-main); font-weight: 500; }
+
+  /* Separator label */
+  .sep-label {
+    font-size: 9px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: .1em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    text-align: center;
+    padding: 6px 0 2px;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <button class="menu-btn">☰</button>
+  <button class="menu-btn">◫</button>
+  <div class="breadcrumb">
+    <span>Ubicación</span>
+    <span class="sep">›</span>
+    <span>Luminaerion</span>
+    <span class="sep">›</span>
+    <span>Tumbaflor</span>
+    <span class="sep">›</span>
+    <span class="current">Plaza Mayor</span>
+  </div>
+  <div class="header-actions">
+    <button class="save-btn">Guardar</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- ══ LEFT PANEL ══ -->
+  <aside class="left-panel">
+
+    <div class="char-card">
+      <div class="char-header">
+        <div class="avatar-wrap">
+          <img src="/mnt/user-data/uploads/Generico-DeXfKj_J.png" alt="Avatar">
+          <div class="level-badge">Nv 1</div>
+        </div>
+        <div class="char-info">
+          <div class="char-name">Azkarmacryl</div>
+          <div class="char-class">Tiefling · Monje</div>
+          <div class="gold-display">
+            <span class="gold-icon">◈</span>
+            <span>0 PO</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <span class="stat-label">HP</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width: 100%"></div>
+        </div>
+        <span class="stat-value">8/8</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">KI</span>
+        <div class="bar-track">
+          <div class="bar-fill mp" style="width: 60%"></div>
+        </div>
+        <span class="stat-value">3/5</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">XP</span>
+        <div class="bar-track">
+          <div class="bar-fill xp" style="width: 15%"></div>
+        </div>
+        <span class="stat-value">37</span>
+      </div>
+
+      <div class="ac-display" style="margin-top: 8px;">
+        <div class="ac-item">CA <span class="ac-val">10</span></div>
+        <div class="ac-item">Ini <span class="ac-val">+2</span></div>
+        <div class="ac-item">Vel <span class="ac-val">9m</span></div>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <button class="qa-btn">Inventario</button>
+      <button class="qa-btn">Habilidades</button>
+      <button class="qa-btn">Estadísticas</button>
+      <button class="qa-btn">Hechizos</button>
+    </div>
+
+    <div class="section-group">
+
+      <!-- STATS -->
+      <div class="section open">
+        <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
+          <span class="section-title">Atributos</span>
+          <span class="section-chevron">▾</span>
+        </div>
+        <div class="section-body">
+          <div class="core-stats">
+            <div class="core-stat"><span class="cs-val">14</span><span class="cs-label">FUE</span></div>
+            <div class="core-stat"><span class="cs-val">15</span><span class="cs-label">DES</span></div>
+            <div class="core-stat"><span class="cs-val">13</span><span class="cs-label">CON</span></div>
+            <div class="core-stat"><span class="cs-val">10</span><span class="cs-label">INT</span></div>
+            <div class="core-stat"><span class="cs-val">16</span><span class="cs-label">SAB</span></div>
+            <div class="core-stat"><span class="cs-val">12</span><span class="cs-label">CAR</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABILITIES -->
+      <div class="section open">
+        <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
+          <span class="section-title">Habilidades</span>
+          <span class="section-chevron">▾</span>
+        </div>
+        <div class="section-body">
+          <div class="ability-list">
+            <div class="ability-item">
+              <div class="ability-icon">👊</div>
+              <span class="ability-name">Ataque Desarmado</span>
+              <span class="ability-cd">—</span>
+            </div>
+            <div class="ability-item">
+              <div class="ability-icon">💨</div>
+              <span class="ability-name">Paso del Viento</span>
+              <span class="ability-cd">—</span>
+            </div>
+            <div class="ability-item">
+              <div class="ability-icon">🔮</div>
+              <span class="ability-name">Fuego Infernal</span>
+              <span class="ability-cd">1/día</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVENTORY -->
+      <div class="section">
+        <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
+          <span class="section-title">Inventario</span>
+          <span class="section-chevron">▾</span>
+        </div>
+        <div class="section-body">
+          <div class="inv-grid">
+            <div class="inv-slot">🧥<span class="inv-qty">1</span></div>
+            <div class="inv-slot">🧪<span class="inv-qty">2</span></div>
+            <div class="inv-slot">🗺<span class="inv-qty">1</span></div>
+            <div class="inv-slot">🪙<span class="inv-qty">5</span></div>
+            <div class="inv-slot empty">□</div>
+            <div class="inv-slot empty">□</div>
+            <div class="inv-slot empty">□</div>
+            <div class="inv-slot empty">□</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ══ CENTER PANEL ══ -->
+  <section class="center-panel">
+    <div class="scene-bg"></div>
+
+    <div class="narrative-area">
+      <div class="narr-block">
+        <div class="narr-label">Narrador</div>
+        <p class="narr-text">
+          El olor a pan recién horneado y especias exóticas llena el aire de la <strong>Plaza Mayor de Tumbaflor</strong>. Los adoquines relucen bajo el sol de la tarde, húmedos aún por la lluvia de la mañana. Comerciantes anuncian sus mercancías en voz alta, mientras niños corren entre los puestos. Al fondo, la fuente central con sus flores azules —la marca inconfundible del pueblo— susurra con el sonido del agua.
+        </p>
+      </div>
+
+      <div class="narr-block">
+        <div class="narr-label">Escena</div>
+        <p class="narr-text">
+          Una posada robusta se alza en la esquina norte de la plaza. El sonido de la música alegre y las risas amortiguadas se escapa por la puerta entreabierta, invitando a entrar. Es un lugar conocido, donde los viajeros suelen encontrar no solo una buena pinta, sino también un oído para los rumores del pueblo y, con suerte, alguna tarea para un aventurero con las manos vacías.
+        </p>
+        <br>
+        <p class="narr-text">
+          Dicen que su dueño, <strong>Gordo Wren</strong>, un hombre corpulento y de voz resonante, es una fuente inagotable de información y, a veces, de trabajo para aquellos dispuestos a ganarse unas monedas.
+        </p>
+      </div>
+
+      <div class="player-action-log">
+        «Me acerco a los puestos del mercado y observo la mercancía con disimulo, buscando algo interesante o inusual.»
+      </div>
+
+      <div class="narr-block">
+        <div class="narr-label">Resultado</div>
+        <p class="narr-text">
+          Tus ojos entrenados recorren los puestos con calma. Entre telas azules y canastos de frutas, un vendedor mayor parece nervioso — sus ojos se mueven con demasiada frecuencia hacia el callejón del este. Sobre su mesa, semioculto bajo un paño, descansas algo que emite un leve <em>tenue brillo verdoso</em>.
+        </p>
+      </div>
+    </div>
+
+    <!-- OPTIONS + INPUT -->
+    <div class="options-strip">
+      <div class="options-label">Puedes hacer</div>
+      <div class="options-list">
+        <div class="option-card">
+          <div class="option-num">1</div>
+          <span class="option-text">Hablar con el vendedor nervioso sobre lo que esconde</span>
+          <span class="option-tag tag-social">Social</span>
+        </div>
+        <div class="option-card">
+          <div class="option-num">2</div>
+          <span class="option-text">Seguir disimuladamente al hombre que observa el callejón</span>
+          <span class="option-tag tag-explore">Explorar</span>
+        </div>
+        <div class="option-card">
+          <div class="option-num">3</div>
+          <span class="option-text">Usar Percepción para identificar el objeto brillante</span>
+          <span class="option-tag tag-magic">Magia</span>
+        </div>
+        <div class="option-card">
+          <div class="option-num">4</div>
+          <span class="option-text">Entrar a la posada a buscar a Gordo Wren</span>
+          <span class="option-tag tag-social">Social</span>
+        </div>
+      </div>
+
+      <div class="action-input-row">
+        <span class="action-label">Tu acción</span>
+        <input class="action-input" type="text" placeholder="Describe qué hace tu personaje…">
+        <button class="send-btn">Enviar <span class="send-arrow">↗</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ RIGHT PANEL ══ -->
+  <aside class="right-panel">
+    <div class="scene-title">
+      <div class="scene-title-label">Escena actual</div>
+      <div class="scene-name">Plaza Mayor · Día</div>
+    </div>
+
+    <div class="right-scroll">
+
+      <!-- SCENE CHARACTERS -->
+      <div class="chars-section">
+        <div class="chars-label">Personajes en escena</div>
+        <div class="char-list">
+          <div class="char-entry">
+            <div class="char-entry-avatar">👴</div>
+            <div class="char-entry-info">
+              <div class="char-entry-name">Vendedor nervioso</div>
+              <div class="char-entry-role">Desconocido · Mercader</div>
+            </div>
+            <span class="char-relation rel-neutral">Neutral</span>
+          </div>
+          <div class="char-entry">
+            <div class="char-entry-avatar">🏺</div>
+            <div class="char-entry-info">
+              <div class="char-entry-name">Gordo Wren</div>
+              <div class="char-entry-role">Posadero · Rumores</div>
+            </div>
+            <span class="char-relation rel-friendly">Amistoso</span>
+          </div>
+          <div class="char-entry">
+            <div class="char-entry-avatar">👁</div>
+            <div class="char-entry-info">
+              <div class="char-entry-name">Figura sospechosa</div>
+              <div class="char-entry-role">Desconocido · Callejón Este</div>
+            </div>
+            <span class="char-relation rel-hostile">Alerta</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PARTY -->
+      <div class="party-section">
+        <div class="chars-label">Grupo de aventureros</div>
+        <div class="char-list">
+          <div class="char-entry">
+            <div class="char-entry-avatar">
+              <img src="/mnt/user-data/uploads/Generico-DeXfKj_J.png" alt="">
+            </div>
+            <div class="char-entry-info">
+              <div class="char-entry-name">Azkarmacryl</div>
+              <div class="char-entry-role">Tiefling · Monje Nv1</div>
+            </div>
+            <span class="char-relation rel-friendly">Tú</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MINI MAP -->
+      <div class="map-section">
+        <div class="chars-label">Mapa — Tumbaflor</div>
+        <div class="mini-map">
+          <div class="mini-map-inner">
+            <div class="map-cell building"></div>
+            <div class="map-cell building"></div>
+            <div class="map-cell road"></div>
+            <div class="map-cell road"></div>
+            <div class="map-cell building"></div>
+            <div class="map-cell building"></div>
+            <div class="map-cell building"></div>
+
+            <div class="map-cell road"></div>
+            <div class="map-cell road"></div>
+            <div class="map-cell market"></div>
+            <div class="map-cell plaza current"></div>
+            <div class="map-cell market"></div>
+            <div class="map-cell road"></div>
+            <div class="map-cell road"></div>
+
+            <div class="map-cell building"></div>
+            <div class="map-cell inn"></div>
+            <div class="map-cell road"></div>
+            <div class="map-cell road"></div>
+            <div class="map-cell road"></div>
+            <div class="map-cell inn"></div>
+            <div class="map-cell building"></div>
+
+            <div class="map-cell building"></div>
+            <div class="map-cell building"></div>
+            <div class="map-cell road"></div>
+            <div class="map-cell building"></div>
+            <div class="map-cell road"></div>
+            <div class="map-cell building"></div>
+            <div class="map-cell building"></div>
+          </div>
+          <span class="map-expand">⊞ Ampliar</span>
+        </div>
+      </div>
+
+      <!-- LOG -->
+      <div class="log-section">
+        <div class="chars-label">Registro de sesión</div>
+        <div class="log-list">
+          <div class="log-item">
+            <span class="log-time">T·003</span>
+            <span class="log-text">Observaste el mercado y detectaste al <span class="log-hi">vendedor nervioso</span>.</span>
+          </div>
+          <div class="log-item">
+            <span class="log-time">T·002</span>
+            <span class="log-text">Llegaste a la <span class="log-hi">Plaza Mayor</span> de Tumbaflor.</span>
+          </div>
+          <div class="log-item">
+            <span class="log-time">T·001</span>
+            <span class="log-text">Inicio de partida en <span class="log-hi">Luminaerion</span>.</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+</main>
+
+</body>
+</html>

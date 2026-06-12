@@ -67,7 +67,7 @@ export default function ConfiguracionServidor({ onNavigate }) {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="font-[var(--font-display)] text-3xl text-[var(--color-gold)] tracking-wider mb-2">
-            ⚔ Motor de Rol IA
+            ⚔ Raphael
           </h1>
           <p className="font-[var(--font-narrative)] text-[var(--color-parchment-dark)] text-lg italic">
             Configuración del Servidor de IA

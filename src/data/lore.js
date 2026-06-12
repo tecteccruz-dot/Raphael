@@ -1,4 +1,4 @@
-export const promptMaestroPredeterminado = `# Prompt Maestro — Motor de Rol IA
+export const promptMaestroPredeterminado = `# Prompt Maestro — Raphael
 
 == BLOQUE 1: IDENTIDAD Y COMPORTAMIENTO DEL DJ ==
 

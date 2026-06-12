@@ -1,7 +1,7 @@
 @echo off
 color 0B
 echo ===================================================
-echo     Iniciando Motor de Rol IA (Modo Actualizado)
+echo     Iniciando Raphael (Modo Actualizado)
 echo ===================================================
 echo.
 
