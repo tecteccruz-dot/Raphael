@@ -63,7 +63,7 @@ export function parsearRespuesta(textoCompleto) {
     }
   } else {
     // Backup: buscar comandos sueltos en todo el texto si el bloque falló
-    const regexComandos = /\[(DAMAGE|HEAL|ADD_XP|SET_CONDITION|REMOVE_CONDITION|ADD_ITEM|REMOVE_ITEM|DAMAGE_ITEM|ADD_GOLD|REMOVE_GOLD|SET_LOCATION|SPAWN_NPC|KILL_NPC|DAMAGE_NPC|SET_NPC_RELATION|SET_FLAG|SET_TIME)([^\]]*)\]/g;
+    const regexComandos = /\[(DAMAGE|HEAL|ADD_XP|SET_CONDITION|REMOVE_CONDITION|ADD_ITEM|REMOVE_ITEM|DAMAGE_ITEM|ADD_GOLD|REMOVE_GOLD|SET_LOCATION|SPAWN_NPC|KILL_NPC|DAMAGE_NPC|HEAL_NPC|SET_NPC_STATS|ADD_NPC_ITEM|REMOVE_NPC_ITEM|JOIN_PARTY|LEAVE_PARTY|SET_NPC_RELATION|SET_FLAG|SET_TIME)([^\]]*)\]/g;
     let match;
     while ((match = regexComandos.exec(textoCompleto)) !== null) {
       result.comandos.push({
@@ -99,13 +99,29 @@ export function ejecutarComando(comando, store) {
         break;
       case 'ADD_ITEM':
         // eslint-disable-next-line no-case-declarations
-        const idItem = args[0];
+        let cantidadAdd = 1;
         // eslint-disable-next-line no-case-declarations
-        const nombreItem = args.slice(1).join(' ').replace(/['"]/g, '');
-        store.addItem({ id: idItem, nombre: nombreItem, tipo: 'equipo' });
+        let indexAddId = 0;
+        if (!isNaN(args[0])) {
+          cantidadAdd = parseInt(args[0], 10);
+          indexAddId = 1;
+        }
+        // eslint-disable-next-line no-case-declarations
+        const idItem = args[indexAddId];
+        // eslint-disable-next-line no-case-declarations
+        const nombreItem = args.slice(indexAddId + 1).join(' ').replace(/['"]/g, '');
+        store.addItem({ id: idItem, nombre: nombreItem, tipo: 'consumible', cantidad: cantidadAdd });
         break;
       case 'REMOVE_ITEM':
-        store.removeItem(args[0]);
+        // eslint-disable-next-line no-case-declarations
+        let cantidadRem = 1;
+        // eslint-disable-next-line no-case-declarations
+        let indexRemId = 0;
+        if (!isNaN(args[0])) {
+          cantidadRem = parseInt(args[0], 10);
+          indexRemId = 1;
+        }
+        store.removeItem(args[indexRemId], cantidadRem);
         break;
       case 'ADD_GOLD':
         store.addGold(parseInt(args[0], 10));
@@ -128,10 +144,74 @@ export function ejecutarComando(comando, store) {
         }
         break;
       case 'SPAWN_NPC':
-        store.spawnNpc({ id: args[0], nombre: args.slice(1).join(' ').replace(/['"]/g, '') });
+        // eslint-disable-next-line no-case-declarations
+        const spawnId = args[0];
+        // eslint-disable-next-line no-case-declarations
+        let spawnHp = null;
+        // eslint-disable-next-line no-case-declarations
+        const lastArg = args[args.length - 1];
+        if (!isNaN(lastArg) && args.length > 2) {
+          spawnHp = parseInt(lastArg, 10);
+          args.pop();
+        }
+        // eslint-disable-next-line no-case-declarations
+        const spawnNombre = args.slice(1).join(' ').replace(/['"]/g, '');
+        store.spawnNpc({ id: spawnId, nombre: spawnNombre, hp: spawnHp });
         break;
       case 'KILL_NPC':
         store.killNpc(args[0]);
+        break;
+      case 'SET_NPC_STATS':
+        if (args.length >= 8) {
+          store.setNpcStats(args[0], parseInt(args[1], 10), {
+            FUE: parseInt(args[2], 10), DES: parseInt(args[3], 10), CON: parseInt(args[4], 10),
+            INT: parseInt(args[5], 10), SAB: parseInt(args[6], 10), CAR: parseInt(args[7], 10)
+          });
+        }
+        break;
+      case 'ADD_NPC_ITEM':
+        // eslint-disable-next-line no-case-declarations
+        let cantAddNpc = 1;
+        // eslint-disable-next-line no-case-declarations
+        let idNpcAdd = args[0];
+        // eslint-disable-next-line no-case-declarations
+        let idItemNpcAdd = args[1];
+        // eslint-disable-next-line no-case-declarations
+        let startNombreNpcAdd = 2;
+        if (!isNaN(args[1])) {
+          cantAddNpc = parseInt(args[1], 10);
+          idItemNpcAdd = args[2];
+          startNombreNpcAdd = 3;
+        }
+        // eslint-disable-next-line no-case-declarations
+        const nombreItemNpc = args.slice(startNombreNpcAdd).join(' ').replace(/['"]/g, '');
+        store.addNpcItem(idNpcAdd, { id: idItemNpcAdd, nombre: nombreItemNpc, cantidad: cantAddNpc });
+        break;
+      case 'REMOVE_NPC_ITEM':
+        // eslint-disable-next-line no-case-declarations
+        let cantRemNpc = 1;
+        // eslint-disable-next-line no-case-declarations
+        let idItemNpcRem = args[1];
+        if (!isNaN(args[1])) {
+          cantRemNpc = parseInt(args[1], 10);
+          idItemNpcRem = args[2];
+        }
+        store.removeNpcItem(args[0], idItemNpcRem, cantRemNpc);
+        break;
+      case 'JOIN_PARTY':
+        store.joinParty(args[0]);
+        break;
+      case 'LEAVE_PARTY':
+        store.leaveParty(args[0]);
+        break;
+      case 'DAMAGE_NPC':
+        store.damageNpc(args[0], parseInt(args[1], 10));
+        break;
+      case 'HEAL_NPC':
+        store.healNpc(args[0], parseInt(args[1], 10));
+        break;
+      case 'SET_NPC_RELATION':
+        store.setNpcRelation(args[0], args[1]);
         break;
       case 'SET_FLAG':
         store.setFlag(args[0], args[1] === 'true');
@@ -139,9 +219,6 @@ export function ejecutarComando(comando, store) {
       case 'SET_TIME':
         store.setTime(args[0]);
         break;
-      // Comandos que se asumen visuales o de narrativa (sin estado fuerte aún)
-      case 'DAMAGE_NPC':
-      case 'SET_NPC_RELATION':
       case 'DAMAGE_ITEM':
         break;
       default:

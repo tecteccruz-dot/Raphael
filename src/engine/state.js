@@ -39,9 +39,14 @@ export const useGameStore = create(
         }
         return { inventario: [...state.inventario, { ...item, cantidad: item.cantidad || 1 }] };
       }),
-      removeItem: (id) => set((state) => ({
-        inventario: state.inventario.filter(i => i.id !== id)
-      })),
+      removeItem: (id, cantidad = 1) => set((state) => {
+        const item = state.inventario.find(i => i.id === id);
+        if (!item) return state;
+        if (item.cantidad <= cantidad) {
+          return { inventario: state.inventario.filter(i => i.id !== id) };
+        }
+        return { inventario: state.inventario.map(i => i.id === id ? { ...i, cantidad: i.cantidad - cantidad } : i) };
+      }),
       addGold: (n) => set((state) => ({ oro: state.oro + n })),
       removeGold: (n) => set((state) => ({ oro: Math.max(0, state.oro - n) })),
 
@@ -99,10 +104,78 @@ export const useGameStore = create(
       spawnNpc: (npc) => set((state) => {
         const existe = state.mundo.npcs.find(n => n.id === npc.id);
         if (existe) return state;
-        return { mundo: { ...state.mundo, npcs: [...state.mundo.npcs, { ...npc, vivo: true, relacion: 'neutral' }] } };
+        return { mundo: { ...state.mundo, npcs: [...state.mundo.npcs, { ...npc, vivo: true, relacion: 'neutral', hp: npc.hp || null, estadisticas: npc.estadisticas || null, inventario: [], enGrupo: false }] } };
       }),
       killNpc: (id) => set((state) => ({
         mundo: { ...state.mundo, npcs: state.mundo.npcs.map(n => n.id === id ? { ...n, vivo: false } : n) }
+      })),
+      setNpcStats: (id, hpMax, stats) => set((state) => ({
+        mundo: {
+          ...state.mundo,
+          npcs: state.mundo.npcs.map(n => n.id === id ? { 
+            ...n, 
+            hp: hpMax ? { actual: hpMax, maximo: hpMax } : n.hp,
+            estadisticas: stats || n.estadisticas || { FUE: 10, DES: 10, CON: 10, INT: 10, SAB: 10, CAR: 10 }
+          } : n)
+        }
+      })),
+      damageNpc: (id, n) => set((state) => ({
+        mundo: {
+          ...state.mundo,
+          npcs: state.mundo.npcs.map(npc => {
+            if (npc.id !== id || !npc.hp) return npc;
+            const newHp = Math.max(0, npc.hp.actual - n);
+            return { ...npc, hp: { ...npc.hp, actual: newHp }, vivo: newHp > 0 };
+          })
+        }
+      })),
+      healNpc: (id, n) => set((state) => ({
+        mundo: {
+          ...state.mundo,
+          npcs: state.mundo.npcs.map(npc => {
+            if (npc.id !== id || !npc.hp) return npc;
+            const newHp = Math.min(npc.hp.maximo, npc.hp.actual + n);
+            return { ...npc, hp: { ...npc.hp, actual: newHp } };
+          })
+        }
+      })),
+      addNpcItem: (id, item) => set((state) => ({
+        mundo: {
+          ...state.mundo,
+          npcs: state.mundo.npcs.map(npc => {
+            if (npc.id !== id) return npc;
+            const inv = npc.inventario || [];
+            const existe = inv.find(i => i.id === item.id);
+            if (existe) {
+              return { ...npc, inventario: inv.map(i => i.id === item.id ? { ...i, cantidad: i.cantidad + (item.cantidad || 1) } : i) };
+            }
+            return { ...npc, inventario: [...inv, { ...item, cantidad: item.cantidad || 1 }] };
+          })
+        }
+      })),
+      removeNpcItem: (npcId, itemId, cantidad = 1) => set((state) => ({
+        mundo: {
+          ...state.mundo,
+          npcs: state.mundo.npcs.map(npc => {
+            if (npc.id !== npcId) return npc;
+            const inv = npc.inventario || [];
+            const item = inv.find(i => i.id === itemId);
+            if (!item) return npc;
+            if (item.cantidad <= cantidad) {
+              return { ...npc, inventario: inv.filter(i => i.id !== itemId) };
+            }
+            return { ...npc, inventario: inv.map(i => i.id === itemId ? { ...i, cantidad: i.cantidad - cantidad } : i) };
+          })
+        }
+      })),
+      joinParty: (id) => set((state) => ({
+        mundo: { ...state.mundo, npcs: state.mundo.npcs.map(n => n.id === id ? { ...n, enGrupo: true } : n) }
+      })),
+      leaveParty: (id) => set((state) => ({
+        mundo: { ...state.mundo, npcs: state.mundo.npcs.map(n => n.id === id ? { ...n, enGrupo: false } : n) }
+      })),
+      setNpcRelation: (id, rel) => set((state) => ({
+        mundo: { ...state.mundo, npcs: state.mundo.npcs.map(n => n.id === id ? { ...n, relacion: rel } : n) }
       })),
 
       // --- HISTORIAL ---

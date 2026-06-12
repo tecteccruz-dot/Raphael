@@ -73,8 +73,12 @@ export default function Galeria({ onNavigate }) {
                     )}
 
                     <div className="text-center pt-2">
-                      <div className="text-3xl mb-2">
-                        {pj.sexo === 'Femenino' ? '👩' : pj.sexo === 'Masculino' ? '🧑' : '🧝'}
+                      <div className="mx-auto w-16 h-16 rounded-full border-2 border-[var(--color-gold)] overflow-hidden bg-[#1a1729] mb-2 flex items-center justify-center">
+                        {pj.avatar ? (
+                          <img src={pj.avatar} alt={pj.nombre} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="text-3xl">{pj.sexo === 'Femenino' ? '👩' : pj.sexo === 'Masculino' ? '🧑' : '🧝'}</div>
+                        )}
                       </div>
                       <h3 className="font-[var(--font-display)] text-lg text-[var(--color-parchment)]">
                         {pj.nombre}

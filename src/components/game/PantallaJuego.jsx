@@ -3,6 +3,7 @@ import { useGameState } from '../../hooks/useGameState';
 import { useAI } from '../../hooks/useAI';
 import { useGameStore } from '../../engine/state';
 import ModalMapa from './ModalMapa';
+import { obtenerAvatarNpc } from '../../engine/avatars';
 
 // Importamos imágenes
 import avatarGenerico from '../../assets/Imagenes/Avatars/Generico.png';
@@ -354,7 +355,52 @@ export default function PantallaJuego({ onOpenSave, onOpenNavigation }) {
             {/* NPCs o Enemigos en escena */}
             <div className="p-3" style={{ borderBottom: `1px solid ${colors.border}` }}>
               <div className="font-['Cinzel'] text-[9px] tracking-[0.1em] uppercase mb-2" style={{ color: colors.textDim }}>Entidades Presentes</div>
-              <div className="text-[10px] italic" style={{ color: colors.textMuted }}>El área parece tranquila por ahora...</div>
+              
+              {mundo.npcs.filter(n => n.vivo).length === 0 ? (
+                <div className="text-[10px] italic" style={{ color: colors.textMuted }}>El área parece tranquila por ahora...</div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {mundo.npcs.filter(n => n.vivo).map((npc) => (
+                    <div key={npc.id} className="p-2 rounded-md" style={{ backgroundColor: colors.bgCard, border: `1px solid ${colors.border}` }}>
+                      <div className="flex gap-2 items-start mb-2">
+                        <img 
+                          src={obtenerAvatarNpc(npc.id, npc.nombre) || avatarGenerico} 
+                          alt={npc.nombre} 
+                          className="w-10 h-10 rounded-sm object-cover" 
+                          style={{ border: `1px solid ${npc.relacion === 'hostil' ? colors.danger : npc.relacion === 'amigable' ? colors.hpGreen : colors.goldDim}` }} 
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-['Cinzel'] text-[11px] font-semibold truncate" style={{ color: npc.relacion === 'hostil' ? colors.danger : colors.textMain }}>
+                            {npc.nombre}
+                          </div>
+                          {npc.hp && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <div className="flex-1 h-1 rounded overflow-hidden" style={{ backgroundColor: colors.hpTrack }}>
+                                <div className="h-full" style={{ width: `${(npc.hp.actual/npc.hp.maximo)*100}%`, backgroundColor: npc.relacion === 'hostil' ? colors.danger : colors.hpGreen }}></div>
+                              </div>
+                              <span className="text-[8px] font-['Cinzel']" style={{ color: colors.textMuted }}>{npc.hp.actual}</span>
+                            </div>
+                          )}
+                          {npc.enGrupo && <div className="text-[8px] italic mt-0.5" style={{ color: colors.gold }}>Miembro del Grupo</div>}
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-1">
+                        <button 
+                          onClick={() => setInput(`(Me acerco a hablar con ${npc.nombre}) `)}
+                          className="flex-1 py-1 rounded text-[9px] font-['Cinzel'] transition-colors hover:bg-[rgba(201,168,76,0.1)] cursor-pointer" 
+                          style={{ border: `1px solid ${colors.border}`, color: colors.gold }}
+                        >💬 Hablar</button>
+                        <button 
+                          onClick={() => setInput(`(Ataco a ${npc.nombre}) `)}
+                          className="flex-1 py-1 rounded text-[9px] font-['Cinzel'] transition-colors hover:bg-[rgba(192,68,74,0.1)] cursor-pointer" 
+                          style={{ border: `1px solid ${colors.border}`, color: colors.danger }}
+                        >⚔️ Atacar</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Log Técnico */}
